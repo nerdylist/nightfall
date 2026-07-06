@@ -2,6 +2,19 @@
 # Resolve extensionless directory routes like /api/register to their index.php.
 DirectoryIndex index.php
 
+# API routing: map the slash-less endpoints straight to their index.php so a
+# POST is NOT lost to Apache's dir 301 redirect (/api/register -> /api/register/).
+# Both /api/register and /api/register/ now serve the handler without a redirect.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^api/register/?$ api/register/index.php [L]
+    RewriteRule ^api/login/?$    api/login/index.php    [L]
+</IfModule>
+
+# Fallback for hosts without mod_rewrite: stop Apache appending the 301 slash
+# so the POST body is preserved (the handler dir is still resolved).
+DirectorySlash Off
+
 # Deny direct web access to sensitive files/dirs (defense in depth;
 # .env and the SQLite DB must never be served).
 <FilesMatch "^\.env">
