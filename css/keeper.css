@@ -1,0 +1,163 @@
+/* GRAVE RISING — Keeper admin area (separate look from public site, shares base tokens) */
+
+body.keeper {
+  background: var(--bg-0);
+}
+
+.keeper-header {
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-1);
+}
+
+.keeper-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-4);
+}
+
+.keeper-header__brand {
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  font-size: 0.95rem;
+  color: var(--accent);
+}
+
+.keeper-header__nav {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.keeper-header__link {
+  font-size: 0.88rem;
+  color: var(--text-1);
+}
+
+.keeper-header__link:hover {
+  color: var(--text-0);
+}
+
+.keeper-main {
+  padding: var(--space-6) 0 var(--space-7);
+}
+
+.keeper-main--centered {
+  display: flex;
+  align-items: center;
+  min-height: calc(100vh - 130px);
+}
+
+.keeper-page-title {
+  font-size: 1.4rem;
+  margin-bottom: var(--space-5);
+}
+
+.keeper-login-card {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: var(--space-6);
+}
+
+.keeper-login-card__heading {
+  font-size: 1.3rem;
+  margin-bottom: var(--space-1);
+}
+
+.keeper-login-card__sub {
+  margin-bottom: var(--space-5);
+  font-size: 0.88rem;
+}
+
+.keeper-login-card__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.keeper-login-card__note {
+  margin-top: var(--space-4);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.keeper-login-card__note a {
+  color: var(--accent);
+}
+
+.keeper-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 260px));
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.keeper-stat-tile {
+  padding: var(--space-4) var(--space-5);
+}
+
+.keeper-stat-tile__label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-2);
+}
+
+.keeper-stat-tile__value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.keeper-table-card {
+  padding: var(--space-5);
+}
+
+.keeper-table-card__heading {
+  font-size: 1.05rem;
+  margin-bottom: var(--space-4);
+}
+
+.keeper-table-scroll {
+  overflow-x: auto;
+}
+
+.keeper-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.keeper-table th {
+  text-align: left;
+  padding: 10px 14px;
+  color: var(--text-2);
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-strong);
+  white-space: nowrap;
+}
+
+.keeper-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+.keeper-table tbody tr:hover {
+  background: var(--bg-2);
+}
+
+.keeper-footer {
+  border-top: 1px solid var(--border-subtle);
+  padding: var(--space-5) 0;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 600px) {
+  .keeper-header__link.text-muted {
+    display: none;
+  }
+}

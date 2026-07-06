@@ -1,0 +1,16 @@
+# GRAVE RISING web/ — ignore local secrets and generated data.
+# No repo-root .gitignore exists yet in this project, so this covers web/.
+
+# Environment / secrets (never commit real values)
+.env
+.env.local
+api.env
+
+# SQLite database files (generated at runtime, never commit)
+data/*.sqlite
+data/*.sqlite-journal
+data/*.sqlite-wal
+data/*.sqlite-shm
+
+# OS cruft
+.DS_Store
