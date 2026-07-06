@@ -1,8 +1,41 @@
 <?php
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/lib/auth.php';
+
 $pageTitle = 'Login — Grave Rising';
 $pageCss = ['/css/login.css'];
 $pageJs = ['/js/login.js'];
+
+$formErrors = [];
+$oldIdentifier = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $oldIdentifier = trim((string) ($_POST['identifier'] ?? ''));
+    $password = (string) ($_POST['password'] ?? '');
+
+    if ($oldIdentifier === '') {
+        $formErrors['identifier'] = 'Username or email is required.';
+    }
+    if ($password === '') {
+        $formErrors['password'] = 'Password is required.';
+    }
+
+    if (empty($formErrors)) {
+        $pdo = grave_db();
+        $user = grave_verify_login($pdo, $oldIdentifier, $password);
+
+        if (!$user) {
+            $formErrors['password'] = 'Invalid username/email or password.';
+        } else {
+            session_start();
+            $_SESSION['user_id'] = (int) $user['id'];
+            $_SESSION['username'] = $user['username'];
+            header('Location: /index.php');
+            exit;
+        }
+    }
+}
+
 include __DIR__ . '/partials/header.php';
 ?>
 
@@ -12,15 +45,14 @@ include __DIR__ . '/partials/header.php';
       <h1 class="auth__heading">Login</h1>
       <p class="text-muted auth__sub">Return to the world. It hasn't forgotten you.</p>
 
-      <!-- BACKEND WIRING GOES HERE — POST to login handler, verify against SQLite users table, start session -->
-      <form id="loginForm" class="auth__form" action="#" method="post" novalidate>
+      <form id="loginForm" class="auth__form" action="/login.php" method="post" novalidate>
         <div>
-          <input class="field" type="text" name="identifier" id="identifier" placeholder="Username or Email" autocomplete="username">
-          <p class="error-text" id="identifierError"></p>
+          <input class="field" type="text" name="identifier" id="identifier" placeholder="Username or Email" autocomplete="username" value="<?= htmlspecialchars($oldIdentifier) ?>">
+          <p class="error-text" id="identifierError"><?= htmlspecialchars($formErrors['identifier'] ?? '') ?></p>
         </div>
         <div>
           <input class="field" type="password" name="password" id="password" placeholder="Password" autocomplete="current-password">
-          <p class="error-text" id="passwordError"></p>
+          <p class="error-text" id="passwordError"><?= htmlspecialchars($formErrors['password'] ?? '') ?></p>
         </div>
 
         <button type="submit" class="btn btn-primary btn-block">Login</button>

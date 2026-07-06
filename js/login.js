@@ -1,4 +1,6 @@
-// GRAVE RISING — login page client-side validation (no real submission logic)
+// GRAVE RISING — login page client-side validation
+// Blocks submission on invalid input; otherwise lets the form POST to
+// login.php, which verifies against SQLite and starts a session.
 
 document.addEventListener('DOMContentLoaded', function () {
   var form = document.getElementById('loginForm');
@@ -11,7 +13,6 @@ document.addEventListener('DOMContentLoaded', function () {
   var passwordError = document.getElementById('passwordError');
 
   form.addEventListener('submit', function (event) {
-    event.preventDefault();
     var valid = true;
 
     if (!identifier.value.trim()) {
@@ -29,10 +30,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (!valid) {
+      event.preventDefault();
       return;
     }
 
-    // BACKEND WIRING GOES HERE — POST to login handler, verify against SQLite users table, start session
-    console.log('Prototype only: form validated, no submission wired yet.');
+    // Client-side validation passed — allow the native form submission to
+    // proceed to login.php, which verifies against SQLite and starts a session.
   });
 });

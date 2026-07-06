@@ -1,4 +1,6 @@
-// GRAVE RISING — register page client-side validation (no real submission logic)
+// GRAVE RISING — register page client-side validation
+// Blocks submission on invalid input; otherwise lets the form POST to
+// register.php, which handles it server-side against SQLite.
 
 document.addEventListener('DOMContentLoaded', function () {
   var form = document.getElementById('registerForm');
@@ -15,7 +17,6 @@ document.addEventListener('DOMContentLoaded', function () {
   var passwordConfirmError = document.getElementById('passwordConfirmError');
 
   form.addEventListener('submit', function (event) {
-    event.preventDefault();
     var valid = true;
 
     if (!email.value.trim()) {
@@ -56,11 +57,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (!valid) {
+      event.preventDefault();
       return;
     }
 
-    // BACKEND WIRING GOES HERE — POST to register handler, insert into SQLite users table
-    // Example (future): fetch('/register-handler.php', { method: 'POST', body: new FormData(form) })
-    console.log('Prototype only: form validated, no submission wired yet.');
+    // Client-side validation passed — allow the native form submission to
+    // proceed to register.php, which handles it server-side against SQLite.
   });
 });

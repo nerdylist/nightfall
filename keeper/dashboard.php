@@ -1,23 +1,23 @@
 <?php
 require_once __DIR__ . '/../config.php';
+
+session_start();
+
+if (empty($_SESSION['keeper_admin'])) {
+    header('Location: /keeper/index.php');
+    exit;
+}
+
 $pageTitle = 'Dashboard — Keeper';
 $pageCss = [];
 include __DIR__ . '/../partials/keeper-header.php';
 
-// Real session gating goes here in the wiring pass — for the prototype
-// this page renders directly as the "logged in" state.
+$pdo = grave_db();
 
-// Placeholder data only — not read from any database.
-$totalUsers = 128;
-$fakeUsers = [
-    ['email' => 'ashwood.mara@example.com', 'username' => 'maraash', 'created_at' => '2026-06-02 14:12'],
-    ['email' => 'grady.holt@example.com', 'username' => 'holtgrady', 'created_at' => '2026-06-05 09:47'],
-    ['email' => 'delacroix.jean@example.com', 'username' => 'jdelacroix', 'created_at' => '2026-06-11 22:03'],
-    ['email' => 'winters.rae@example.com', 'username' => 'raewinters', 'created_at' => '2026-06-14 17:29'],
-    ['email' => 'oc.finn@example.com', 'username' => 'finnoc', 'created_at' => '2026-06-20 08:55'],
-    ['email' => 'blackwood.eli@example.com', 'username' => 'eliblackwood', 'created_at' => '2026-06-25 13:41'],
-    ['email' => 'sato.yumi@example.com', 'username' => 'yumisato', 'created_at' => '2026-07-01 19:16'],
-];
+$totalUsers = (int) $pdo->query('SELECT COUNT(*) AS c FROM users')->fetch()['c'];
+
+$stmt = $pdo->query('SELECT id, email, username, created_at FROM users ORDER BY created_at DESC');
+$registeredUsers = $stmt->fetchAll();
 ?>
 
 <main class="keeper-main">
@@ -43,7 +43,7 @@ $fakeUsers = [
             </tr>
           </thead>
           <tbody>
-            <?php foreach ($fakeUsers as $user): ?>
+            <?php foreach ($registeredUsers as $user): ?>
             <tr>
               <td><?= htmlspecialchars($user['email']) ?></td>
               <td><?= htmlspecialchars($user['username']) ?></td>

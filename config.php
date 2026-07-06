@@ -1,11 +1,10 @@
 <?php
 /**
- * GRAVE RISING — config loader (stub)
+ * GRAVE RISING — config loader
  *
- * Prototype-only. This shows the shape the wiring pass will fill in:
- * parse web/.env, expose values via env(), and open a real SQLite
- * connection. For now it just stubs env() with safe placeholder reads
- * so pages can reference config without a live backend.
+ * Parses web/.env, exposes values via env(), and wires in the real
+ * SQLite connection helper (web/lib/db.php). Use grave_db() to get a
+ * PDO connection — see lib/db.php for details.
  */
 
 function grave_load_env(string $path): array
@@ -35,8 +34,4 @@ function env(string $key, $default = null)
     return $GLOBALS['__grave_env'][$key] ?? $default;
 }
 
-// BACKEND WIRING GOES HERE — open a real SQLite connection using
-// env('DB_PATH'), e.g.:
-//   $pdo = new PDO('sqlite:' . env('DB_PATH'));
-//   $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-// Not implemented in this prototype — no .db file is created.
+require_once __DIR__ . '/lib/db.php';

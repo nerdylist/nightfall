@@ -1,13 +1,7 @@
--- GRAVE RISING — SQLite schema (reference only)
---
--- This file is NOT executed. The executable source of truth is the
--- numbered migration set in web/migrations/ (001_init.sql, 002_..., ...),
--- applied and tracked by web/bin/setup-db.php via a schema_migrations
--- table. Run `php web/bin/setup-db.php` to create/update the real
--- database. This file exists only so the schema shape is easy to read
--- without opening the migrations directory.
---
--- Current schema (mirrors migrations/001_init.sql):
+-- GRAVE RISING — migration 001: initial schema
+-- Executable source of truth for the database structure.
+-- Applied automatically by web/bin/setup-db.php and recorded in
+-- schema_migrations. See web/schema.sql for a reference-only pointer.
 
 CREATE TABLE IF NOT EXISTS users (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,9 +26,3 @@ CREATE TABLE IF NOT EXISTS tokens (
 
 CREATE INDEX IF NOT EXISTS idx_tokens_token   ON tokens(token);
 CREATE INDEX IF NOT EXISTS idx_tokens_user_id ON tokens(user_id);
-
--- NOTE on admin/Keeper auth: we deliberately do NOT define a separate
--- "admins" table. Keeper is a single-operator admin area, so a single
--- credential pair stored in .env (KEEPER_ADMIN_USER / KEEPER_ADMIN_PASS_HASH)
--- is simpler and sufficient. If Keeper ever needs multiple admin accounts,
--- add an `admins` table then (same shape as `users` minus game fields).
