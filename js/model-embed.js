@@ -139,6 +139,7 @@ export function initModelEmbed(container, modelUrl) {
 	let isDragging = false;
 	let previousPointerX = 0;
 	let cameraDistance = 5;
+	let currentBoundingSphereRadius = null;
 
 	function onPointerDown(event) {
 		isDragging = true;
@@ -170,13 +171,53 @@ export function initModelEmbed(container, modelUrl) {
 	function onResize() {
 		if (!renderer) return;
 		const { width, height } = getSize();
-		camera.aspect = width / height;
-		camera.updateProjectionMatrix();
 		renderer.setSize(width, height, false);
+		updateCameraFraming();
 	}
 
 	const resizeObserver = new ResizeObserver(onResize);
 	resizeObserver.observe(container);
+
+	// Recomputes camera aspect, fit distance (against both vertical and
+	// horizontal FOV, with 20px padding on every side), near/far, and
+	// position/lookAt. Safe to call before a model has loaded (no-ops the
+	// distance/position portion in that case) and on every resize.
+	function updateCameraFraming() {
+		const { width, height } = getSize();
+		camera.aspect = width / height;
+
+		if (!currentBoundingSphereRadius) {
+			camera.updateProjectionMatrix();
+			return;
+		}
+
+		const PADDING = 20; // px, per side
+		// Clamp so the padded viewport never goes to zero/negative for tiny containers.
+		const paddedWidth = Math.max(width - PADDING * 2, width * 0.1);
+		const paddedHeight = Math.max(height - PADDING * 2, height * 0.1);
+
+		const vFov = (camera.fov * Math.PI) / 180; // full vertical FOV, radians
+		const fullAspect = width / height;
+		const hFov = 2 * Math.atan(Math.tan(vFov / 2) * fullAspect); // full horizontal FOV, radians
+
+		const r = currentBoundingSphereRadius;
+		const vFitDistanceFull = r / Math.sin(vFov / 2);
+		const hFitDistanceFull = r / Math.sin(hFov / 2);
+
+		// Inflate each axis's fit distance proportionally to how much smaller
+		// the padded viewport is than the full viewport on that axis.
+		const vFitDistance = vFitDistanceFull * (height / paddedHeight);
+		const hFitDistance = hFitDistanceFull * (width / paddedWidth);
+
+		const fitDistance = Math.max(vFitDistance, hFitDistance);
+
+		cameraDistance = fitDistance;
+		camera.near = Math.max(fitDistance / 100, 0.01);
+		camera.far = fitDistance * 100;
+		camera.updateProjectionMatrix();
+		camera.position.set(0, 0, cameraDistance);
+		camera.lookAt(0, 0, 0);
+	}
 
 	function frameCameraToObject(object) {
 		const box = new THREE.Box3().setFromObject(object);
@@ -186,16 +227,8 @@ export function initModelEmbed(container, modelUrl) {
 		// Recenter the object within the pivot so it rotates around its own middle.
 		object.position.sub(center);
 
-		const boundingSphereRadius = size.length() / 2 || 1;
-		const fitDistance =
-			(boundingSphereRadius / Math.sin((Math.PI * camera.fov) / 360)) * 1.2;
-
-		cameraDistance = fitDistance;
-		camera.near = Math.max(fitDistance / 100, 0.01);
-		camera.far = fitDistance * 100;
-		camera.updateProjectionMatrix();
-		camera.position.set(0, 0, cameraDistance);
-		camera.lookAt(0, 0, 0);
+		currentBoundingSphereRadius = size.length() / 2 || 1;
+		updateCameraFraming();
 	}
 
 	function loadModel(path) {
