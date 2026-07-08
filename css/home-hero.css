@@ -23,22 +23,6 @@
   width: 98%;
   aspect-ratio: 1 / 1;
   margin: 0 auto;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-subtle);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02), var(--shadow-md);
-}
-
-.hero__drag-hint {
-  margin: 0;
-  align-self: center;
-  padding: 6px 14px;
-  font-size: 12px;
-  letter-spacing: 0.02em;
-  color: var(--text-2);
-  background: var(--bg-2);
-  border: 1px solid var(--border-subtle);
-  border-radius: 999px;
-  user-select: none;
 }
 
 @media (max-width: 768px) {
@@ -51,9 +35,4 @@
     align-items: center;
   }
 
-  .hero__model-container {
-    width: 98%;
-    aspect-ratio: 1 / 1;
-    margin: 0 auto;
-  }
 }

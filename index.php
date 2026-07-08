@@ -30,7 +30,6 @@ include __DIR__ . '/partials/header.php';
       </div>
       <div class="hero__model">
         <div id="home-hero-model" class="hero__model-container"></div>
-        <p class="hero__drag-hint">Drag to rotate</p>
       </div>
     </div>
   </section>
