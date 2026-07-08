@@ -139,7 +139,7 @@ export function initModelEmbed(container, modelUrl) {
 	let isDragging = false;
 	let previousPointerX = 0;
 	let cameraDistance = 5;
-	let currentBoundingSphereRadius = null;
+	let currentHalfExtents = null; // { halfH, halfW } — Y-rotation-aware fit extents
 
 	function onPointerDown(event) {
 		isDragging = true;
@@ -186,7 +186,7 @@ export function initModelEmbed(container, modelUrl) {
 		const { width, height } = getSize();
 		camera.aspect = width / height;
 
-		if (!currentBoundingSphereRadius) {
+		if (!currentHalfExtents) {
 			camera.updateProjectionMatrix();
 			return;
 		}
@@ -200,34 +200,58 @@ export function initModelEmbed(container, modelUrl) {
 		const fullAspect = width / height;
 		const hFov = 2 * Math.atan(Math.tan(vFov / 2) * fullAspect); // full horizontal FOV, radians
 
-		const r = currentBoundingSphereRadius;
-		const vFitDistanceFull = r / Math.sin(vFov / 2);
-		const hFitDistanceFull = r / Math.sin(hFov / 2);
+		// Y-rotation-aware fit: the model only ever spins around Y, so its
+		// vertical extent is constant (halfH) while its horizontal footprint
+		// (as seen by the camera) varies between its narrowest and widest
+		// side; halfW is the worst case (diagonal of the XZ footprint), i.e.
+		// the largest silhouette the camera will ever see at any spin angle.
+		const { halfH, halfW } = currentHalfExtents;
+
+		const vFitDistanceFull = halfH / Math.tan(vFov / 2);
+		const hFitDistanceFull = halfW / Math.tan(hFov / 2);
 
 		// Inflate each axis's fit distance proportionally to how much smaller
 		// the padded viewport is than the full viewport on that axis.
 		const vFitDistance = vFitDistanceFull * (height / paddedHeight);
 		const hFitDistance = hFitDistanceFull * (width / paddedWidth);
 
-		const fitDistance = Math.max(vFitDistance, hFitDistance);
+		// The worst-case rotated footprint can bring the model's near face up
+		// to halfW closer to the camera than its center, so push the camera
+		// back by halfW to guarantee it never clips regardless of spin angle.
+		const fitDistance = Math.max(vFitDistance, hFitDistance) + halfW;
 
 		cameraDistance = fitDistance;
-		camera.near = Math.max(fitDistance / 100, 0.01);
-		camera.far = fitDistance * 100;
+		camera.near = Math.max((fitDistance - halfW) / 10, 0.01);
+		camera.far = fitDistance + halfW * 10;
 		camera.updateProjectionMatrix();
 		camera.position.set(0, 0, cameraDistance);
 		camera.lookAt(0, 0, 0);
 	}
 
 	function frameCameraToObject(object) {
+		// Measure and recenter BEFORE parenting into the pivot. The pivot
+		// auto-rotates continuously from the moment the widget starts (see
+		// animate()), so by the time an async GLTF load resolves, pivot may
+		// already be sitting at an arbitrary non-zero rotation. Computing the
+		// box on `object` while it is still unparented (object.parent is
+		// null) guarantees object.matrixWorld === object.matrix, i.e. the
+		// measurement is taken in the model's own undisturbed local space —
+		// decoupled from the pivot's live rotation — so the recenter offset
+		// and the pivot's rotation origin always agree. Force a matrix
+		// update first so the box isn't computed from a stale matrix.
+		object.updateWorldMatrix(true, true);
 		const box = new THREE.Box3().setFromObject(object);
 		const size = box.getSize(new THREE.Vector3());
 		const center = box.getCenter(new THREE.Vector3());
 
-		// Recenter the object within the pivot so it rotates around its own middle.
+		// Recenter the object around its own bounding-box middle so that
+		// middle coincides with the pivot's origin — which is both the
+		// rotation pivot and the camera's lookAt target.
 		object.position.sub(center);
 
-		currentBoundingSphereRadius = size.length() / 2 || 1;
+		const halfH = size.y / 2;
+		const halfW = Math.sqrt((size.x / 2) ** 2 + (size.z / 2) ** 2);
+		currentHalfExtents = { halfH: halfH || 1, halfW: halfW || 1 };
 		updateCameraFraming();
 	}
 
@@ -239,8 +263,12 @@ export function initModelEmbed(container, modelUrl) {
 		loader.load(
 			path,
 			(gltf) => {
-				pivot.add(gltf.scene);
+				// Measure + recenter first, while gltf.scene is still
+				// unparented, then attach to the (possibly already
+				// auto-rotating) pivot. See frameCameraToObject() for why
+				// the ordering matters.
 				frameCameraToObject(gltf.scene);
+				pivot.add(gltf.scene);
 				hideStatus();
 				hideLoader();
 			},
