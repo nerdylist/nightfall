@@ -98,9 +98,7 @@ scene.add(pivot);
 let isDragging = false;
 let previousPointerX = 0;
 let cameraDistance = 5;
-let targetDistance = 5;
-let minDistance = 0.1;
-let maxDistance = 100;
+const autoRotateSpeed = 0.2; // radians/sec
 
 function onPointerDown(event) {
 	isDragging = true;
@@ -130,23 +128,6 @@ window.addEventListener('pointermove', onPointerMove);
 window.addEventListener('pointerup', onPointerUp);
 window.addEventListener('pointercancel', onPointerUp);
 
-canvas.addEventListener(
-	'wheel',
-	(event) => {
-		event.preventDefault();
-		const zoomSpeed = 0.0015;
-		targetDistance *= 1 + event.deltaY * zoomSpeed;
-		targetDistance = Math.min(maxDistance, Math.max(minDistance, targetDistance));
-	},
-	{ passive: false }
-);
-
-function updateCameraDistance() {
-	cameraDistance += (targetDistance - cameraDistance) * 0.15;
-	camera.position.set(0, camera.position.y, cameraDistance);
-	camera.lookAt(0, camera.position.y, 0);
-}
-
 function onWindowResize() {
 	if (!renderer) return;
 	camera.aspect = window.innerWidth / window.innerHeight;
@@ -167,7 +148,6 @@ function frameCameraToObject(object) {
 	const fitDistance =
 		(boundingSphereRadius / Math.sin((Math.PI * camera.fov) / 360)) * 1.2;
 
-	targetDistance = fitDistance;
 	cameraDistance = fitDistance;
 	camera.near = Math.max(fitDistance / 100, 0.01);
 	camera.far = fitDistance * 100;
@@ -205,9 +185,14 @@ function loadModel(path) {
 	);
 }
 
+const clock = new THREE.Clock();
+
 function animate() {
 	requestAnimationFrame(animate);
-	updateCameraDistance();
+	const delta = clock.getDelta();
+	if (!isDragging) {
+		pivot.rotation.y += autoRotateSpeed * delta;
+	}
 	renderer.render(scene, camera);
 }
 
