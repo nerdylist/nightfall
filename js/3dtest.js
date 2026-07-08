@@ -3,9 +3,63 @@ import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
 
 const canvas = document.getElementById('viewer');
 const statusEl = document.getElementById('status');
+const loaderEl = document.getElementById('loader');
+const loaderLabelEl = document.getElementById('loader-label');
+const loaderTrackEl = loaderEl ? loaderEl.querySelector('.loader-track') : null;
+const loaderBarEl = document.getElementById('loader-bar');
+const loaderPercentEl = document.getElementById('loader-percent');
 
 const params = new URLSearchParams(window.location.search);
 const modelPath = params.get('model') || './assets/horde-up.glb';
+
+function showStatus(message) {
+	statusEl.innerHTML = message;
+	statusEl.hidden = false;
+}
+
+function hideStatus() {
+	statusEl.hidden = true;
+}
+
+function showLoader() {
+	if (!loaderEl) return;
+	loaderEl.hidden = false;
+	loaderEl.classList.remove('fade-out');
+}
+
+function hideLoader() {
+	if (!loaderEl) return;
+	loaderEl.classList.add('fade-out');
+	window.setTimeout(() => {
+		loaderEl.hidden = true;
+	}, 250);
+}
+
+function setLoaderIndeterminate() {
+	if (!loaderTrackEl) return;
+	loaderTrackEl.classList.add('indeterminate');
+	if (loaderLabelEl) loaderLabelEl.textContent = 'Loading model…';
+	if (loaderPercentEl) loaderPercentEl.textContent = '';
+}
+
+function setLoaderProgress(fraction) {
+	if (!loaderTrackEl || !loaderBarEl) return;
+	loaderTrackEl.classList.remove('indeterminate');
+	const percent = Math.round(Math.min(1, Math.max(0, fraction)) * 100);
+	loaderBarEl.style.width = percent + '%';
+	if (loaderLabelEl) loaderLabelEl.textContent = 'Loading model…';
+	if (loaderPercentEl) loaderPercentEl.textContent = percent + '%';
+}
+
+let renderer;
+try {
+	renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+} catch (err) {
+	showStatus(
+		"<strong>Can't start 3D viewer</strong>Your browser couldn't create a WebGL context. Enable hardware acceleration in your browser settings (<code>chrome://gpu</code> to diagnose) or update your GPU drivers, then reload."
+	);
+	renderer = null;
+}
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0a0a0a);
@@ -18,10 +72,11 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.set(0, 0, 5);
 
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.outputColorSpace = THREE.SRGBColorSpace;
+if (renderer) {
+	renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+	renderer.setSize(window.innerWidth, window.innerHeight);
+	renderer.outputColorSpace = THREE.SRGBColorSpace;
+}
 
 // Lighting: neutral ambient + directional so any model is clearly visible.
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
@@ -89,20 +144,12 @@ function updateCameraDistance() {
 }
 
 function onWindowResize() {
+	if (!renderer) return;
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
 	renderer.setSize(window.innerWidth, window.innerHeight);
 }
 window.addEventListener('resize', onWindowResize);
-
-function showStatus(message) {
-	statusEl.innerHTML = message;
-	statusEl.hidden = false;
-}
-
-function hideStatus() {
-	statusEl.hidden = true;
-}
 
 function frameCameraToObject(object) {
 	const box = new THREE.Box3().setFromObject(object);
@@ -126,6 +173,9 @@ function frameCameraToObject(object) {
 }
 
 function loadModel(path) {
+	showLoader();
+	setLoaderIndeterminate();
+
 	const loader = new GLTFLoader();
 	loader.load(
 		path,
@@ -133,9 +183,17 @@ function loadModel(path) {
 			pivot.add(gltf.scene);
 			frameCameraToObject(gltf.scene);
 			hideStatus();
+			hideLoader();
 		},
-		undefined,
+		(event) => {
+			if (event.lengthComputable && event.total > 0) {
+				setLoaderProgress(event.loaded / event.total);
+			} else {
+				setLoaderIndeterminate();
+			}
+		},
 		() => {
+			hideLoader();
 			showStatus(
 				'<strong>No model found</strong>Save your Meshy export as <code>web/assets/horde-up.glb</code> and reload this page.'
 			);
@@ -149,5 +207,7 @@ function animate() {
 	renderer.render(scene, camera);
 }
 
-loadModel(modelPath);
-animate();
+if (renderer) {
+	loadModel(modelPath);
+	animate();
+}

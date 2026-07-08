@@ -16,6 +16,13 @@
 <body>
 	<canvas id="viewer"></canvas>
 	<div id="status" class="status-message" hidden></div>
+	<div id="loader" class="loader" hidden>
+		<div class="loader-label" id="loader-label">Loading model&hellip;</div>
+		<div class="loader-track">
+			<div class="loader-bar" id="loader-bar"></div>
+		</div>
+		<div class="loader-percent" id="loader-percent"></div>
+	</div>
 	<footer class="hint">Drag to rotate &middot; Scroll to zoom</footer>
 
 	<script type="module" src="js/3dtest.js"></script>
