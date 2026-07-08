@@ -1,0 +1,89 @@
+:root {
+	color-scheme: dark;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	background: #0a0a0a;
+	overflow: hidden;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+}
+
+#viewer {
+	display: block;
+	position: fixed;
+	inset: 0;
+	width: 100vw;
+	height: 100vh;
+	cursor: grab;
+	background: radial-gradient(circle at 50% 40%, #141414 0%, #0a0a0a 70%);
+}
+
+#viewer:active,
+#viewer.dragging {
+	cursor: grabbing;
+}
+
+.hint {
+	position: fixed;
+	left: 50%;
+	bottom: 22px;
+	transform: translateX(-50%);
+	margin: 0;
+	padding: 6px 14px;
+	font-size: 12px;
+	letter-spacing: 0.02em;
+	color: rgba(255, 255, 255, 0.38);
+	background: rgba(255, 255, 255, 0.03);
+	border: 1px solid rgba(255, 255, 255, 0.06);
+	border-radius: 999px;
+	backdrop-filter: blur(6px);
+	pointer-events: none;
+	user-select: none;
+}
+
+.status-message {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	max-width: 420px;
+	width: calc(100% - 48px);
+	padding: 22px 26px;
+	text-align: center;
+	color: rgba(255, 255, 255, 0.82);
+	background: rgba(20, 20, 20, 0.9);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 12px;
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 20px 60px rgba(0, 0, 0, 0.55);
+	font-size: 14px;
+	line-height: 1.6;
+	letter-spacing: 0.01em;
+	pointer-events: none;
+	user-select: none;
+}
+
+.status-message strong {
+	display: block;
+	margin-bottom: 6px;
+	font-size: 15px;
+	font-weight: 600;
+	color: rgba(255, 255, 255, 0.95);
+}
+
+.status-message code {
+	padding: 1px 6px;
+	background: rgba(255, 255, 255, 0.06);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 5px;
+	font-size: 13px;
+	color: rgba(255, 255, 255, 0.9);
+}

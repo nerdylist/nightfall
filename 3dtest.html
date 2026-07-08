@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>3D Model Viewer Test</title>
+	<link rel="stylesheet" href="css/3dtest.css" />
+	<script type="importmap">
+	{
+		"imports": {
+			"three": "./js/vendor/three.module.js"
+		}
+	}
+	</script>
+</head>
+<body>
+	<canvas id="viewer"></canvas>
+	<div id="status" class="status-message" hidden></div>
+	<footer class="hint">Drag to rotate &middot; Scroll to zoom</footer>
+
+	<script type="module" src="js/3dtest.js"></script>
+</body>
+</html>
