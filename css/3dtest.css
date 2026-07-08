@@ -24,6 +24,7 @@ body {
 	width: 100vw;
 	height: 100vh;
 	cursor: grab;
+	touch-action: none;
 	background: radial-gradient(circle at 50% 40%, #141414 0%, #0a0a0a 70%);
 }
 

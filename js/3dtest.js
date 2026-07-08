@@ -106,6 +106,7 @@ function onPointerDown(event) {
 	isDragging = true;
 	previousPointerX = event.clientX;
 	canvas.classList.add('dragging');
+	canvas.setPointerCapture(event.pointerId);
 }
 
 function onPointerMove(event) {
@@ -116,9 +117,12 @@ function onPointerMove(event) {
 	pivot.rotation.y += deltaX * rotationSpeed;
 }
 
-function onPointerUp() {
+function onPointerUp(event) {
 	isDragging = false;
 	canvas.classList.remove('dragging');
+	if (event && canvas.hasPointerCapture(event.pointerId)) {
+		canvas.releasePointerCapture(event.pointerId);
+	}
 }
 
 canvas.addEventListener('pointerdown', onPointerDown);
