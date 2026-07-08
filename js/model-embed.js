@@ -50,9 +50,18 @@ function buildWidgetDom(container) {
 	};
 }
 
-export function initModelEmbed(container, modelUrl) {
+export function initModelEmbed(container, modelUrl, options = {}) {
 	const dom = buildWidgetDom(container);
 	const { canvas, statusEl, loaderEl, loaderLabelEl, loaderTrackEl, loaderBarEl, loaderPercentEl } = dom;
+
+	// Resolve the configured size once at init time. Accepts a number in
+	// [1, 100] (percentage of the padded container the model should fill),
+	// or 'auto' / undefined / null / non-numeric, all of which mean "100"
+	// (full size, current default behavior).
+	let sizePercent = 100;
+	if (typeof options.size === 'number' && Number.isFinite(options.size)) {
+		sizePercent = Math.min(100, Math.max(1, options.size));
+	}
 
 	function showStatus(message) {
 		statusEl.innerHTML = message;
@@ -203,8 +212,9 @@ export function initModelEmbed(container, modelUrl) {
 		// Y-rotation-aware fit: the model only ever spins around Y, so its
 		// vertical extent is constant (halfH) while its horizontal footprint
 		// (as seen by the camera) varies between its narrowest and widest
-		// side; halfW is the worst case (diagonal of the XZ footprint), i.e.
-		// the largest silhouette the camera will ever see at any spin angle.
+		// side; halfW is the realistic worst case — the model's largest
+		// horizontal extent (its widest side, not the XZ diagonal) — since
+		// the diagonal only faces the camera at a fleeting instant mid-spin.
 		const { halfH, halfW } = currentHalfExtents;
 
 		const vFitDistanceFull = halfH / Math.tan(vFov / 2);
@@ -215,14 +225,29 @@ export function initModelEmbed(container, modelUrl) {
 		const vFitDistance = vFitDistanceFull * (height / paddedHeight);
 		const hFitDistance = hFitDistanceFull * (width / paddedWidth);
 
-		// The worst-case rotated footprint can bring the model's near face up
-		// to halfW closer to the camera than its center, so push the camera
-		// back by halfW to guarantee it never clips regardless of spin angle.
-		const fitDistance = Math.max(vFitDistance, hFitDistance) + halfW;
+		// Use realistic extents (no diagonal depth allowance) plus a modest
+		// safety margin — an extremity may occasionally graze the edge
+		// mid-rotation, which is accepted in exchange for a larger model.
+		const fitDistance = Math.max(vFitDistance, hFitDistance) * 1.04;
 
-		cameraDistance = fitDistance;
-		camera.near = Math.max((fitDistance - halfW) / 10, 0.01);
-		camera.far = fitDistance + halfW * 10;
+		// Scale the fit distance by the configured size: a smaller
+		// sizePercent pushes the camera further away, making the model
+		// occupy a smaller fraction of the padded container.
+		const scaledFitDistance = fitDistance * (100 / sizePercent);
+
+		// Near/far still need to account for the worst-case rotated diagonal
+		// footprint, since the model's nearest point to the camera can swing
+		// as close as (distance - diagHalf) during rotation, regardless of
+		// the realistic-extent framing distance used above.
+		const { diagHalf } = currentHalfExtents;
+
+		cameraDistance = scaledFitDistance;
+		camera.near = Math.max((scaledFitDistance - diagHalf) * 0.5, 0.01);
+		camera.far = scaledFitDistance + diagHalf * 4;
+		if (camera.near >= camera.far) {
+			camera.near = 0.01;
+			camera.far = Math.max(scaledFitDistance * 2, camera.near + 1);
+		}
 		camera.updateProjectionMatrix();
 		camera.position.set(0, 0, cameraDistance);
 		camera.lookAt(0, 0, 0);
@@ -250,8 +275,15 @@ export function initModelEmbed(container, modelUrl) {
 		object.position.sub(center);
 
 		const halfH = size.y / 2;
-		const halfW = Math.sqrt((size.x / 2) ** 2 + (size.z / 2) ** 2);
-		currentHalfExtents = { halfH: halfH || 1, halfW: halfW || 1 };
+		// Realistic max horizontal extent during Y rotation — the model's
+		// widest side, not the XZ diagonal (see updateCameraFraming()).
+		const halfW = Math.max(size.x, size.z) / 2;
+		// Diagonal half-extent of the XZ footprint — used only for near/far
+		// clipping-plane safety, since the worst-case rotated corner can
+		// bring the model this close to the camera regardless of the
+		// realistic-extent framing distance.
+		const diagHalf = Math.sqrt((size.x / 2) ** 2 + (size.z / 2) ** 2);
+		currentHalfExtents = { halfH: halfH || 1, halfW: halfW || 1, diagHalf: diagHalf || 1 };
 		updateCameraFraming();
 	}
 
