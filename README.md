@@ -55,6 +55,28 @@ and `api/login/index.php` for the request/response contract. Both return
 `{ "success": true, "user": {...}, "token": "..." }` on success, or
 `{ "success": false, "error": "..." }` on failure.
 
+## Meshy backlog (character pipeline)
+
+Two endpoints feed the local `models/characters/meshy-queue.sh` puller, which
+turns T-pose character images into rigged FBX skins for `build.sh`. Both are
+guarded by `MESHY_WEBHOOK_SECRET` (add it to the server `.env`).
+
+- `POST /mesh_payload.php` — the **Meshy account webhook receiver**. Register
+  it in the Meshy dashboard (API settings → Webhooks) as
+  `https://graverising.com/mesh_payload.php?secret=<MESHY_WEBHOOK_SECRET>`.
+  It authenticates the shared secret (query `?secret=` or `X-Meshy-Secret`
+  header; also verifies an `X-Meshy-Signature` HMAC-SHA256 if present),
+  then upserts the delivered task object into `meshy_tasks`.
+- `GET /api/meshy` — the **local puller**. Auth: `Authorization: Bearer
+  <MESHY_WEBHOOK_SECRET>`. Returns `SUCCEEDED`, not-yet-consumed tasks with
+  their full payload (`model_urls`, `texture_urls`) as JSON.
+- `POST /api/meshy` with `{ "consume": ["<task_id>", ...] }` — marks tasks
+  consumed once the local machine has downloaded their assets.
+
+Meshy webhooks are configured account-level (no per-task webhook param), so the
+secret lives in the registered URL. Run `php web/bin/setup-db.php` after pulling
+to apply the `002_meshy_tasks.sql` migration.
+
 ## Keeper (admin area)
 
 Single-operator admin login gated by `KEEPER_ADMIN_USER` /

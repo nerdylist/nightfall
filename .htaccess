@@ -9,6 +9,7 @@ DirectoryIndex index.php
     RewriteEngine On
     RewriteRule ^api/register/?$ api/register/index.php [L]
     RewriteRule ^api/login/?$    api/login/index.php    [L]
+    RewriteRule ^api/meshy/?$    api/meshy/index.php    [L]
 
     # Pretty URLs for the public pages: /register -> register.php, /login ->
     # login.php, etc. Only rewrites when the .php file actually exists and the
