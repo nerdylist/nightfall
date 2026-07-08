@@ -1,22 +1,36 @@
 <?php
 require_once __DIR__ . '/config.php';
 $pageTitle = 'Grave Rising — Survival is only half of the game.';
-$pageCss = ['/css/index.css'];
+$pageCss = ['/css/index.css', '/css/home-hero.css'];
 include __DIR__ . '/partials/header.php';
 ?>
+<link rel="stylesheet" href="/css/model-embed.css">
+<script type="importmap">
+{
+	"imports": {
+		"three": "/js/vendor/three.module.js"
+	}
+}
+</script>
 
 <main>
   <section class="hero">
-    <div class="container hero__inner">
-      <p class="hero__eyebrow">Living Dead Studios</p>
-      <h1 class="hero__title">
-        <span class="hero__title-line">GRAVE</span>
-        <span class="hero__title-line">RISING</span>
-      </h1>
-      <p class="hero__tagline">Survival is only half of the game.</p>
-      <div class="hero__actions">
-        <a href="/register.php" class="btn btn-primary">Create Survivor</a>
-        <a href="/login.php" class="btn btn-ghost">Login</a>
+    <div class="container hero__grid">
+      <div class="hero__inner">
+        <p class="hero__eyebrow">Living Dead Studios</p>
+        <h1 class="hero__title">
+          <span class="hero__title-line">GRAVE</span>
+          <span class="hero__title-line">RISING</span>
+        </h1>
+        <p class="hero__tagline">Survival is only half of the game.</p>
+        <div class="hero__actions">
+          <a href="/register.php" class="btn btn-primary">Create Survivor</a>
+          <a href="/login.php" class="btn btn-ghost">Login</a>
+        </div>
+      </div>
+      <div class="hero__model">
+        <div id="home-hero-model" class="hero__model-container"></div>
+        <p class="hero__drag-hint">Drag to rotate</p>
       </div>
     </div>
   </section>
@@ -50,4 +64,5 @@ include __DIR__ . '/partials/header.php';
   </section>
 </main>
 
+<script type="module" src="/js/home-hero-model.js?v=1"></script>
 <?php include __DIR__ . '/partials/footer.php'; ?>
