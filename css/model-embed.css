@@ -25,6 +25,7 @@
 	height: 100%;
 	cursor: grab;
 	touch-action: pan-y pinch-zoom;
+	filter: grayscale(1);
 }
 
 .me-canvas:active,
