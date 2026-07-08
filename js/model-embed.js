@@ -148,7 +148,7 @@ export function initModelEmbed(container, modelUrl, options = {}) {
 	let isDragging = false;
 	let previousPointerX = 0;
 	let cameraDistance = 5;
-	let currentHalfExtents = null; // { halfH, halfW } — Y-rotation-aware fit extents
+	let currentHalfExtents = null; // { cylR, halfH } — exact Y-rotation bounding-cylinder fit extents
 
 	function onPointerDown(event) {
 		isDragging = true;
@@ -209,41 +209,45 @@ export function initModelEmbed(container, modelUrl, options = {}) {
 		const fullAspect = width / height;
 		const hFov = 2 * Math.atan(Math.tan(vFov / 2) * fullAspect); // full horizontal FOV, radians
 
-		// Y-rotation-aware fit: the model only ever spins around Y, so its
-		// vertical extent is constant (halfH) while its horizontal footprint
-		// (as seen by the camera) varies between its narrowest and widest
-		// side; halfW is the realistic worst case — the model's largest
-		// horizontal extent (its widest side, not the XZ diagonal) — since
-		// the diagonal only faces the camera at a fleeting instant mid-spin.
-		const { halfH, halfW } = currentHalfExtents;
+		// Shrink each axis's usable FOV angle proportionally to how much
+		// smaller the padded viewport is than the full viewport on that
+		// axis — same padded-FOV mechanism as before (previously expressed
+		// as inflating the fit *distance* by height/paddedHeight; expressed
+		// here as an equivalent angle so the exact cylinder formulas below
+		// stay exact), so fitting the model into this smaller angle leaves
+		// the 20px padding margin on every side.
+		const vFovPadded = 2 * Math.atan(Math.tan(vFov / 2) * (paddedHeight / height));
+		const hFovPadded = 2 * Math.atan(Math.tan(hFov / 2) * (paddedWidth / width));
 
-		const vFitDistanceFull = halfH / Math.tan(vFov / 2);
-		const hFitDistanceFull = halfW / Math.tan(hFov / 2);
+		// Exact bounding-cylinder fit: the model only ever spins around Y, so
+		// every point traces a circle of some radius (<= cylR) in the XZ
+		// plane at some height (within [-halfH, halfH] of the origin, using
+		// the larger of the top/bottom extents since the camera looks at
+		// the origin, not the vertical center of mass).
+		const { cylR, halfH } = currentHalfExtents;
 
-		// Inflate each axis's fit distance proportionally to how much smaller
-		// the padded viewport is than the full viewport on that axis.
-		const vFitDistance = vFitDistanceFull * (height / paddedHeight);
-		const hFitDistance = hFitDistanceFull * (width / paddedWidth);
+		// Horizontal: worst case is the cylinder's equatorial silhouette,
+		// radius cylR, as seen edge-on — requires the half horizontal FOV to
+		// subtend at least asin(cylR / d).
+		const hFitDistance = cylR / Math.sin(hFovPadded / 2);
 
-		// Use realistic extents (no diagonal depth allowance) plus a modest
-		// safety margin — an extremity may occasionally graze the edge
-		// mid-rotation, which is accepted in exchange for a larger model.
-		const fitDistance = Math.max(vFitDistance, hFitDistance) * 1.04;
+		// Vertical: worst case is the top/bottom rim at the point on the
+		// cylinder nearest the camera (z = cylR toward the camera), which
+		// sits (d - cylR) away along the view axis and halfH off-axis.
+		const vFitDistance = halfH / Math.tan(vFovPadded / 2) + cylR;
+
+		// The cylinder bound is exact, so no extra fudge factor is needed;
+		// keep a hairline safety margin against floating-point rounding.
+		const fitDistance = Math.max(hFitDistance, vFitDistance) * 1.01;
 
 		// Scale the fit distance by the configured size: a smaller
 		// sizePercent pushes the camera further away, making the model
 		// occupy a smaller fraction of the padded container.
 		const scaledFitDistance = fitDistance * (100 / sizePercent);
 
-		// Near/far still need to account for the worst-case rotated diagonal
-		// footprint, since the model's nearest point to the camera can swing
-		// as close as (distance - diagHalf) during rotation, regardless of
-		// the realistic-extent framing distance used above.
-		const { diagHalf } = currentHalfExtents;
-
 		cameraDistance = scaledFitDistance;
-		camera.near = Math.max((scaledFitDistance - diagHalf) * 0.5, 0.01);
-		camera.far = scaledFitDistance + diagHalf * 4;
+		camera.near = Math.max((scaledFitDistance - cylR) * 0.5, 0.01);
+		camera.far = scaledFitDistance + cylR * 4;
 		if (camera.near >= camera.far) {
 			camera.near = 0.01;
 			camera.far = Math.max(scaledFitDistance * 2, camera.near + 1);
@@ -266,7 +270,6 @@ export function initModelEmbed(container, modelUrl, options = {}) {
 		// update first so the box isn't computed from a stale matrix.
 		object.updateWorldMatrix(true, true);
 		const box = new THREE.Box3().setFromObject(object);
-		const size = box.getSize(new THREE.Vector3());
 		const center = box.getCenter(new THREE.Vector3());
 
 		// Recenter the object around its own bounding-box middle so that
@@ -274,16 +277,49 @@ export function initModelEmbed(container, modelUrl, options = {}) {
 		// rotation pivot and the camera's lookAt target.
 		object.position.sub(center);
 
-		const halfH = size.y / 2;
-		// Realistic max horizontal extent during Y rotation — the model's
-		// widest side, not the XZ diagonal (see updateCameraFraming()).
-		const halfW = Math.max(size.x, size.z) / 2;
-		// Diagonal half-extent of the XZ footprint — used only for near/far
-		// clipping-plane safety, since the worst-case rotated corner can
-		// bring the model this close to the camera regardless of the
-		// realistic-extent framing distance.
-		const diagHalf = Math.sqrt((size.x / 2) ** 2 + (size.z / 2) ** 2);
-		currentHalfExtents = { halfH: halfH || 1, halfW: halfW || 1, diagHalf: diagHalf || 1 };
+		// Re-apply world matrices so vertex positions read below are in the
+		// recentered frame (object.position changed above).
+		object.updateWorldMatrix(true, true);
+
+		// Exact bounding-cylinder fit around the Y axis through the origin:
+		// walk every vertex of every mesh, transform to world (recentered)
+		// space, and track the furthest XZ radius and the tallest/deepest Y
+		// extent. This guarantees no rotation angle can ever clip, unlike
+		// the bounding-box estimate (which underestimates the true swept
+		// radius for non-box-shaped meshes and over/under-estimates depending
+		// on rotation phase).
+		let cylR = 0;
+		let yMin = Infinity;
+		let yMax = -Infinity;
+		const v = new THREE.Vector3();
+
+		object.traverse((node) => {
+			if (!node.isMesh || !node.geometry) return;
+			const positionAttr = node.geometry.getAttribute('position');
+			if (!positionAttr) return;
+			node.updateWorldMatrix(true, false);
+			const matrixWorld = node.matrixWorld;
+			for (let i = 0; i < positionAttr.count; i++) {
+				v.fromBufferAttribute(positionAttr, i);
+				v.applyMatrix4(matrixWorld);
+				const r = Math.sqrt(v.x * v.x + v.z * v.z);
+				if (r > cylR) cylR = r;
+				if (v.y < yMin) yMin = v.y;
+				if (v.y > yMax) yMax = v.y;
+			}
+		});
+
+		if (!Number.isFinite(yMin) || !Number.isFinite(yMax)) {
+			yMin = 0;
+			yMax = 0;
+		}
+
+		// Camera looks at the origin, not the vertical midpoint, so use the
+		// larger of the top/bottom extents — otherwise the shorter side
+		// would under-frame and the taller side would clip.
+		const halfH = Math.max(Math.abs(yMin), Math.abs(yMax));
+
+		currentHalfExtents = { cylR: cylR || 1, halfH: halfH || 1 };
 		updateCameraFraming();
 	}
 

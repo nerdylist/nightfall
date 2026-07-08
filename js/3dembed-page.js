@@ -1,4 +1,4 @@
-import { initModelEmbed } from './model-embed.js?v=2';
+import { initModelEmbed } from './model-embed.js?v=3';
 
 const container = document.getElementById('model-embed');
 if (container) {
