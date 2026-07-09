@@ -179,6 +179,10 @@
   font-family: var(--font-condensed);
   font-weight: 800;
   font-size: 0.9rem;
+  /* Explicit so app-specific stylesheets (e.g. a .btn rule loaded earlier or
+     later in either app) can never skew nav height via inheritance games.
+     1.5 matches the body line-height both apps inherit from css/base.css. */
+  line-height: 1.5;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   cursor: pointer;
