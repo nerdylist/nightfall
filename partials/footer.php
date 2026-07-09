@@ -1,7 +1,12 @@
 <footer class="site-footer">
   <div class="container site-footer__inner">
-    <span class="text-muted">&copy; <?= date('Y') ?> Living Dead Studios. THE DEAD LAST.</span>
-    <span class="text-muted">Survival is only half of the game.</span>
+    <a href="/index.php" class="site-footer__brand">THE DEAD LAST</a>
+    <div class="site-footer__links">
+      <a href="#" class="site-footer__link">Privacy Policy</a>
+      <a href="#" class="site-footer__link">Terms of Service</a>
+      <a href="#" class="site-footer__link">Support</a>
+    </div>
+    <span class="text-muted site-footer__copy">&copy; <?= date('Y') ?> Living Dead Studios. All rights reserved.</span>
   </div>
 </footer>
 <?php $pageJs = $pageJs ?? []; ?>

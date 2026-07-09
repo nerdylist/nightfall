@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/config.php';
 $pageTitle = 'The Dead Last — Survival is only half of the game.';
-$pageCss = ['/css/index.css', '/css/home-hero.css'];
+$pageCss = ['/css/index.css'];
 include __DIR__ . '/partials/header.php';
 ?>
 <link rel="stylesheet" href="/css/model-embed.css">
@@ -15,95 +15,125 @@ include __DIR__ . '/partials/header.php';
 
 <main>
   <section class="hero">
-    <div class="container hero__grid">
-      <div class="hero__inner">
-        <p class="hero__eyebrow">Living Dead Studios</p>
-        <h1 class="hero__title">
-          <img src="/assets/logo.png" alt="THE DEAD LAST" width="960" height="870" class="hero__logo">
-        </h1>
-        <p class="hero__tagline">Survival is only half of the game.</p>
-        <div class="hero__actions">
-          <a href="/register.php" class="btn btn-primary">Create Survivor</a>
-          <a href="/login.php" class="btn btn-ghost">Login</a>
-        </div>
-      </div>
-      <div class="hero__model">
-        <div id="home-hero-model" class="hero__model-container"></div>
-      </div>
+    <div class="hero__bg">
+      <img src="/assets/images/1.png" alt="" class="hero__bg-img">
     </div>
-  </section>
-
-  <section class="sides">
-    <div class="container">
-      <h2 class="sides__heading">Choose Your Side</h2>
-      <div class="sides__grid">
-        <div class="card sides__panel sides__panel--human">
-          <h3 class="sides__panel-heading">Humans</h3>
-          <p class="text-muted">
-            Scavenge what's left. Build caches no one else can find.
-          </p>
-          <p class="text-muted">
-            Every stranger is a risk &mdash; trust them, and you might
-            not live to regret it.
-          </p>
-          <p class="text-muted">
-            Stay alive. Stay quiet. Stay armed.
-          </p>
-        </div>
-        <div class="card sides__panel sides__panel--zombie">
-          <h3 class="sides__panel-heading">Zombies</h3>
-          <p class="text-muted">
-            Getting bitten isn't the end &mdash; it's a new beginning.
-          </p>
-          <p class="text-muted">
-            Feed to grow stronger. Hunt with enhanced smell and hearing.
-          </p>
-          <p class="text-muted">
-            Evolve through mutation, from Fresh to something far worse.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="pitch">
-    <div class="container pitch__grid">
-      <div class="card pitch__card">
-        <h2 class="pitch__heading">Survival Royale</h2>
-        <p class="text-muted">
-          A persistent, open 1950s world where every survivor scavenges,
-          builds, and fights to stay alive &mdash; against the infected,
-          and sometimes against each other.
-        </p>
-      </div>
-      <div class="card pitch__card">
-        <h2 class="pitch__heading">True Death</h2>
-        <p class="text-muted">
-          Permadeath is real and final. Die, and your inventory, skills,
-          and XP go with you &mdash; character deleted, no respawns. A new
-          survivor starts the story from nothing.
-        </p>
-      </div>
-      <div class="card pitch__card">
-        <h2 class="pitch__heading">Redemption</h2>
-        <p class="text-muted">
-          A zombie that refuses to feed can claw its way back to
-          humanity &mdash; a dangerous path back, not a free pass.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <section class="cta-strip">
-    <div class="container cta-strip__inner">
-      <p class="cta-strip__line">The line between human and monster is one bite.</p>
-      <div class="cta-strip__actions">
+    <div class="container hero__inner">
+      <h1 class="hero__title">
+        <img src="/assets/logo.png" alt="THE DEAD LAST" width="960" height="870" class="hero__logo">
+      </h1>
+      <p class="hero__tagline">Survival is only half the game.</p>
+      <div class="hero__actions">
         <a href="/register.php" class="btn btn-primary">Create Survivor</a>
-        <a href="/login.php" class="btn btn-ghost">Login</a>
+        <a href="#" class="btn btn-ghost btn-trailer"><span class="btn-trailer__glyph">&#9658;</span> Watch Trailer</a>
+      </div>
+    </div>
+    <div class="hero__chevron" aria-hidden="true">&#8964;</div>
+  </section>
+
+  <section class="features">
+    <div class="container features__grid">
+      <div class="feature">
+        <img src="/assets/images/2.png" alt="" class="feature__icon">
+        <h3 class="feature__heading">Scavenge &amp; Craft</h3>
+        <p class="text-muted feature__desc">Search, loot, and craft weapons, tools, and supplies to stay alive.</p>
+      </div>
+      <div class="feature">
+        <img src="/assets/images/3.png" alt="" class="feature__icon">
+        <h3 class="feature__heading">Trust No One</h3>
+        <p class="text-muted feature__desc">Team up with others, or betray them. Your choices define your story.</p>
+      </div>
+      <div class="feature">
+        <img src="/assets/images/4.png" alt="" class="feature__icon">
+        <h3 class="feature__heading">Zombie Threat</h3>
+        <p class="text-muted feature__desc">Relentless. Unforgiving. The dead don't stop coming.</p>
+      </div>
+      <div class="feature">
+        <img src="/assets/images/5.png" alt="" class="feature__icon">
+        <h3 class="feature__heading">Explore &amp; Endure</h3>
+        <p class="text-muted feature__desc">A vast, dynamic world filled with danger, mysteries, and rewards.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="town">
+    <div class="container card town__card">
+      <div class="town__copy">
+        <h2 class="town__heading">1950s. SMALL TOWN.<br>NO ESCAPE.</h2>
+        <p class="text-muted">Civilization has fallen. The dead roam the streets, and the few who remain are fighting for their last chance at survival.</p>
+        <a href="#" class="btn btn-ghost">Learn More</a>
+      </div>
+      <div class="town__carousel" id="town-carousel">
+        <div class="town-carousel__track">
+          <div class="town-carousel__slide is-active">
+            <img src="/assets/images/6.png" alt="Town slide 1">
+          </div>
+          <div class="town-carousel__slide">
+            <img src="/assets/images/7.png" alt="Town slide 2">
+          </div>
+          <div class="town-carousel__slide">
+            <img src="/assets/images/8.png" alt="Town slide 3">
+          </div>
+        </div>
+        <div class="town-carousel__dots">
+          <button type="button" class="town-carousel__dot is-active" data-slide="0" aria-label="Slide 1"></button>
+          <button type="button" class="town-carousel__dot" data-slide="1" aria-label="Slide 2"></button>
+          <button type="button" class="town-carousel__dot" data-slide="2" aria-label="Slide 3"></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="community">
+    <div class="container card community__card">
+      <div class="community__col community__col--social">
+        <h2 class="community__heading">Join the Community</h2>
+        <p class="text-muted">Share your story. Find allies. Stay updated.</p>
+        <div class="community__socials">
+          <a href="#" class="community__social" aria-label="Discord"><img src="/assets/images/13.png" alt=""></a>
+          <a href="#" class="community__social" aria-label="Twitter"><img src="/assets/images/14.png" alt=""></a>
+          <a href="#" class="community__social" aria-label="YouTube"><img src="/assets/images/15.png" alt=""></a>
+          <a href="#" class="community__social" aria-label="Reddit"><img src="/assets/images/16.png" alt=""></a>
+        </div>
+        <img src="/assets/images/12.png" alt="Community photo collage" class="community__collage">
+      </div>
+      <div class="community__col community__col--model">
+        <div id="home-hero-model" class="community__model"></div>
+      </div>
+      <div class="community__col community__col--news">
+        <h2 class="community__heading">Latest News</h2>
+        <div class="news-list">
+          <a href="#" class="news-item">
+            <img src="/assets/images/9.png" alt="" class="news-item__thumb">
+            <div class="news-item__body">
+              <h3 class="news-item__title">Server Stress Test &mdash; May 25</h3>
+              <p class="news-item__date">May 18, 2025</p>
+              <p class="news-item__blurb text-muted">Sign up now and help us stress test the servers before launch.</p>
+            </div>
+          </a>
+          <a href="#" class="news-item">
+            <img src="/assets/images/10.png" alt="" class="news-item__thumb">
+            <div class="news-item__body">
+              <h3 class="news-item__title">Developer Update #7</h3>
+              <p class="news-item__date">May 12, 2025</p>
+              <p class="news-item__blurb text-muted">New AI behaviors, weapon balance, and more.</p>
+            </div>
+          </a>
+          <a href="#" class="news-item">
+            <img src="/assets/images/11.png" alt="" class="news-item__thumb">
+            <div class="news-item__body">
+              <h3 class="news-item__title">New Map Teaser</h3>
+              <p class="news-item__date">May 5, 2025</p>
+              <p class="news-item__blurb text-muted">Take a look at our newest location coming soon.</p>
+            </div>
+          </a>
+        </div>
+        <a href="#" class="btn btn-ghost">View All News</a>
       </div>
     </div>
   </section>
 </main>
 
 <script type="module" src="/js/home-hero-model.js?v=1"></script>
+<script src="/js/home-carousel.js?v=1"></script>
 <?php include __DIR__ . '/partials/footer.php'; ?>
