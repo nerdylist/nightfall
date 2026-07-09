@@ -1,0 +1,35 @@
+{
+  "base_path": "",
+  "routes": [
+    {
+      "url": "/",
+      "destination": "pages/home.php",
+      "description": "Homepage"
+    },
+    {
+      "url": "/about",
+      "destination": "pages/about.php",
+      "description": "About page"
+    },
+    {
+      "url": "/contact",
+      "destination": "pages/contact.php",
+      "description": "Contact page"
+    },
+    {
+      "url": "/blog",
+      "destination": "pages/blog.php",
+      "description": "Blog listing"
+    },
+    {
+      "url": "/blog/:slug",
+      "destination": "pages/blog-post.php",
+      "description": "Blog post detail - :slug becomes $_ROUTE_PARAMS['slug']"
+    },
+    {
+      "url": "/products/:id",
+      "destination": "pages/product.php",
+      "description": "Product detail - :id becomes $_ROUTE_PARAMS['id']"
+    }
+  ]
+}

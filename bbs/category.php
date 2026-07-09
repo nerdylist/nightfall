@@ -7,6 +7,9 @@ $data = require __DIR__ . '/data/live.php';   // returns mock array -> $data
 $me = auth_current_user();
 $data['current_user'] = $me ? (int)$me['id'] : 0;
 
+// friendly-URL: /bbs/category/:id exposes id via $_ROUTE_PARAMS; bridge to $_GET
+if (isset($GLOBALS['_ROUTE_PARAMS']['id']) && !isset($_GET['id'])) { $_GET['id'] = $GLOBALS['_ROUTE_PARAMS']['id']; }
+
 // Resolve requested category id (default to first category).
 $requestedId = isset($_GET['id']) ? (int) $_GET['id'] : (int) ($data['categories'][0]['id'] ?? 0);
 
@@ -46,7 +49,7 @@ include __DIR__ . '/partials/header.php';     // <header class="site-header">
 
     <aside class="category-aside">
       <?php if (auth_is_logged_in()): ?>
-      <a class="btn btn-primary new-thread-btn" href="write.php?category=<?= (int)$categoryId ?>">
+      <a class="btn btn-primary new-thread-btn" href="/bbs/write.php?category=<?= (int)$categoryId ?>">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <line x1="12" y1="5" x2="12" y2="19"></line>
           <line x1="5" y1="12" x2="19" y2="12"></line>

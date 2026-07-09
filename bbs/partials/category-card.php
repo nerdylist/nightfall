@@ -7,7 +7,7 @@ if (empty($category)) {
 
 require_once __DIR__ . '/category-badge.php';
 ?>
-<a class="category-card" href="category.php?id=<?= (int)$category['id'] ?>" style="--cat-color: <?= forum_category_color($category) ?>;">
+<a class="category-card" href="/bbs/category/<?= (int)$category['id'] ?>" style="--cat-color: <?= forum_category_color($category) ?>;">
   <span class="card-head">
     <span class="icon<?= forum_category_badge_is_image($category) ? ' is-image' : '' ?>"><?= forum_category_badge($category) ?></span>
     <span class="name"><?= htmlspecialchars($category['name'] ?? '') ?></span>

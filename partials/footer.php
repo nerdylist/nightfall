@@ -1,6 +1,6 @@
 <footer class="site-footer">
   <div class="container site-footer__inner">
-    <a href="/index.php" class="site-footer__brand">THE DEAD LAST</a>
+    <a href="/" class="site-footer__brand">THE DEAD LAST</a>
     <div class="site-footer__links">
       <a href="#" class="site-footer__link">Privacy Policy</a>
       <a href="#" class="site-footer__link">Terms of Service</a>

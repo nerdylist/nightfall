@@ -70,7 +70,12 @@ if (!function_exists('forum_load_env')) {
 
 $forum_env = forum_load_env(__DIR__ . '/.env');
 
-$CONFIG = [
+// Friendly-URL routing (router/Router.php) requires destination files from
+// inside a class method, so a bare `$CONFIG = [...]` here only lands in that
+// method's local scope, not PHP's global scope. bbs/db.php reaches into the
+// real global scope via `global $CONFIG;`, so populate $GLOBALS explicitly
+// to keep that working regardless of the calling context.
+$GLOBALS['CONFIG'] = [
     'SITE_NAME'     => isset($forum_env['SITE_NAME']) && $forum_env['SITE_NAME'] !== ''
         ? (string) $forum_env['SITE_NAME']
         : 'Nexus',
@@ -99,3 +104,4 @@ $CONFIG = [
         ? (string) $forum_env['UPLOAD_ALLOWED_EXT']
         : 'jpg,jpeg,png,gif,webp',
 ];
+$CONFIG = $GLOBALS['CONFIG'];

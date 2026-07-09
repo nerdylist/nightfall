@@ -44,7 +44,7 @@ $totalMembers = count($data['users'] ?? []);
   ?>
   <div class="section-head">
     <h2 class="section-title">Categories</h2>
-    <a class="section-hint section-link" href="forums.php">View all <?= count($data['categories']) ?> forums &rarr;</a>
+    <a class="section-hint section-link" href="/bbs/forums">View all <?= count($data['categories']) ?> forums &rarr;</a>
   </div>
 
   <section class="category-grid">

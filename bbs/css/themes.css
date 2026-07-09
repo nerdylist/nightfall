@@ -12,13 +12,19 @@
   --space-7: 48px;
   --space-8: 64px;
 
-  /* ---- Radii (flat + sharp: crisp, smaller) ---- */
-  --radius-sm: 5px;
+  /* ---- Radii (flat + sharp: crisp, smaller; matches host 2/4/8) ---- */
+  --radius-sm: 2px;
   --radius: 8px;
-  --radius-lg: 12px;
+  --radius-lg: 8px;
 
   /* ---- Typography (tightened scale for sharp editorial hierarchy) ---- */
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Host token vocabulary (site-nav.css + host design system rely on these
+     resolving on forum pages too, since forum pages don't load host base.css).
+     --font-sans is overridden to the host stack (was a different system-ui
+     stack) so body/post text matches the host exactly. */
+  --font-display: "Night of the Deads", var(--font-sans);
+  --font-condensed: "Arial Narrow", "Helvetica Neue Condensed", "Roboto Condensed", Impact, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
 
   --fs-xs: 0.75rem;
   --fs-sm: 0.8125rem;
@@ -45,6 +51,11 @@
 }
 
 /* ================= MIDNIGHT (default) ================= */
+/* Bound to bare :root too, so it is the pre-JS default before the inline
+   theme script in head.php sets data-theme="darkness". Since darkness is
+   force-applied site-wide, this theme is otherwise unreachable — but its
+   accent/hot are neutered to the host green/rust (matching darkness) so no
+   purple/orange can ever flash or leak, even momentarily pre-JS. */
 [data-theme="midnight"],
 :root {
   --bg:            #08080b;
@@ -56,20 +67,22 @@
   --text:          #f2f2f7;
   --text-muted:    #9a9aab;
   --text-faint:    #64646f;
-  --accent:        #7a64f5;
-  --accent-hover:  #8a76f8;
-  --accent-soft:   rgba(122, 100, 245, 0.16);
-  --accent-contrast: #ffffff;
+  --accent:        #7fae7a;
+  --accent-hover:  #9ac394;
+  --accent-soft:   rgba(127, 174, 122, 0.18);
+  --accent-contrast: #000000;
   --avatar-fg:     #ffffff;
-  --hot:           #ff8a5c;
-  --hot-soft:      rgba(255, 138, 92, 0.13);
-  --hot-border:    rgba(255, 138, 92, 0.28);
+  --hot:           #a5453a;
+  --hot-soft:      rgba(165, 69, 58, 0.18);
+  --hot-border:    rgba(165, 69, 58, 0.35);
   --shadow:        0 0 0 1px rgba(0, 0, 0, 0.45);
   --glow:          0 0 0 1px var(--accent-soft);
   --ring:          0 0 0 3px var(--accent-soft);
 }
 
 /* ================= DUSK ================= */
+/* Unreachable while darkness is force-applied; accent/hot neutered to the
+   host green/rust (same as darkness) so no teal/orange can ever leak. */
 [data-theme="dusk"] {
   --bg:            #0e131b;
   --bg-elevated:   #161e2a;
@@ -80,20 +93,22 @@
   --text:          #eaf1f8;
   --text-muted:    #9aabbf;
   --text-faint:    #5f6f83;
-  --accent:        #25c2af;
-  --accent-hover:  #36d0bd;
-  --accent-soft:   rgba(37, 194, 175, 0.15);
-  --accent-contrast: #052420;
+  --accent:        #7fae7a;
+  --accent-hover:  #9ac394;
+  --accent-soft:   rgba(127, 174, 122, 0.18);
+  --accent-contrast: #000000;
   --avatar-fg:     #ffffff;
-  --hot:           #ff9466;
-  --hot-soft:      rgba(255, 148, 102, 0.13);
-  --hot-border:    rgba(255, 148, 102, 0.28);
+  --hot:           #a5453a;
+  --hot-soft:      rgba(165, 69, 58, 0.18);
+  --hot-border:    rgba(165, 69, 58, 0.35);
   --shadow:        0 0 0 1px rgba(0, 0, 0, 0.40);
   --glow:          0 0 0 1px var(--accent-soft);
   --ring:          0 0 0 3px var(--accent-soft);
 }
 
 /* ================= LIGHT ================= */
+/* Unreachable while darkness is force-applied; accent/hot neutered to the
+   host green/rust (same as darkness) so no purple/orange can ever leak. */
 [data-theme="light"] {
   --bg:            #fbfbfc;
   --bg-elevated:   #ffffff;
@@ -104,52 +119,100 @@
   --text:          #0d0e12;
   --text-muted:    #5c5f6a;
   --text-faint:    #9296a2;
-  --accent:        #6a48f2;
-  --accent-hover:  #5a37e8;
-  --accent-soft:   rgba(106, 72, 242, 0.10);
-  --accent-contrast: #ffffff;
+  --accent:        #7fae7a;
+  --accent-hover:  #9ac394;
+  --accent-soft:   rgba(127, 174, 122, 0.18);
+  --accent-contrast: #000000;
   --avatar-fg:     #ffffff;
-  --hot:           #cf5018;
-  --hot-soft:      rgba(207, 80, 24, 0.09);
-  --hot-border:    rgba(207, 80, 24, 0.26);
+  --hot:           #a5453a;
+  --hot-soft:      rgba(165, 69, 58, 0.18);
+  --hot-border:    rgba(165, 69, 58, 0.35);
   --shadow:        0 0 0 1px rgba(15, 17, 21, 0.06);
   --glow:          0 0 0 1px var(--accent-soft);
   --ring:          0 0 0 3px var(--accent-soft);
 }
 
 /* ================= DARKNESS (monochrome) ================= */
-/* Pure black / white / gray only — near-black bg, faintly lighter cards. */
+/* Pure black / white / gray + two rare accents (undead-green, blood-rust),
+   remapped 1:1 to the HOST palette (css/base.css :root) so the forum reads
+   as the same site as the host. Forum token NAMES are kept (components
+   consume --bg/--text/--accent/etc.) but VALUES now equal host tokens. */
 [data-theme="darkness"] {
-  --bg:            #010101;
-  --bg-elevated:   #0a0a0a;
-  --bg-card:       #0e0e0e;
-  --surface:       #161616;
-  --border:        #2a2a2a;
-  --border-subtle: #1c1c1c;
-  --text:          #f4f4f4;
+  --bg:            #000000;
+  --bg-elevated:   #050505;
+  --bg-card:       #0a0a0a;
+  --surface:       #101010;
+  --border:        rgba(255, 255, 255, 0.12);
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --text:          #ffffff;
   --text-muted:    #9a9a9a;
-  --text-faint:    #5e5e5e;
-  --accent:        #d0d0d0;
-  --accent-hover:  #ececec;
-  --accent-soft:   rgba(255, 255, 255, 0.12);
+  --text-faint:    #666666;
+  --accent:        #7fae7a;
+  --accent-hover:  #9ac394;
+  --accent-soft:   rgba(127, 174, 122, 0.18);
   --accent-contrast: #000000;
-  --avatar-fg:     #000000;
-  --hot:           #cfcfcf;
-  --hot-soft:      rgba(255, 255, 255, 0.10);
-  --hot-border:    rgba(255, 255, 255, 0.22);
-  --shadow:        0 0 0 1px rgba(0, 0, 0, 0.60);
-  --glow:          0 0 0 1px var(--accent-soft);
-  --ring:          0 0 0 3px var(--accent-soft);
+  --avatar-fg:     #ffffff;
+  --hot:           #a5453a;
+  --hot-soft:      rgba(165, 69, 58, 0.18);
+  --hot-border:    rgba(165, 69, 58, 0.35);
+  --shadow:        0 0 0 1px rgba(255, 255, 255, 0.06);
+  --glow:          0 0 20px rgba(255, 255, 255, 0.15);
+  --ring:          0 0 0 3px rgba(255, 255, 255, 0.1);
+
+  /* ---- HOST token vocabulary ---- */
+  /* site-nav.css (shared header, loaded on host + forum) consumes these
+     directly; the forum never defined them before, so the nav fell back to
+     unstyled fonts/colors. Defining them here (matching css/base.css :root
+     exactly) makes site-nav.css resolve identically on both apps. */
+  --font-display: "Night of the Deads", var(--font-sans);
+  --font-condensed: "Arial Narrow", "Helvetica Neue Condensed", "Roboto Condensed", Impact, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --text-0: #ffffff;
+  --text-1: #d6d6d6;
+  --text-2: #9a9a9a;
+  /* NOTE: host --text-muted (#666666) and host --border-subtle
+     (rgba(255,255,255,0.07)) are intentionally NOT redefined under those
+     exact names here — the forum already has --text-muted (#9a9a9a, used
+     everywhere as body-copy secondary color) and --border-subtle
+     (rgba(255,255,255,0.07), same value already) serving those same slots.
+     Redefining --text-muted to the host's darker #666666 would silently
+     recolor every existing forum component that reads --text-muted. Host
+     --text-muted's value already lives on the forum as --text-faint
+     (#666666); host --border-subtle's value already matches forum
+     --border-subtle exactly. site-nav.css itself only reaches for
+     --font-display/--font-condensed/--text-0/--text-1/--border-strong, none
+     of which collide, so this is sufficient. */
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --bg-0: #000000;
+  --bg-1: #050505;
+  --bg-2: #0a0a0a;
+  --bg-3: #101010;
+  --accent-dim: #5c7d59;
+  --accent-glow: rgba(127, 174, 122, 0.18);
+  --danger: #a5453a;
+  --danger-dim: #7a352d;
+  --danger-glow: rgba(165, 69, 58, 0.18);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 0 20px rgba(255, 255, 255, 0.15);
+  --radius-md: 4px;
 }
 
 /* Darkness is strictly monochrome: desaturate any user-supplied color
    (category badge hex via --cat-color, badge images, emoji) so the whole
-   UI stays black / white / gray. */
+   UI stays black / white / gray. Category badges keep a whisper of hue
+   (grayscale 0.7 + slightly reduced contrast) so categories stay visually
+   distinguishable from one another at a glance, while still reading as
+   noir. Avatars are identity signals, not decoration, so they're muted
+   harder (0.85) — enough to stay monochrome-first but not fully flat. */
 [data-theme="darkness"] .cat-badge,
 [data-theme="darkness"] .category-card .icon,
 [data-theme="darkness"] .op-category-badge,
 [data-theme="darkness"] .cat-swatch,
-[data-theme="darkness"] .cat-badge-img,
+[data-theme="darkness"] .cat-badge-img {
+  filter: grayscale(0.7) contrast(0.95);
+}
+
 [data-theme="darkness"] .avatar {
-  filter: grayscale(1);
+  filter: grayscale(0.85);
 }

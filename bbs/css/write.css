@@ -13,11 +13,15 @@
   border-radius: var(--radius-lg);
   padding: var(--space-6);
   box-shadow: var(--shadow);
+  border-image: url('/assets/images/grunge-border.png') 24 round;
+  border-image-width: 1px;
 }
 
 .write-page h1 {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-weight: 400;
   font-size: var(--fs-2xl);
-  font-weight: var(--fw-bold);
   letter-spacing: -0.018em;
   margin: 0 0 var(--space-1);
 }

@@ -32,14 +32,20 @@
 }
 
 .profile-name {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-weight: 400;
   font-size: var(--fs-2xl);
-  font-weight: var(--fw-bold);
   letter-spacing: -0.018em;
   color: var(--text);
   margin-bottom: var(--space-1);
 }
 
 .profile-meta {
+  font-family: var(--font-condensed);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
   font-size: var(--fs-sm);
   color: var(--text-faint);
 }
@@ -47,6 +53,7 @@
 .profile-bio {
   max-width: 68ch;
   margin: var(--space-5) var(--space-5) 0;
+  font-family: var(--font-sans);
   font-size: var(--fs-base);
   line-height: var(--lh-relaxed);
   color: var(--text-muted);
@@ -84,6 +91,8 @@
 .profile-stats .stat .label {
   display: block;
   margin-top: var(--space-1);
+  font-family: var(--font-condensed);
+  font-weight: var(--fw-bold);
   font-size: var(--fs-xs);
   color: var(--text-faint);
   text-transform: uppercase;

@@ -24,7 +24,7 @@ foreach ($categories as $cat) {
 
 // On a fresh GET with no valid category, send the user home.
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && $selectedCategory === null) {
-    header('Location: index.php');
+    header('Location: /bbs/forums');
     exit;
 }
 
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $excerpt = bbcode_excerpt($old['body']);
         try {
             $id = create_thread($categoryId, $uid, $old['title'], $old['body'], $excerpt);
-            header('Location: thread.php?id=' . $id);
+            header('Location: /bbs/thread/' . $id);
             exit;
         } catch (Throwable $e) {
             $errors[] = 'Something went wrong creating your thread. Please try again.';
@@ -105,7 +105,7 @@ include __DIR__ . '/partials/header.php';
         </div>
       <?php endif; ?>
 
-      <form method="post" action="write.php">
+      <form method="post" action="/bbs/write.php">
         <?= csrf_field() ?>
         <input type="hidden" name="category_id" value="<?= (int) $selectedCategoryId ?>">
         <div class="write-field">
@@ -119,7 +119,7 @@ include __DIR__ . '/partials/header.php';
 
         <div class="write-actions">
           <button type="submit" class="btn btn-primary">Post Thread</button>
-          <a class="btn btn-ghost" href="category.php?id=<?= $selectedCategoryId ?>">Cancel</a>
+          <a class="btn btn-ghost" href="/bbs/category/<?= $selectedCategoryId ?>">Cancel</a>
         </div>
       </form>
     </div>

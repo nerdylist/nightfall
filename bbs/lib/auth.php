@@ -338,7 +338,7 @@ if (!function_exists('csrf_check')) {
 if (!function_exists('require_login')) {
     function require_login() {
         if (!auth_is_logged_in()) {
-            header('Location: /login.php?next=' . urlencode($_SERVER['REQUEST_URI'] ?? '/index.php'));
+            header('Location: /login?next=' . urlencode($_SERVER['REQUEST_URI'] ?? '/index.php'));
             exit;
         }
     }
@@ -348,7 +348,7 @@ if (!function_exists('require_admin')) {
     function require_admin() {
         if (!auth_is_admin()) {
             if (!auth_is_logged_in()) {
-                header('Location: /login.php?next=' . urlencode($_SERVER['REQUEST_URI'] ?? '/index.php'));
+                header('Location: /login?next=' . urlencode($_SERVER['REQUEST_URI'] ?? '/index.php'));
                 exit;
             }
             http_response_code(403);

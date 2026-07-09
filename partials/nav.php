@@ -23,8 +23,8 @@ require_once __DIR__ . '/../config.php';
 
 $NAV_HIDE_HOME = $NAV_HIDE_HOME ?? false;
 $NAV_ADMIN_URL = $NAV_ADMIN_URL ?? null;
-$NAV_LOGIN_URL = $NAV_LOGIN_URL ?? '/login.php';
-$NAV_REGISTER_URL = $NAV_REGISTER_URL ?? '/register.php';
+$NAV_LOGIN_URL = $NAV_LOGIN_URL ?? '/login';
+$NAV_REGISTER_URL = $NAV_REGISTER_URL ?? '/register';
 $NAV_SEARCH_PLACEHOLDER = $NAV_SEARCH_PLACEHOLDER ?? 'Search THE DEAD LAST...';
 
 // Nav auth state: resolve the logged-in user (if any) from the shared
@@ -43,14 +43,14 @@ if (!empty($_SESSION['user_id'])) {
 ?>
 <nav class="site-nav">
   <div class="container site-nav__inner">
-    <a href="/index.php" class="site-nav__brand">THE DEAD LAST</a>
+    <a href="/" class="site-nav__brand">THE DEAD LAST</a>
     <div class="site-nav__links">
       <?php if (!$NAV_HIDE_HOME): ?>
-        <a href="/index.php" class="site-nav__link">Home</a>
+        <a href="/" class="site-nav__link">Home</a>
       <?php endif; ?>
       <a href="#" class="site-nav__link">Game</a>
       <a href="#" class="site-nav__link">News</a>
-      <a href="/bbs/" class="site-nav__link">Community</a>
+      <a href="/bbs/forums" class="site-nav__link">Community</a>
       <a href="#" class="site-nav__link">Support</a>
       <?php if ($NAV_ADMIN_URL !== null): ?>
         <a href="<?= htmlspecialchars($NAV_ADMIN_URL) ?>" class="site-nav__link">Admin</a>
@@ -69,8 +69,8 @@ if (!empty($_SESSION['user_id'])) {
     </div>
     <div class="site-nav__auth">
       <?php if ($navUser): ?>
-        <a href="/bbs/profile.php?user=<?= urlencode($navUser['username']) ?>" class="site-nav__link site-nav__username"><?= htmlspecialchars(strtoupper($navUser['username'])) ?></a>
-        <a href="/logout.php" class="btn btn-ghost site-nav__cta">Logout</a>
+        <a href="/bbs/profile/<?= urlencode($navUser['username']) ?>" class="site-nav__link site-nav__username"><?= htmlspecialchars(strtoupper($navUser['username'])) ?></a>
+        <a href="/logout" class="btn btn-ghost site-nav__cta">Logout</a>
       <?php else: ?>
         <a href="<?= htmlspecialchars($NAV_LOGIN_URL) ?>" class="btn btn-ghost site-nav__cta">Login</a>
         <a href="<?= htmlspecialchars($NAV_REGISTER_URL) ?>" class="btn btn-primary site-nav__cta">Register</a>

@@ -17,6 +17,8 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
+  border-image: url('/assets/images/grunge-border.png') 24 round;
+  border-image-width: 1px;
 }
 
 /* ---- Original-post header (title + byline + stats) ---- */
@@ -42,7 +44,8 @@
 }
 
 .op-author {
-  font-weight: var(--fw-semibold);
+  font-family: var(--font-condensed);
+  font-weight: var(--fw-bold);
   color: var(--text);
 }
 
@@ -53,8 +56,11 @@
   gap: var(--space-2);
   padding: var(--space-1) var(--space-2) var(--space-1) var(--space-1);
   border-radius: var(--radius);
+  font-family: var(--font-condensed);
   font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: var(--text-muted);
   text-decoration: none;
   transition: color var(--transition-fast), background var(--transition-fast);
@@ -97,6 +103,9 @@
 
 .op-title {
   margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-weight: 400;
   font-size: var(--fs-2xl);
   letter-spacing: -0.01em;
   color: var(--text);
@@ -106,6 +115,10 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
+  font-family: var(--font-condensed);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
   font-size: var(--fs-sm);
   color: var(--text-faint);
 }
@@ -127,6 +140,7 @@
   padding-right: 10px;
   /* leave room so the last line isn't hidden under the fade overlay */
   padding-bottom: var(--space-6);
+  font-family: var(--font-sans);
   line-height: var(--lh-relaxed);
   font-size: var(--fs-lg);
   color: var(--text);

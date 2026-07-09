@@ -44,7 +44,7 @@ main {
   justify-content: space-between;
   gap: var(--space-4);
   width: 100%;
-  max-width: 1100px;
+  max-width: 1120px;
   margin-inline: auto;
   padding: var(--space-4) var(--space-5);
   border-top: 1px solid var(--border);
@@ -60,7 +60,7 @@ img {
 /* ---- Layout container ---- */
 .container {
   width: 100%;
-  max-width: 1100px;
+  max-width: 1120px;
   margin-inline: auto;
   padding-inline: var(--space-5);
 }
@@ -99,28 +99,31 @@ small {
   color: var(--text-muted);
 }
 
-/* ---- Buttons ---- */
+/* ---- Buttons (mirrors host css/base.css .btn/.btn-primary/.btn-ghost) ---- */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-5);
-  font-family: inherit;
+  font-family: var(--font-condensed);
   font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   line-height: 1;
   color: var(--text);
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background var(--transition), border-color var(--transition),
               box-shadow var(--transition), color var(--transition), transform var(--transition-fast);
 }
 
 .btn:hover {
-  border-color: var(--accent);
+  border-color: var(--text);
+  box-shadow: var(--glow);
 }
 
 .btn:active {
@@ -139,29 +142,33 @@ a:focus-visible {
   box-shadow: var(--ring);
 }
 
+/* Host primary button is a near-white chip with black text — token-driven
+   equivalent: --text (white in darkness) as the fill, --bg (black) as the
+   contrasting label color. */
 .btn-primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-contrast);
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
 }
 
 .btn-primary:hover {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
-  color: var(--accent-contrast);
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
   box-shadow: var(--glow);
+  transform: translateY(-1px);
 }
 
 .btn-ghost {
   background: transparent;
-  border-color: transparent;
-  color: var(--text-muted);
+  border: 1px solid var(--border);
+  color: var(--text);
 }
 
 .btn-ghost:hover {
-  background: var(--surface);
-  border-color: var(--border-subtle);
-  color: var(--text);
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
 }
 
 /* ---- Badges ---- */
@@ -234,12 +241,17 @@ textarea {
 }
 
 /* ---- Card ---- */
+/* Host .card (css/base.css) uses a grunge border-image over the hairline
+   border for a worn, noir texture. Asset verified reachable (200) at
+   /assets/images/grunge-border.png from /bbs/ — applied directly. */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
   box-shadow: var(--shadow);
+  border-image: url('/assets/images/grunge-border.png') 24 round;
+  border-image-width: 1px;
 }
 
 /* ---- Utility spacing ---- */

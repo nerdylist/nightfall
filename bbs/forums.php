@@ -17,7 +17,7 @@ include __DIR__ . '/partials/header.php';
 
   <section class="forum-rows">
     <?php foreach ($data['categories'] as $category): ?>
-      <a class="forum-row" href="category.php?id=<?= (int)$category['id'] ?>" style="--cat-color: <?= forum_category_color($category) ?>;">
+      <a class="forum-row" href="/bbs/category/<?= (int)$category['id'] ?>" style="--cat-color: <?= forum_category_color($category) ?>;">
         <span class="forum-row-badge cat-badge<?= forum_category_badge_is_image($category) ? ' is-image' : '' ?>"><?= forum_category_badge($category) ?></span>
         <span class="forum-row-main">
           <span class="forum-row-name"><?= htmlspecialchars($category['name'] ?? '') ?></span>

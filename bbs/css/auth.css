@@ -20,11 +20,15 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
+  border-image: url('/assets/images/grunge-border.png') 24 round;
+  border-image-width: 1px;
 }
 
 .auth-title {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-weight: 400;
   font-size: var(--fs-2xl);
-  font-weight: var(--fw-bold);
   letter-spacing: -0.018em;
   text-align: center;
   margin: 0 0 var(--space-2);
@@ -67,6 +71,8 @@
   align-items: center;
   gap: var(--space-3);
   margin: var(--space-5) 0;
+  font-family: var(--font-condensed);
+  font-weight: var(--fw-bold);
   font-size: var(--fs-xs);
   text-transform: uppercase;
   letter-spacing: 0.06em;

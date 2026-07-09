@@ -55,13 +55,16 @@
 }
 
 .forum-row-name {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-weight: 400;
   font-size: var(--fs-lg);
-  font-weight: var(--fw-semibold);
   letter-spacing: -0.01em;
   color: var(--text);
 }
 
 .forum-row-desc {
+  font-family: var(--font-sans);
   font-size: var(--fs-sm);
   color: var(--text-muted);
   line-height: var(--lh-snug);
@@ -75,6 +78,10 @@
   align-items: baseline;
   gap: var(--space-4);
   flex: 0 0 auto;
+  font-family: var(--font-condensed);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
   font-size: var(--fs-xs);
   color: var(--text-faint);
 }

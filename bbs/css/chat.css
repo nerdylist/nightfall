@@ -19,8 +19,11 @@
   justify-content: space-between;
   padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--border-subtle);
+  font-family: var(--font-condensed);
   font-size: var(--fs-sm);
-  font-weight: var(--fw-semibold);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: var(--text);
 }
 
@@ -79,8 +82,9 @@
 }
 
 .chat-user {
+  font-family: var(--font-condensed);
   font-size: var(--fs-sm);
-  font-weight: var(--fw-semibold);
+  font-weight: var(--fw-bold);
   color: var(--text);
 }
 
@@ -91,6 +95,7 @@
 
 /* The bubble */
 .chat-text {
+  font-family: var(--font-sans);
   font-size: var(--fs-sm);
   line-height: var(--lh-snug);
   color: var(--text);

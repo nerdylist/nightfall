@@ -2,13 +2,18 @@
    Static styling lives here; only the deterministic background color is
    passed per-instance via the --avatar-bg custom property. */
 
+/* Initials render in the condensed UI-label face (bold, tight tracking) —
+   consistent with how the host treats short identity/label text.
+   Background hue keeps the grayscale(0.85) mute from themes.css darkness
+   block (identity signal, muted hard but not fully flattened). */
 .avatar {
   display: flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
   border-radius: var(--radius);
-  font-weight: var(--fw-semibold);
+  font-family: var(--font-condensed);
+  font-weight: var(--fw-bold);
   letter-spacing: 0.01em;
   line-height: 1;
   background: var(--avatar-bg);

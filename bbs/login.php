@@ -19,5 +19,5 @@ if (!function_exists('login_safe_next')) {
 $next = login_safe_next($_GET['next'] ?? '');
 if ($next === '') { $next = '/bbs/index.php'; }
 
-header('Location: /login.php?next=' . urlencode($next));
+header('Location: /login?next=' . urlencode($next));
 exit;

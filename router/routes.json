@@ -1,0 +1,65 @@
+{
+  "base_path": "",
+  "routes": [
+    {
+      "url": "/",
+      "destination": "home.php",
+      "description": "Homepage"
+    },
+    {
+      "url": "/index.php",
+      "destination": "home.php",
+      "description": "Legacy homepage URL (pre-friendly-URL bookmarks/links)"
+    },
+    {
+      "url": "/login",
+      "destination": "login.php",
+      "description": "Login page"
+    },
+    {
+      "url": "/register",
+      "destination": "register.php",
+      "description": "Register page"
+    },
+    {
+      "url": "/logout",
+      "destination": "logout.php",
+      "description": "Logout"
+    },
+    {
+      "url": "/bbs/forums",
+      "destination": "bbs/forums.php",
+      "description": "Forum: all forums listing"
+    },
+    {
+      "url": "/bbs/write",
+      "destination": "bbs/write.php",
+      "description": "Forum: new thread composer"
+    },
+    {
+      "url": "/bbs/settings",
+      "destination": "bbs/settings.php",
+      "description": "Forum: user settings"
+    },
+    {
+      "url": "/bbs/chat",
+      "destination": "bbs/chat.php",
+      "description": "Forum: chat endpoint"
+    },
+    {
+      "url": "/bbs/thread/:id",
+      "destination": "bbs/thread.php",
+      "description": "Forum: thread detail - :id becomes $_ROUTE_PARAMS['id']"
+    },
+    {
+      "url": "/bbs/category/:id",
+      "destination": "bbs/category.php",
+      "description": "Forum: category detail - :id becomes $_ROUTE_PARAMS['id']"
+    },
+    {
+      "url": "/bbs/profile/:user",
+      "destination": "bbs/profile.php",
+      "description": "Forum: user profile - :user becomes $_ROUTE_PARAMS['user']"
+    }
+  ]
+}

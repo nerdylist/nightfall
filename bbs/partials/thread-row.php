@@ -21,7 +21,7 @@ foreach ($data['users'] as $u) {
   </div>
   <div class="thread-main">
     <div class="thread-head">
-      <a class="title" href="thread.php?id=<?= (int)$thread['id'] ?>"><?= htmlspecialchars($thread['title']) ?></a>
+      <a class="title" href="/bbs/thread/<?= (int)$thread['id'] ?>"><?= htmlspecialchars($thread['title']) ?></a>
       <?php if (!empty($thread['pinned'])): ?><span class="badge badge-pinned">Pinned</span><?php endif; ?>
       <?php if (!empty($thread['hot'])): ?><span class="badge badge-hot">Hot</span><?php endif; ?>
     </div>

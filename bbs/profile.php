@@ -7,6 +7,9 @@ $me = auth_current_user();
 $data['current_user'] = $me ? (int)$me['id'] : 0;
 require_once __DIR__ . '/partials/avatar.php';
 
+// friendly-URL: /bbs/profile/:user exposes user via $_ROUTE_PARAMS; bridge to $_GET
+if (isset($GLOBALS['_ROUTE_PARAMS']['user']) && !isset($_GET['user'])) { $_GET['user'] = $GLOBALS['_ROUTE_PARAMS']['user']; }
+
 // Resolve requested user (default to current user). Accepts either a
 // numeric id or a username in ?user=.
 $requestedParam = isset($_GET['user']) ? (string) $_GET['user'] : (string) $data['current_user'];

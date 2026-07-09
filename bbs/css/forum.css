@@ -13,8 +13,9 @@
 .hero-eyebrow {
   display: inline-block;
   margin-bottom: var(--space-3);
+  font-family: var(--font-condensed);
   font-size: var(--fs-xs);
-  font-weight: var(--fw-semibold);
+  font-weight: var(--fw-bold);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--accent);
@@ -23,6 +24,9 @@
 .hero-title {
   margin: 0 0 var(--space-4);
   max-width: 18ch;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-weight: 400;
   font-size: var(--fs-3xl);
   line-height: var(--lh-tight);
   letter-spacing: -0.03em;
@@ -61,8 +65,9 @@
 }
 
 .hero-stat-label {
+  font-family: var(--font-condensed);
   font-size: var(--fs-xs);
-  font-weight: var(--fw-medium);
+  font-weight: var(--fw-bold);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-faint);
@@ -79,13 +84,17 @@
 
 .section-title {
   margin: 0;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-weight: 400;
   font-size: var(--fs-xl);
   letter-spacing: -0.01em;
 }
 
 .section-hint {
+  font-family: var(--font-condensed);
   font-size: var(--fs-xs);
-  font-weight: var(--fw-medium);
+  font-weight: var(--fw-bold);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--text-faint);
@@ -206,13 +215,16 @@
 }
 
 .category-card .name {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-weight: 400;
   font-size: var(--fs-lg);
-  font-weight: var(--fw-semibold);
   letter-spacing: -0.01em;
   color: var(--text);
 }
 
 .category-card .desc {
+  font-family: var(--font-sans);
   font-size: var(--fs-sm);
   color: var(--text-muted);
   line-height: var(--lh-snug);
@@ -225,7 +237,11 @@
   margin-top: auto;
   padding-top: var(--space-4);
   border-top: 1px solid var(--border-subtle);
+  font-family: var(--font-condensed);
   font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: var(--text-faint);
 }
 
@@ -305,6 +321,8 @@
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  border-image: url('/assets/images/grunge-border.png') 24 round;
+  border-image-width: 1px;
 }
 
 .cat-info-head {
@@ -315,6 +333,9 @@
 
 .cat-info-name {
   margin: 0;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-weight: 400;
   font-size: var(--fs-xl);
   letter-spacing: -0.01em;
   color: var(--text);
@@ -344,6 +365,8 @@
 }
 
 .cat-info-stat dt {
+  font-family: var(--font-condensed);
+  font-weight: var(--fw-bold);
   font-size: var(--fs-xs);
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -411,7 +434,11 @@
   gap: var(--space-2);
 }
 
+/* List-row title, not a page heading — stays plain sans (bold) for dense
+   scanability. The actual thread-page heading (.op-title, thread.css) is
+   the one that gets var(--font-display). */
 .thread-row .title {
+  font-family: var(--font-sans);
   font-size: var(--fs-lg);
   font-weight: var(--fw-semibold);
   letter-spacing: -0.01em;

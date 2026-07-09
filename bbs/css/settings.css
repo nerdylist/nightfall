@@ -7,10 +7,15 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
+  border-image: url('/assets/images/grunge-border.png') 24 round;
+  border-image-width: 1px;
 }
 
 .settings-group > h3 {
   margin: 0 0 var(--space-1);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-weight: 400;
   font-size: var(--fs-lg);
   letter-spacing: -0.005em;
 }
@@ -38,8 +43,11 @@
 }
 
 .form-grid .field label {
+  font-family: var(--font-condensed);
   font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: var(--text-muted);
 }
 
@@ -76,8 +84,11 @@
 }
 
 .category-form-grid .field label {
+  font-family: var(--font-condensed);
   font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: var(--text-muted);
 }
 

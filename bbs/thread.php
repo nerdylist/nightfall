@@ -9,6 +9,9 @@ require_once __DIR__ . '/partials/avatar.php';
 require_once __DIR__ . '/lib/bbcode.php';
 require_once __DIR__ . '/partials/category-badge.php';
 
+// friendly-URL: /bbs/thread/:id exposes id via $_ROUTE_PARAMS; bridge to $_GET
+if (isset($GLOBALS['_ROUTE_PARAMS']['id']) && !isset($_GET['id'])) { $_GET['id'] = $GLOBALS['_ROUTE_PARAMS']['id']; }
+
 // Resolve requested thread id (default to first thread).
 $requestedId = isset($_GET['id']) ? (int) $_GET['id'] : (int) ($data['threads'][0]['id'] ?? 0);
 
@@ -103,7 +106,7 @@ include __DIR__ . '/partials/header.php';     // <header class="site-header">
           <span class="op-author"><?= htmlspecialchars($postAuthorName) ?></span>
         </div>
         <?php if ($threadCategory !== null): ?>
-          <a class="op-category" href="category.php?id=<?= (int)$threadCategory['id'] ?>" style="--cat-color: <?= forum_category_color($threadCategory) ?>;">
+          <a class="op-category" href="/bbs/category/<?= (int)$threadCategory['id'] ?>" style="--cat-color: <?= forum_category_color($threadCategory) ?>;">
             <span class="op-category-badge<?= forum_category_badge_is_image($threadCategory) ? ' is-image' : '' ?>"><?= forum_category_badge($threadCategory) ?></span>
             <span class="op-category-name"><?= htmlspecialchars($threadCategory['name']) ?></span>
           </a>
