@@ -7,14 +7,24 @@ $me = auth_current_user();
 $data['current_user'] = $me ? (int)$me['id'] : 0;
 require_once __DIR__ . '/partials/avatar.php';
 
-// Resolve requested user id (default to current user).
-$requestedId = isset($_GET['user']) ? (int) $_GET['user'] : (int) $data['current_user'];
+// Resolve requested user (default to current user). Accepts either a
+// numeric id or a username in ?user=.
+$requestedParam = isset($_GET['user']) ? (string) $_GET['user'] : (string) $data['current_user'];
+$requestedIsId = (bool) preg_match('/^\d+$/', $requestedParam);
+$requestedId = $requestedIsId ? (int) $requestedParam : 0;
 
 $profileUser = null;
 foreach ($data['users'] as $u) {
-    if ((int) $u['id'] === $requestedId) {
-        $profileUser = $u;
-        break;
+    if ($requestedIsId) {
+        if ((int) $u['id'] === $requestedId) {
+            $profileUser = $u;
+            break;
+        }
+    } else {
+        if (strcasecmp((string) $u['username'], $requestedParam) === 0) {
+            $profileUser = $u;
+            break;
+        }
     }
 }
 if ($profileUser === null) {

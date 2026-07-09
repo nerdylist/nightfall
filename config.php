@@ -27,6 +27,14 @@ function grave_load_env(string $path): array
     return $values;
 }
 
+// SSO: host (root) and forum (/bbs) share ONE PHP session cookie (default
+// name PHPSESSID, path '/'). Whichever app calls session_start() first wins.
+// Guarded so pages that already start their own session (login.php,
+// logout.php, keeper/*) are not double-started.
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 $GLOBALS['__grave_env'] = grave_load_env(__DIR__ . '/.env');
 
 function env(string $key, $default = null)

@@ -65,6 +65,12 @@
   font-size: 0.85rem;
 }
 
+.site-nav__username {
+  color: var(--text-0);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
 /* Shared interactive states: hover lift + glow on all buttons/links */
 .btn,
 a {

@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/../config.php';
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 $pageTitle = 'Keeper Login — The Dead Last Admin';
 $pageCss = [];

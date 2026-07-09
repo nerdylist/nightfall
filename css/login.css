@@ -63,6 +63,12 @@
   font-size: 0.85rem;
 }
 
+.site-nav__username {
+  color: var(--text-0);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
 .site-footer {
   border-top: 1px solid var(--border-subtle);
   padding: var(--space-5) 0;

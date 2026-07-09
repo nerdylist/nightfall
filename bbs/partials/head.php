@@ -22,7 +22,7 @@ $EXTRA_CSS = $EXTRA_CSS ?? [];
 <link rel="stylesheet" href="<?= $BASE ?>css/editor.css">
 <link rel="stylesheet" href="<?= $BASE ?>css/write.css">
 <link rel="stylesheet" href="<?= $BASE ?>css/forums.css">
-<script>(function(){try{var t=localStorage.getItem('forum-theme');var valid=['midnight','dusk','light','darkness'];if(valid.indexOf(t)!==-1){document.documentElement.dataset.theme=t;}else{document.documentElement.dataset.theme=<?= json_encode($CONFIG['DEFAULT_THEME']) ?>;}}catch(e){document.documentElement.dataset.theme=<?= json_encode($CONFIG['DEFAULT_THEME']) ?>;}})();</script>
+<script>(function(){document.documentElement.dataset.theme=<?= json_encode($CONFIG['DEFAULT_THEME']) ?>;})();</script>
 <?php foreach ((array)$EXTRA_CSS as $href) { echo '<link rel="stylesheet" href="' . htmlspecialchars($BASE . $href) . '">' . "\n"; } ?>
 </head>
 <body>

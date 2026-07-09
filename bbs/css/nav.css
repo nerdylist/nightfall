@@ -1,6 +1,16 @@
 /* nav.css — top header, nav links, search, theme switcher, user menu
    FLAT + SHARP: hairline borders, crisp type, near-zero shadow, fast micro-interactions. */
 
+/* Host site brand font (see /css/base.css) — same-origin under /bbs pages,
+   so the root-absolute URL resolves correctly here too. */
+@font-face {
+  font-family: "Night of the Deads";
+  src: url("/fonts/night-of-the-deads.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 .site-header {
   position: sticky;
   top: 0;
@@ -33,19 +43,11 @@
   color: var(--text);
 }
 
-.logo .logo-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: var(--radius-sm);
-  background: var(--accent);
-  color: var(--accent-contrast);
-}
-
-.logo .logo-mark svg {
-  display: block;
+/* Brand wordmark — host site's horror display font, falls back to the
+   default logo styling (--font-sans) if the font fails to load. */
+.logo .logo-text {
+  font-family: "Night of the Deads", var(--font-sans);
+  letter-spacing: 0.02em;
 }
 
 /* ---- Nav links ---- */
@@ -105,9 +107,10 @@
 
 /* ---- Theme switcher (segmented control) ---- */
 /* Theme switcher: palette-icon trigger + dropdown menu of theme options */
+/* Site is locked to the "darkness" theme (see head.php pre-paint script);
+   the picker is hidden rather than removed so the markup/JS stay intact. */
 .theme-switcher {
-  position: relative;
-  display: inline-flex;
+  display: none;
 }
 
 .theme-trigger {

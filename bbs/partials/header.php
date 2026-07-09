@@ -13,7 +13,7 @@ $navHome = ($navPage === 'index.php');
 ?>
 <header class="site-header">
   <div class="container">
-    <a class="logo" href="<?= $BASE ?>index.php"><span class="logo-mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V6.5a2.5 2.5 0 0 1 2.5-2.5H20"/><path d="M4 19l8-8 8 8"/></svg></span><span class="logo-text"><?= htmlspecialchars($CONFIG['SITE_NAME']) ?></span></a>
+    <a class="logo" href="<?= $BASE ?>index.php"><span class="logo-text"><?= htmlspecialchars($CONFIG['SITE_NAME']) ?></span></a>
     <nav class="nav-links">
       <a class="<?= $navHome ? 'active' : '' ?>" href="<?= $BASE ?>index.php">Home</a>
       <a class="<?= $navForums ? 'active' : '' ?>" href="<?= $BASE ?>forums.php">Forums</a>
