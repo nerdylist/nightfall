@@ -19,8 +19,7 @@ include __DIR__ . '/partials/header.php';
       <div class="hero__inner">
         <p class="hero__eyebrow">Living Dead Studios</p>
         <h1 class="hero__title">
-          <span class="hero__title-pre">THE</span>
-          <span class="hero__title-line">DEAD LAST</span>
+          <img src="/assets/logo.png" alt="THE DEAD LAST" width="960" height="870" class="hero__logo">
         </h1>
         <p class="hero__tagline">Survival is only half of the game.</p>
         <div class="hero__actions">
