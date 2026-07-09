@@ -12,9 +12,9 @@ $pageCss = $pageCss ?? [];
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= htmlspecialchars($pageTitle) ?></title>
-  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="<?= htmlspecialchars(asset_url('/css/base.css')) ?>">
   <?php foreach ($pageCss as $css): ?>
-  <link rel="stylesheet" href="<?= htmlspecialchars($css) ?>">
+  <link rel="stylesheet" href="<?= htmlspecialchars(asset_url($css)) ?>">
   <?php endforeach; ?>
 </head>
 <body>

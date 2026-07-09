@@ -4,10 +4,10 @@
   </div>
 </footer>
 <?php $pageJs = $pageJs ?? []; ?>
-<script src="/js/base.js"></script>
-<script src="/js/keeper.js"></script>
+<script src="<?= htmlspecialchars(asset_url('/js/base.js')) ?>"></script>
+<script src="<?= htmlspecialchars(asset_url('/js/keeper.js')) ?>"></script>
 <?php foreach ($pageJs as $js): ?>
-<script src="<?= htmlspecialchars($js) ?>"></script>
+<script src="<?= htmlspecialchars(asset_url($js)) ?>"></script>
 <?php endforeach; ?>
 </body>
 </html>

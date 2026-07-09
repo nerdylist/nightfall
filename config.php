@@ -34,4 +34,17 @@ function env(string $key, $default = null)
     return $GLOBALS['__grave_env'][$key] ?? $default;
 }
 
+/**
+ * Resolve a root-relative asset path (e.g. '/css/base.css') against the web
+ * root and append a '?v=' cache-busting query string based on the file's
+ * mtime. Falls back to the bare path if the file can't be found.
+ */
+function asset_url(string $path): string
+{
+    $file = __DIR__ . '/' . ltrim($path, '/');
+    $mtime = is_file($file) ? filemtime($file) : false;
+
+    return $mtime !== false ? $path . '?v=' . $mtime : $path;
+}
+
 require_once __DIR__ . '/lib/db.php';

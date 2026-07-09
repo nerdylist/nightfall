@@ -4,7 +4,7 @@ $pageTitle = 'The Dead Last — Survival is only half of the game.';
 $pageCss = ['/css/index.css'];
 include __DIR__ . '/partials/header.php';
 ?>
-<link rel="stylesheet" href="/css/model-embed.css">
+<link rel="stylesheet" href="<?= htmlspecialchars(asset_url('/css/model-embed.css')) ?>">
 <script type="importmap">
 {
 	"imports": {
@@ -134,6 +134,6 @@ include __DIR__ . '/partials/header.php';
   </section>
 </main>
 
-<script type="module" src="/js/home-hero-model.js?v=1"></script>
-<script src="/js/home-carousel.js?v=1"></script>
+<script type="module" src="<?= htmlspecialchars(asset_url('/js/home-hero-model.js')) ?>"></script>
+<script src="<?= htmlspecialchars(asset_url('/js/home-carousel.js')) ?>"></script>
 <?php include __DIR__ . '/partials/footer.php'; ?>
