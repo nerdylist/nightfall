@@ -1,0 +1,522 @@
+/* forum.css — hero, section head, category grid/cards, category toolbar, thread list/rows
+   FLAT + SHARP: hairline borders, crisp editorial type, near-zero shadow, fast micro-interactions. */
+
+/* ---- Hero ---- */
+.hero {
+  /* main already supplies top padding; keep the hero's own top space small. */
+  padding: 0 0 var(--space-7);
+  margin-bottom: var(--space-6);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.hero-eyebrow {
+  display: inline-block;
+  margin-bottom: var(--space-3);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.hero-title {
+  margin: 0 0 var(--space-4);
+  max-width: 18ch;
+  font-size: var(--fs-3xl);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.03em;
+}
+
+.hero-lede {
+  max-width: 60ch;
+  margin: 0 0 var(--space-6);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-base);
+  color: var(--text-muted);
+}
+
+/* Designed inline stat figures */
+.hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-7);
+  margin: 0;
+}
+
+.hero-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hero-stat-num {
+  margin: 0;
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  line-height: 1;
+}
+
+.hero-stat-label {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* ---- Section head (above category grid) ---- */
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.section-title {
+  margin: 0;
+  font-size: var(--fs-xl);
+  letter-spacing: -0.01em;
+}
+
+.section-hint {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* ---- Category grid ---- */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+
+.category-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+/* Accent edge on the left, revealed on hover */
+.category-card::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: var(--space-5);
+  bottom: var(--space-5);
+  width: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.category-card:hover,
+.category-card:focus-visible {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.category-card:hover::before,
+.category-card:focus-visible::before {
+  opacity: 1;
+}
+
+.category-card:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.category-card .card-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.category-card .icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--cat-color, var(--accent)) 12%, transparent);
+  border: 1px solid var(--cat-color, var(--accent));
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.category-card .icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  display: block;
+}
+
+/* ---- Shared category badge (category page header + admin list) ---- */
+.cat-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 var(--space-2);
+  overflow: hidden;
+  border-radius: var(--radius);
+  border: 1px solid var(--cat-color, var(--accent));
+  background: color-mix(in srgb, var(--cat-color, var(--accent)) 12%, transparent);
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+  line-height: 1;
+}
+
+.cat-badge-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: inherit;
+}
+
+/* Image badges: drop the chip background/border/padding so the image
+   shows on its own (still clipped to a rounded tile). */
+.category-card .icon.is-image,
+.cat-badge.is-image {
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.category-card .name {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.category-card .desc {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  line-height: var(--lh-snug);
+}
+
+.category-card .meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  margin-top: auto;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--fs-xs);
+  color: var(--text-faint);
+}
+
+.category-card .meta-stat {
+  color: var(--text-faint);
+}
+
+.category-card .meta-num {
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.category-card .meta-time {
+  margin-left: auto;
+  color: var(--text-faint);
+}
+
+/* ---- Category page: two-column layout (thread list + info sidebar) ---- */
+/* Mobile-first: single column. Markup order is list then aside, but on mobile
+   we want category info first, New Thread next, then the thread list — so flip
+   the visual order here and restore the grid order on desktop below. */
+.category-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.category-layout .thread-list {
+  order: 2;
+}
+
+.category-layout .category-aside {
+  order: 1;
+}
+
+@media (min-width: 900px) {
+  .category-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    align-items: start;
+  }
+  /* Restore natural placement: list left, aside right. */
+  .category-layout .thread-list,
+  .category-layout .category-aside {
+    order: 0;
+  }
+  /* Sidebar follows the list as it scrolls. */
+  .category-aside {
+    position: sticky;
+    top: calc(var(--nav-h) + var(--space-6));
+  }
+}
+
+.new-thread-btn {
+  width: 100%;
+  white-space: nowrap;
+}
+
+/* Category info card in the sidebar.
+   On mobile (flex column), the New Thread button sits BELOW the info card;
+   on desktop the button stays on top of the card. */
+.category-aside {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--space-4);
+}
+
+@media (min-width: 900px) {
+  .category-aside {
+    flex-direction: column;
+  }
+}
+
+.cat-info {
+  padding: var(--space-5);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.cat-info-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.cat-info-name {
+  margin: 0;
+  font-size: var(--fs-xl);
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.cat-info-desc {
+  margin: var(--space-3) 0 0;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
+}
+
+.cat-info-stats {
+  margin: var(--space-5) 0 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.cat-info-stat {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.cat-info-stat dt {
+  font-size: var(--fs-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.cat-info-stat dd {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+/* ---- Thread list ---- */
+.thread-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.thread-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.thread-row:hover {
+  border-color: var(--accent);
+  background: var(--bg-elevated);
+}
+
+.thread-row:focus-within {
+  border-color: var(--accent);
+}
+
+.thread-row:focus-visible,
+.thread-row a:focus-visible,
+.thread-row .title:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+.thread-avatar {
+  display: flex;
+  align-items: center;
+}
+
+.thread-main {
+  min-width: 0;
+}
+
+/* Title row: title + inline badges on the same line. */
+.thread-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.thread-row .title {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.01em;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The whole row is clickable via the title's stretched link. */
+.thread-row .title::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.thread-excerpt {
+  margin: var(--space-1) 0 0;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.thread-sub {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  font-size: var(--fs-xs);
+  color: var(--text-faint);
+}
+
+.thread-sub .thread-author {
+  font-weight: var(--fw-medium);
+  color: var(--text-muted);
+}
+
+.thread-sub .dot {
+  color: var(--text-faint);
+}
+
+/* Compact inline stats (icon + number), not tall stacked blocks. */
+.thread-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.thread-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-sm);
+  color: var(--text-faint);
+}
+
+.thread-stat svg {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.thread-stat .num {
+  font-weight: var(--fw-medium);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 1024px) {
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-stats {
+    gap: var(--space-6);
+  }
+}
+
+@media (max-width: 720px) {
+  /* Avatar + content on the top row; stats drop to a full-width line below. */
+  .thread-row {
+    grid-template-columns: auto 1fr;
+    gap: var(--space-3) var(--space-4);
+  }
+  .thread-meta {
+    grid-column: 1 / -1;
+    gap: var(--space-5);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border-subtle);
+  }
+}
+
+@media (max-width: 560px) {
+  .category-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-title {
+    font-size: var(--fs-2xl);
+  }
+  .hero-stats {
+    gap: var(--space-5);
+  }
+}

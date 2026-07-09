@@ -1,0 +1,155 @@
+/* themes.css — palette + theme-independent design tokens
+   ONLY this file may contain raw hex palette values. */
+
+:root {
+  /* ---- Spacing scale (theme-independent) ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* ---- Radii (flat + sharp: crisp, smaller) ---- */
+  --radius-sm: 5px;
+  --radius: 8px;
+  --radius-lg: 12px;
+
+  /* ---- Typography (tightened scale for sharp editorial hierarchy) ---- */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-base: 0.9375rem;
+  --fs-lg: 1.0625rem;
+  --fs-xl: 1.3125rem;
+  --fs-2xl: 1.6875rem;
+  --fs-3xl: 2.375rem;
+
+  --lh-tight: 1.15;
+  --lh-snug: 1.35;
+  --lh-base: 1.55;
+  --lh-relaxed: 1.7;
+
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* ---- Transitions (snappy micro-interactions) ---- */
+  --transition-fast: 100ms ease;
+  --transition: 150ms ease;
+  --transition-slow: 240ms ease;
+}
+
+/* ================= MIDNIGHT (default) ================= */
+[data-theme="midnight"],
+:root {
+  --bg:            #08080b;
+  --bg-elevated:   #0f0f15;
+  --bg-card:       #131319;
+  --surface:       #191921;
+  --border:        #26262f;
+  --border-subtle: #1c1c24;
+  --text:          #f2f2f7;
+  --text-muted:    #9a9aab;
+  --text-faint:    #64646f;
+  --accent:        #7a64f5;
+  --accent-hover:  #8a76f8;
+  --accent-soft:   rgba(122, 100, 245, 0.16);
+  --accent-contrast: #ffffff;
+  --avatar-fg:     #ffffff;
+  --hot:           #ff8a5c;
+  --hot-soft:      rgba(255, 138, 92, 0.13);
+  --hot-border:    rgba(255, 138, 92, 0.28);
+  --shadow:        0 0 0 1px rgba(0, 0, 0, 0.45);
+  --glow:          0 0 0 1px var(--accent-soft);
+  --ring:          0 0 0 3px var(--accent-soft);
+}
+
+/* ================= DUSK ================= */
+[data-theme="dusk"] {
+  --bg:            #0e131b;
+  --bg-elevated:   #161e2a;
+  --bg-card:       #1a2331;
+  --surface:       #1f2a3a;
+  --border:        #2c3a4d;
+  --border-subtle: #222e3d;
+  --text:          #eaf1f8;
+  --text-muted:    #9aabbf;
+  --text-faint:    #5f6f83;
+  --accent:        #25c2af;
+  --accent-hover:  #36d0bd;
+  --accent-soft:   rgba(37, 194, 175, 0.15);
+  --accent-contrast: #052420;
+  --avatar-fg:     #ffffff;
+  --hot:           #ff9466;
+  --hot-soft:      rgba(255, 148, 102, 0.13);
+  --hot-border:    rgba(255, 148, 102, 0.28);
+  --shadow:        0 0 0 1px rgba(0, 0, 0, 0.40);
+  --glow:          0 0 0 1px var(--accent-soft);
+  --ring:          0 0 0 3px var(--accent-soft);
+}
+
+/* ================= LIGHT ================= */
+[data-theme="light"] {
+  --bg:            #fbfbfc;
+  --bg-elevated:   #ffffff;
+  --bg-card:       #ffffff;
+  --surface:       #f3f3f6;
+  --border:        #e2e2e8;
+  --border-subtle: #ececf1;
+  --text:          #0d0e12;
+  --text-muted:    #5c5f6a;
+  --text-faint:    #9296a2;
+  --accent:        #6a48f2;
+  --accent-hover:  #5a37e8;
+  --accent-soft:   rgba(106, 72, 242, 0.10);
+  --accent-contrast: #ffffff;
+  --avatar-fg:     #ffffff;
+  --hot:           #cf5018;
+  --hot-soft:      rgba(207, 80, 24, 0.09);
+  --hot-border:    rgba(207, 80, 24, 0.26);
+  --shadow:        0 0 0 1px rgba(15, 17, 21, 0.06);
+  --glow:          0 0 0 1px var(--accent-soft);
+  --ring:          0 0 0 3px var(--accent-soft);
+}
+
+/* ================= DARKNESS (monochrome) ================= */
+/* Pure black / white / gray only — near-black bg, faintly lighter cards. */
+[data-theme="darkness"] {
+  --bg:            #010101;
+  --bg-elevated:   #0a0a0a;
+  --bg-card:       #0e0e0e;
+  --surface:       #161616;
+  --border:        #2a2a2a;
+  --border-subtle: #1c1c1c;
+  --text:          #f4f4f4;
+  --text-muted:    #9a9a9a;
+  --text-faint:    #5e5e5e;
+  --accent:        #d0d0d0;
+  --accent-hover:  #ececec;
+  --accent-soft:   rgba(255, 255, 255, 0.12);
+  --accent-contrast: #000000;
+  --avatar-fg:     #000000;
+  --hot:           #cfcfcf;
+  --hot-soft:      rgba(255, 255, 255, 0.10);
+  --hot-border:    rgba(255, 255, 255, 0.22);
+  --shadow:        0 0 0 1px rgba(0, 0, 0, 0.60);
+  --glow:          0 0 0 1px var(--accent-soft);
+  --ring:          0 0 0 3px var(--accent-soft);
+}
+
+/* Darkness is strictly monochrome: desaturate any user-supplied color
+   (category badge hex via --cat-color, badge images, emoji) so the whole
+   UI stays black / white / gray. */
+[data-theme="darkness"] .cat-badge,
+[data-theme="darkness"] .category-card .icon,
+[data-theme="darkness"] .op-category-badge,
+[data-theme="darkness"] .cat-swatch,
+[data-theme="darkness"] .cat-badge-img,
+[data-theme="darkness"] .avatar {
+  filter: grayscale(1);
+}

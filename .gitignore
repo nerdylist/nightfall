@@ -14,3 +14,12 @@ data/*.sqlite-shm
 
 # OS cruft
 .DS_Store
+
+# BBS forum (copied app) — same policy: no secrets, no runtime data
+bbs/.env
+bbs/forum.db
+bbs/forum.db-wal
+bbs/forum.db-shm
+bbs/up/*
+!bbs/up/index.html
+!bbs/up/.htaccess

@@ -1,0 +1,183 @@
+/* chat.css — mini chat container, message list, lines, composer */
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  /* Tall, viewport-derived, but always capped so the composer stays visible. */
+  height: min(70vh, 640px);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.chat-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+
+/* ---- Message list ---- */
+.chat-messages {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: var(--text-faint);
+}
+
+/* ---- Chat line (talk bubbles) ----
+   Avatar sits at the bottom corner nearest the bubble. The bubble is capped at
+   ~60% width and rounded on every corner except the one touching the avatar. */
+.chat-line {
+  display: flex;
+  align-items: flex-end;   /* avatar aligns to the bubble's bottom corner */
+  gap: var(--space-2);
+}
+
+.chat-body {
+  min-width: 0;
+  max-width: 60%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: 2px;
+  padding-inline: var(--space-1);
+}
+
+.chat-user {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+
+.chat-time {
+  font-size: var(--fs-xs);
+  color: var(--text-faint);
+}
+
+/* The bubble */
+.chat-text {
+  font-size: var(--fs-sm);
+  line-height: var(--lh-snug);
+  color: var(--text);
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface);
+  /* Rounded everywhere except the bottom-left (avatar side) */
+  border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) var(--radius-sm);
+}
+
+/* ---- "Me" messages: avatar + bubble on the right ---- */
+.chat-line--me {
+  flex-direction: row-reverse;
+}
+
+.chat-line--me .chat-body {
+  align-items: flex-end;
+}
+
+.chat-line--me .chat-text {
+  background: var(--accent-soft);
+  /* Square the bottom-right corner (avatar side) instead */
+  border-radius: var(--radius-lg) var(--radius-lg) var(--radius-sm) var(--radius-lg);
+}
+
+/* ---- Composer ---- */
+.chat-composer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-elevated);
+}
+
+.chat-composer textarea {
+  flex: 1;
+  resize: none;
+  min-height: 38px;
+  height: 38px;
+  max-height: 120px;
+  overflow-y: auto;
+  padding-block: var(--space-2);
+}
+
+.chat-composer .btn {
+  padding-inline: var(--space-4);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 720px) {
+  .chat {
+    /* Slightly shorter on mobile so the composer is always reachable;
+       internal scroll still applies. */
+    height: min(60vh, 460px);
+  }
+}
+
+/* Desktop: chat fills its stretched grid cell so both columns are equal height.
+   The grid cell has a definite height from .thread-layout min-height. */
+@media (min-width: 900px) {
+  .chat {
+    height: 100%;
+  }
+}
+
+/* ---- Empty / guest / error states ---- */
+.chat-empty {
+  text-align: center;
+  color: var(--text-faint);
+  font-size: var(--fs-sm);
+  padding: var(--space-4);
+}
+
+.chat-guest-note {
+  border-top: 1px solid var(--border-subtle);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  text-align: center;
+}
+
+.chat-error {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  padding: 0 var(--space-4) var(--space-2);
+}

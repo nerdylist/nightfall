@@ -1,0 +1,7 @@
+# Defense-in-depth only. Caddy (not Apache) is the real server here, so these
+# Apache directives may be inert. The PRIMARY protection is the hashed/unguessable
+# filenames plus the blank index file in this directory.
+Options -Indexes
+php_flag engine off
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .phps
+RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .phps

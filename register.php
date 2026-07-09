@@ -11,6 +11,20 @@ $formSuccess = null;
 $oldEmail = '';
 $oldUsername = '';
 
+// SSO: pass a safe local ?next through to the login link so the user returns
+// to where they came from (e.g. /bbs/...) after registering + logging in.
+$grave_safe_next = static function ($next): string {
+    $next = (string) $next;
+    if ($next === '' || $next[0] !== '/') return '';
+    if (strpos($next, '//') === 0) return '';
+    if (strpos($next, "\\") !== false) return '';
+    if (strpos($next, ':') !== false) return '';
+    return $next;
+};
+$next = $grave_safe_next($_POST['next'] ?? $_GET['next'] ?? '');
+$loginHref = '/login.php' . ($next !== '' ? '?next=' . urlencode($next) : '');
+$registerAction = '/register.php' . ($next !== '' ? '?next=' . urlencode($next) : '');
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $oldEmail = trim((string) ($_POST['email'] ?? ''));
     $oldUsername = trim((string) ($_POST['username'] ?? ''));
@@ -49,7 +63,7 @@ include __DIR__ . '/partials/header.php';
         <p class="text-muted auth__sub"><?= htmlspecialchars($formSuccess) ?></p>
       <?php endif; ?>
 
-      <form id="registerForm" class="auth__form" action="/register.php" method="post" novalidate>
+      <form id="registerForm" class="auth__form" action="<?= htmlspecialchars($registerAction) ?>" method="post" novalidate>
         <div class="form-row">
           <div>
             <input class="field" type="email" name="email" id="email" placeholder="Email" autocomplete="email" value="<?= htmlspecialchars($oldEmail) ?>">
@@ -76,7 +90,7 @@ include __DIR__ . '/partials/header.php';
       </form>
 
       <p class="auth__switch text-muted">
-        Already have a survivor? <a href="/login.php">Login</a>
+        Already have a survivor? <a href="<?= htmlspecialchars($loginHref) ?>">Login</a>
       </p>
     </div>
   </div>

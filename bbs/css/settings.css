@@ -1,0 +1,129 @@
+/* settings.css — settings groups, responsive form grids (flat + sharp) */
+
+.settings-group {
+  margin-bottom: var(--space-5);
+  padding: var(--space-6);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.settings-group > h3 {
+  margin: 0 0 var(--space-1);
+  font-size: var(--fs-lg);
+  letter-spacing: -0.005em;
+}
+
+.settings-group .group-desc {
+  margin: 0 0 var(--space-5);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+/* ---- Form grid: 2-col base, full-width spans all, textareas full width ---- */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.form-grid .field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.form-grid .field label {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--text-muted);
+}
+
+.form-grid .field small {
+  margin-top: var(--space-2);
+}
+
+/* Full-width fields (textareas, avatar block) span all columns. */
+.form-grid .full-width {
+  grid-column: 1 / -1;
+}
+
+.form-grid textarea {
+  width: 100%;
+}
+
+/* Three-up rows (e.g. the password group). */
+.form-grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* ---- Category form grid: 2 rows / 3 cols (Name | Description x2 / Sort | Badge | Color) ---- */
+.category-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.category-form-grid .field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.category-form-grid .field label {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--text-muted);
+}
+
+.category-form-grid .field small {
+  margin-top: var(--space-2);
+}
+
+/* Description spans two columns on the first row. */
+.category-form-grid .span-2 {
+  grid-column: span 2;
+}
+
+/* Color picker fills its cell, matching the standard input height. */
+.category-form-grid .input-color {
+  width: 100%;
+  height: 38px;
+}
+
+/* ---- Settings actions ---- */
+.settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 760px) {
+  .form-grid,
+  .form-grid--3,
+  .category-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .category-form-grid .span-2 {
+    grid-column: auto;
+  }
+  .settings-group {
+    padding: var(--space-5);
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-actions {
+    flex-direction: column-reverse;
+  }
+  .settings-actions .btn {
+    width: 100%;
+  }
+}

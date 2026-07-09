@@ -1,0 +1,206 @@
+.admin-main {
+  padding-bottom: var(--space-7);
+  padding-top: var(--space-5);
+}
+
+.admin-nav {
+  border-bottom: 1px solid var(--border);
+}
+.admin-nav .container {
+  display: flex;
+  gap: var(--space-4);
+}
+.admin-nav a {
+  display: inline-block;
+  padding: var(--space-3) var(--space-2);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: var(--fs-sm);
+  border-bottom: 2px solid transparent;
+  transition: var(--transition);
+}
+.admin-nav a:hover {
+  color: var(--text);
+}
+.admin-nav a.active {
+  color: var(--text);
+  border-bottom: 2px solid var(--accent);
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+.stat-tile {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow);
+}
+.stat-tile .stat-num {
+  font-size: var(--fs-3xl);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  line-height: var(--lh-tight);
+}
+.stat-tile .stat-label {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.admin-table thead th {
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  text-align: left;
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  font-weight: var(--fw-semibold);
+}
+.admin-table tbody td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  vertical-align: middle;
+}
+.admin-table tbody tr:hover {
+  background: var(--surface);
+}
+
+.badge.badge-admin {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent-soft);
+}
+.badge.badge-banned {
+  background: var(--hot-soft);
+  color: var(--hot);
+  border-color: var(--hot-border);
+}
+
+.btn-sm {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--fs-xs);
+}
+.btn-danger {
+  color: var(--hot);
+  border-color: var(--hot-border);
+}
+.btn-danger:hover {
+  border-color: var(--hot);
+}
+
+.action-group {
+  display: flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+  align-items: center;
+}
+.action-form {
+  display: inline;
+}
+
+.admin-flash {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-4);
+  font-size: var(--fs-sm);
+  border: 1px solid;
+}
+.admin-flash--success {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent-soft);
+}
+.admin-flash--error {
+  background: var(--hot-soft);
+  color: var(--hot);
+  border-color: var(--hot-border);
+}
+
+.admin-page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+.admin-cell-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+@media (max-width: 760px) {
+  .stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 480px) {
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- Native color input, themed to match other .input controls ---- */
+.input-color,
+input[type="color"].input {
+  width: 52px;
+  height: 38px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+}
+.input-color::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.input-color::-webkit-color-swatch {
+  border: none;
+  border-radius: calc(var(--radius) - 2px);
+}
+.input-color::-moz-color-swatch {
+  border: none;
+  border-radius: calc(var(--radius) - 2px);
+}
+
+/* Keep the admin-list badge compact in its table cell. */
+.admin-table .cat-badge {
+  min-width: 30px;
+  height: 30px;
+}
+
+/* Featured checkbox row beneath the category form grid. */
+.checkbox-row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.checkbox-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.featured-star {
+  color: var(--accent);
+}

@@ -1,0 +1,149 @@
+/* editor.css — BBCode editor: unified toolbar + textarea box. Theme vars only. */
+
+[data-bbcode-editor] {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+[data-bbcode-editor]:focus-within {
+  border-color: var(--accent);
+  box-shadow: var(--ring);
+}
+
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  padding: var(--space-2);
+}
+
+[data-bbcode-editor] textarea {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  min-height: 200px;
+  resize: vertical;
+  line-height: 1.6;
+  color: var(--text);
+  font: inherit;
+  display: block;
+}
+
+[data-bbcode-editor] textarea:focus {
+  box-shadow: none;
+  border: none;
+  outline: none;
+}
+
+[data-bbcode-editor] textarea::placeholder {
+  color: var(--text-faint);
+}
+
+.editor-btn {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0;
+}
+
+.editor-btn:hover {
+  background: var(--surface);
+  box-shadow: var(--glow);
+}
+
+.editor-btn:active {
+  transform: translateY(1px);
+}
+
+.editor-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px 16px;
+  filter: invert(1) opacity(0.65);
+}
+
+.editor-btn:hover::before {
+  filter: invert(1) opacity(1);
+}
+
+[data-theme="light"] .editor-btn::before {
+  filter: opacity(0.55);
+}
+
+[data-theme="light"] .editor-btn:hover::before {
+  filter: opacity(0.9);
+}
+
+.editor-btn.ic-bold::before {
+  background-image: url('https://nerd.biz/assets/fa/svgs/solid/bold.svg');
+}
+
+.editor-btn.ic-italic::before {
+  background-image: url('https://nerd.biz/assets/fa/svgs/solid/italic.svg');
+}
+
+.editor-btn.ic-underline::before {
+  background-image: url('https://nerd.biz/assets/fa/svgs/solid/underline.svg');
+}
+
+.editor-btn.ic-strike::before {
+  background-image: url('https://nerd.biz/assets/fa/svgs/solid/strikethrough.svg');
+}
+
+.editor-btn.ic-quote::before {
+  background-image: url('https://nerd.biz/assets/fa/svgs/solid/quote-right.svg');
+}
+
+.editor-btn.ic-code::before {
+  background-image: url('https://nerd.biz/assets/fa/svgs/solid/code.svg');
+}
+
+.editor-btn.ic-link::before {
+  background-image: url('https://nerd.biz/assets/fa/svgs/solid/link.svg');
+}
+
+.editor-btn.ic-image::before {
+  background-image: url('https://nerd.biz/assets/fa/svgs/solid/image.svg');
+}
+
+.editor-btn.ic-upload::before {
+  background-image: url('https://nerd.biz/assets/fa/svgs/solid/arrow-up-from-bracket.svg');
+}
+
+.editor-sep {
+  display: inline-block;
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+  margin-inline: var(--space-1);
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.editor-status {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  min-height: 1em;
+  margin-top: var(--space-2);
+  padding: 0 var(--space-4) var(--space-2);
+}

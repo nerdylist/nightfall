@@ -1,0 +1,122 @@
+/* profile.css — banner, avatar, meta, bio, stats, activity (flat + sharp) */
+
+.profile-banner {
+  height: 140px;
+  border-radius: var(--radius-lg);
+  /* Flat hairline-framed band with a faint, sharp accent wash. */
+  background:
+    linear-gradient(120deg, var(--accent-soft), transparent 65%),
+    var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+
+.profile-head {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-5);
+  margin-top: calc(var(--space-7) * -1);
+  padding: 0 var(--space-5);
+}
+
+/* The 3xl avatar (120px) renders inside this; the ring frames it against the banner. */
+.profile-avatar {
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 4px solid var(--bg);
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.profile-head-info {
+  padding-bottom: var(--space-3);
+}
+
+.profile-name {
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.018em;
+  color: var(--text);
+  margin-bottom: var(--space-1);
+}
+
+.profile-meta {
+  font-size: var(--fs-sm);
+  color: var(--text-faint);
+}
+
+.profile-bio {
+  max-width: 68ch;
+  margin: var(--space-5) var(--space-5) 0;
+  font-size: var(--fs-base);
+  line-height: var(--lh-relaxed);
+  color: var(--text-muted);
+}
+
+/* ---- Stats row ---- */
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-6) 0;
+}
+
+.profile-stats .stat {
+  padding: var(--space-4) var(--space-5);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color var(--transition);
+}
+
+.profile-stats .stat:hover {
+  border-color: var(--border);
+}
+
+.profile-stats .stat .num {
+  display: block;
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: var(--lh-tight);
+}
+
+.profile-stats .stat .label {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: var(--fs-xs);
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ---- Activity ---- */
+/* Wrapper + section heading only — .thread-row is styled in forum.css. */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 640px) {
+  .profile-banner {
+    height: 110px;
+  }
+  .profile-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    margin-top: calc(var(--space-6) * -1);
+  }
+  .profile-head-info {
+    padding-bottom: 0;
+  }
+  .profile-bio {
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .profile-stats {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+}

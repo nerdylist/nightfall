@@ -1,0 +1,27 @@
+/* avatar.css — initials avatar component (flat + sharp).
+   Static styling lives here; only the deterministic background color is
+   passed per-instance via the --avatar-bg custom property. */
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: var(--radius);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.01em;
+  line-height: 1;
+  background: var(--avatar-bg);
+  color: var(--avatar-fg);
+  -webkit-user-select: none;
+  user-select: none;
+  overflow: hidden;
+}
+
+/* ---- Size modifiers (width/height + proportional font-size) ---- */
+.avatar--sm  { width: 24px;  height: 24px;  min-width: 24px;  font-size: 10px; border-radius: var(--radius-sm); }
+.avatar--md  { width: 28px;  height: 28px;  min-width: 28px;  font-size: 11px; border-radius: var(--radius-sm); }
+.avatar--lg  { width: 36px;  height: 36px;  min-width: 36px;  font-size: 14px; }
+.avatar--xl  { width: 40px;  height: 40px;  min-width: 40px;  font-size: 16px; }
+.avatar--2xl { width: 72px;  height: 72px;  min-width: 72px;  font-size: 28px; border-radius: var(--radius-lg); }
+.avatar--3xl { width: 120px; height: 120px; min-width: 120px; font-size: 46px; border-radius: var(--radius-lg); }

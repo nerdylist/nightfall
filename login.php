@@ -9,6 +9,19 @@ $pageJs = ['/js/login.js'];
 $formErrors = [];
 $oldIdentifier = '';
 
+// SSO: honor a safe local ?next redirect target (e.g. back to /bbs/...).
+// Only root-relative paths are allowed (no scheme/host/backslash) to prevent
+// open redirects. Falls back to /index.php.
+$grave_safe_next = static function ($next): string {
+    $next = (string) $next;
+    if ($next === '' || $next[0] !== '/') return '/index.php';
+    if (strpos($next, '//') === 0) return '/index.php';
+    if (strpos($next, "\\") !== false) return '/index.php';
+    if (strpos($next, ':') !== false) return '/index.php';
+    return $next;
+};
+$next = $grave_safe_next($_POST['next'] ?? $_GET['next'] ?? '/index.php');
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $oldIdentifier = trim((string) ($_POST['identifier'] ?? ''));
     $password = (string) ($_POST['password'] ?? '');
@@ -30,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             session_start();
             $_SESSION['user_id'] = (int) $user['id'];
             $_SESSION['username'] = $user['username'];
-            header('Location: /index.php');
+            header('Location: ' . $next);
             exit;
         }
     }
@@ -46,6 +59,7 @@ include __DIR__ . '/partials/header.php';
       <p class="text-muted auth__sub">Return to the world. It hasn't forgotten you.</p>
 
       <form id="loginForm" class="auth__form" action="/login.php" method="post" novalidate>
+        <input type="hidden" name="next" value="<?= htmlspecialchars($next) ?>">
         <div>
           <input class="field" type="text" name="identifier" id="identifier" placeholder="Username or Email" autocomplete="username" value="<?= htmlspecialchars($oldIdentifier) ?>">
           <p class="error-text" id="identifierError"><?= htmlspecialchars($formErrors['identifier'] ?? '') ?></p>

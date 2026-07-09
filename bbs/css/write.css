@@ -1,0 +1,49 @@
+/* write.css — new thread page. Centered card with full-width subject, subtitle, and unified editor. Theme vars only. */
+
+.write-page {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-4) 0 var(--space-7);
+}
+
+.write-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: var(--shadow);
+}
+
+.write-page h1 {
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.018em;
+  margin: 0 0 var(--space-1);
+}
+
+.write-subtitle {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  margin: 0 0 var(--space-5);
+}
+
+.write-subtitle span {
+  color: var(--text);
+  font-weight: var(--fw-medium);
+}
+
+.write-field {
+  margin-bottom: var(--space-4);
+}
+
+.write-field input {
+  width: 100%;
+}
+
+.write-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+  margin-top: var(--space-4);
+}

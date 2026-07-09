@@ -1,0 +1,111 @@
+/* forums.css — all-forums list rows (forum-row) + the home "view all" section link.
+   Card-like rows: each its own subtle bordered surface, stacked in a flex column.
+   FLAT + SHARP to match forum.css: hairline borders, fast micro-interactions. */
+
+/* ---- Section link (home "View all N forums") ---- */
+.section-link {
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.section-link:hover {
+  color: var(--text);
+}
+
+/* ---- All-forums list ---- */
+.forum-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.forum-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.forum-row:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.forum-row:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.forum-row-badge {
+  flex: 0 0 auto;
+}
+
+.forum-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.forum-row-name {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.forum-row-desc {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  line-height: var(--lh-snug);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.forum-row-stats {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  flex: 0 0 auto;
+  font-size: var(--fs-xs);
+  color: var(--text-faint);
+}
+
+.forum-row-stat {
+  color: var(--text-faint);
+}
+
+.forum-row-num {
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.forum-row-time {
+  color: var(--text-faint);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 640px) {
+  .forum-row {
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-4);
+  }
+  .forum-row-desc {
+    white-space: normal;
+  }
+  .forum-row-stats {
+    flex-basis: 100%;
+    gap: var(--space-4);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border-subtle);
+  }
+}

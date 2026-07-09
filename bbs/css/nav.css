@@ -1,0 +1,339 @@
+/* nav.css — top header, nav links, search, theme switcher, user menu
+   FLAT + SHARP: hairline borders, crisp type, near-zero shadow, fast micro-interactions. */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: var(--space-3) var(--space-5);
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: saturate(140%) blur(8px);
+}
+
+.site-header .container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+/* ---- Logo (mark + wordmark) ---- */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.03em;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.logo:hover {
+  color: var(--text);
+}
+
+.logo .logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.logo .logo-mark svg {
+  display: block;
+}
+
+/* ---- Nav links ---- */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links a {
+  position: relative;
+  display: inline-block;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--text-muted);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.nav-links a:hover {
+  color: var(--text);
+  background: var(--surface);
+}
+
+/* Active: crisp accent underline that hugs the link */
+.nav-links a.active {
+  color: var(--text);
+}
+
+.nav-links a.active::after {
+  content: "";
+  position: absolute;
+  left: var(--space-3);
+  right: var(--space-3);
+  bottom: 2px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+/* ---- Search ---- */
+.nav-search {
+  flex: 1;
+  max-width: 340px;
+  margin-left: auto;
+  height: 36px;
+  padding-block: 0;
+}
+
+.nav-search::placeholder {
+  color: var(--text-faint);
+}
+
+/* ---- Theme switcher (segmented control) ---- */
+/* Theme switcher: palette-icon trigger + dropdown menu of theme options */
+.theme-switcher {
+  position: relative;
+  display: inline-flex;
+}
+
+.theme-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.theme-trigger:hover,
+.theme-switcher.open .theme-trigger {
+  background: var(--surface);
+  border-color: var(--border-subtle);
+  color: var(--text);
+}
+
+/* Palette icon via the project's self-hosted FA method (Method 2: CSS bg).
+   SVGs render dark, so invert to a light tint on dark themes. */
+.theme-icon {
+  width: 18px;
+  height: 18px;
+  background: url('https://nerd.biz/assets/fa/svgs/solid/palette.svg') no-repeat center / contain;
+  filter: invert(1) opacity(0.7);
+  transition: filter var(--transition-fast);
+}
+
+.theme-trigger:hover .theme-icon,
+.theme-switcher.open .theme-icon {
+  filter: invert(1) opacity(1);
+}
+
+/* Light theme: keep the icon dark on the light header background */
+[data-theme="light"] .theme-icon {
+  filter: none;
+  opacity: 0.65;
+}
+
+[data-theme="light"] .theme-trigger:hover .theme-icon,
+[data-theme="light"] .theme-switcher.open .theme-icon {
+  filter: none;
+  opacity: 1;
+}
+
+.theme-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--space-2));
+  min-width: 160px;
+  padding: var(--space-2);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  z-index: 50;
+}
+
+.theme-switcher.open .theme-dropdown {
+  display: block;
+}
+
+.theme-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.theme-option:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* Active theme: filled tile + a trailing check mark */
+.theme-option.active {
+  color: var(--text);
+}
+
+.theme-option.active::after {
+  content: "✓";
+  float: right;
+  color: var(--accent);
+  font-weight: var(--fw-semibold);
+}
+
+/* ---- User menu + dropdown ---- */
+.user-menu {
+  position: relative;
+}
+
+.user-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  color: var(--text);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.user-menu-trigger:hover {
+  background: var(--surface);
+  border-color: var(--border-subtle);
+}
+
+.user-name {
+  font-weight: var(--fw-medium);
+  color: var(--text);
+}
+
+.user-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--space-2));
+  min-width: 200px;
+  padding: var(--space-2);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.user-menu.open .user-dropdown {
+  display: block;
+}
+
+.user-dropdown a,
+.user-dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.user-dropdown a:hover,
+.user-dropdown button:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.user-dropdown .divider {
+  height: 1px;
+  margin: var(--space-2) 0;
+  background: var(--border-subtle);
+}
+
+/* ---- Focus indicators (a11y) ---- */
+.logo:focus-visible,
+.nav-links a:focus-visible,
+.theme-option:focus-visible,
+.user-menu-trigger:focus-visible,
+.user-dropdown a:focus-visible,
+.user-dropdown button:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .site-header {
+    padding: var(--space-3) var(--space-4);
+  }
+  .site-header .container {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  .nav-search {
+    order: 3;
+    flex-basis: 100%;
+    max-width: none;
+    width: 100%;
+    margin-left: 0;
+  }
+  .theme-switcher {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Save room: hide username text, keep avatar */
+  .user-name {
+    display: none;
+  }
+}
+
+/* ---- Logged-out auth actions + logout form ---- */
+.auth-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.logout-form {
+  margin: 0;
+}
+.logout-form button {
+  width: 100%;
+}
