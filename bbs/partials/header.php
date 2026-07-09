@@ -9,7 +9,6 @@ $currentUser = auth_current_user();
 $navNext = $_SERVER['REQUEST_URI'] ?? '/bbs/';
 
 // Configure the shared nav partial for the forum context, then render it.
-$NAV_HIDE_HOME = true;
 $NAV_ADMIN_URL = ($currentUser !== null && auth_is_admin()) ? $BASE . 'admin/' : null;
 $NAV_LOGIN_URL = '/login?next=' . urlencode($navNext);
 $NAV_REGISTER_URL = '/bbs/register.php';

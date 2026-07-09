@@ -6,7 +6,6 @@
  * Context flags (set by the including page/partial before requiring this
  * file; all optional, defaults match the host's own usage):
  *
- *   $NAV_HIDE_HOME         bool    Omit the HOME link. Default false.
  *   $NAV_ADMIN_URL         ?string When set, render an ADMIN link pointing
  *                                  here. Default null (no admin link).
  *   $NAV_LOGIN_URL         string  href for the Login CTA. Default '/login.php'.
@@ -21,7 +20,6 @@
  */
 require_once __DIR__ . '/../config.php';
 
-$NAV_HIDE_HOME = $NAV_HIDE_HOME ?? false;
 $NAV_ADMIN_URL = $NAV_ADMIN_URL ?? null;
 $NAV_LOGIN_URL = $NAV_LOGIN_URL ?? '/login';
 $NAV_REGISTER_URL = $NAV_REGISTER_URL ?? '/register';
@@ -45,9 +43,7 @@ if (!empty($_SESSION['user_id'])) {
   <div class="container site-nav__inner">
     <a href="/" class="site-nav__brand">THE DEAD LAST</a>
     <div class="site-nav__links">
-      <?php if (!$NAV_HIDE_HOME): ?>
-        <a href="/" class="site-nav__link">Home</a>
-      <?php endif; ?>
+      <a href="/" class="site-nav__link">Home</a>
       <a href="#" class="site-nav__link">Game</a>
       <a href="#" class="site-nav__link">News</a>
       <a href="/bbs/forums" class="site-nav__link">Community</a>
