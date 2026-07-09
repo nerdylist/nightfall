@@ -1,4 +1,5 @@
-/* nav.css — top header, nav links, search, theme switcher, user menu
+/* nav.css — top header, matches the host site's .site-nav header 1:1, plus a
+   forum-only expanding search icon.
    FLAT + SHARP: hairline borders, crisp type, near-zero shadow, fast micro-interactions. */
 
 /* Host site brand font (see /css/base.css) — same-origin under /bbs pages,
@@ -11,332 +12,245 @@
   font-display: swap;
 }
 
-.site-header {
+/* ---- Header bar (mirrors host css/index.css .site-nav) ---- */
+.site-nav {
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(6px);
   position: sticky;
   top: 0;
   z-index: 50;
-  padding: var(--space-3) var(--space-5);
-  background: var(--bg-elevated);
-  border-bottom: 1px solid var(--border);
-  backdrop-filter: saturate(140%) blur(8px);
 }
 
-.site-header .container {
+.site-nav__inner {
   display: flex;
   align-items: center;
-  gap: var(--space-5);
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-4);
+  flex-wrap: wrap;
 }
 
-/* ---- Logo (mark + wordmark) ---- */
-.logo {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--fs-lg);
-  font-weight: var(--fw-bold);
-  letter-spacing: -0.03em;
-  color: var(--text);
+/* ---- Brand ---- */
+.site-nav__brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  font-size: 1.3rem;
+  color: var(--text-0);
+  transition: color 0.18s ease;
   white-space: nowrap;
 }
 
-.logo:hover {
-  color: var(--text);
-}
-
-/* Brand wordmark — host site's horror display font, falls back to the
-   default logo styling (--font-sans) if the font fails to load. */
-.logo .logo-text {
-  font-family: "Night of the Deads", var(--font-sans);
-  letter-spacing: 0.02em;
+.site-nav__brand:hover {
+  color: var(--text-0);
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.5);
 }
 
 /* ---- Nav links ---- */
-.nav-links {
+.site-nav__links {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
-  list-style: none;
-  margin: 0;
-  padding: 0;
+  gap: var(--space-5);
+  flex-wrap: wrap;
 }
 
-.nav-links a {
+.site-nav__link {
+  color: var(--text-1);
+  font-family: var(--font-condensed);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: color 0.18s ease;
+}
+
+.site-nav__link:hover,
+.site-nav__link:focus-visible {
+  color: var(--text-0);
+}
+
+/* ---- Search: icon trigger that expands into an input ---- */
+.site-nav__search {
   position: relative;
-  display: inline-block;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
-  color: var(--text-muted);
-  transition: color var(--transition-fast), background var(--transition-fast);
-}
-
-.nav-links a:hover {
-  color: var(--text);
-  background: var(--surface);
-}
-
-/* Active: crisp accent underline that hugs the link */
-.nav-links a.active {
-  color: var(--text);
-}
-
-.nav-links a.active::after {
-  content: "";
-  position: absolute;
-  left: var(--space-3);
-  right: var(--space-3);
-  bottom: 2px;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--accent);
-}
-
-/* ---- Search ---- */
-.nav-search {
-  flex: 1;
-  max-width: 340px;
+  display: flex;
+  align-items: center;
   margin-left: auto;
-  height: 36px;
-  padding-block: 0;
 }
 
-.nav-search::placeholder {
-  color: var(--text-faint);
-}
-
-/* ---- Theme switcher (segmented control) ---- */
-/* Theme switcher: palette-icon trigger + dropdown menu of theme options */
-/* Site is locked to the "darkness" theme (see head.php pre-paint script);
-   the picker is hidden rather than removed so the markup/JS stay intact. */
-.theme-switcher {
-  display: none;
-}
-
-.theme-trigger {
+.site-nav__search-trigger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
+  flex-shrink: 0;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
+  color: var(--text-1);
   cursor: pointer;
-  color: var(--text-muted);
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
 }
 
-.theme-trigger:hover,
-.theme-switcher.open .theme-trigger {
-  background: var(--surface);
+.site-nav__search-trigger:hover,
+.site-nav__search.is-open .site-nav__search-trigger {
+  color: var(--text-0);
+  background: rgba(255, 255, 255, 0.06);
   border-color: var(--border-subtle);
-  color: var(--text);
 }
 
-/* Palette icon via the project's self-hosted FA method (Method 2: CSS bg).
-   SVGs render dark, so invert to a light tint on dark themes. */
-.theme-icon {
-  width: 18px;
-  height: 18px;
-  background: url('https://nerd.biz/assets/fa/svgs/solid/palette.svg') no-repeat center / contain;
-  filter: invert(1) opacity(0.7);
-  transition: filter var(--transition-fast);
+.site-nav__search-icon {
+  display: block;
 }
 
-.theme-trigger:hover .theme-icon,
-.theme-switcher.open .theme-icon {
-  filter: invert(1) opacity(1);
-}
-
-/* Light theme: keep the icon dark on the light header background */
-[data-theme="light"] .theme-icon {
-  filter: none;
-  opacity: 0.65;
-}
-
-[data-theme="light"] .theme-trigger:hover .theme-icon,
-[data-theme="light"] .theme-switcher.open .theme-icon {
-  filter: none;
-  opacity: 1;
-}
-
-.theme-dropdown {
-  display: none;
+.site-nav__search-form {
   position: absolute;
   right: 0;
-  top: calc(100% + var(--space-2));
-  min-width: 160px;
-  padding: var(--space-2);
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  z-index: 50;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: width 0.2s ease, opacity 0.15s ease;
 }
 
-.theme-switcher.open .theme-dropdown {
-  display: block;
+.site-nav__search.is-open .site-nav__search-form {
+  width: min(260px, 60vw);
+  opacity: 1;
+  pointer-events: auto;
+  margin-right: 44px;
 }
 
-.theme-option {
-  display: block;
+.site-nav__search-input {
   width: 100%;
-  text-align: left;
-  padding: var(--space-2) var(--space-3);
-  font-family: inherit;
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
-  white-space: nowrap;
-  color: var(--text-muted);
-  background: transparent;
-  border: none;
+  height: 36px;
+  padding: 0 var(--space-3);
+  background: var(--bg-2, #0a0a0a);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: color var(--transition-fast), background var(--transition-fast);
+  color: var(--text-0);
 }
 
-.theme-option:hover {
-  background: var(--surface);
-  color: var(--text);
+.site-nav__search-input::placeholder {
+  color: var(--text-muted);
 }
 
-/* Active theme: filled tile + a trailing check mark */
-.theme-option.active {
-  color: var(--text);
+.site-nav__search-input:focus {
+  outline: none;
+  border-color: var(--text-0);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
 }
 
-.theme-option.active::after {
-  content: "✓";
-  float: right;
-  color: var(--accent);
-  font-weight: var(--fw-semibold);
+/* ---- Auth area ---- */
+.site-nav__auth {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
 }
 
-/* ---- User menu + dropdown ---- */
-.user-menu {
-  position: relative;
+.site-nav__cta {
+  padding: 8px 18px;
+  font-size: 0.85rem;
 }
 
-.user-menu-trigger {
+.site-nav__username {
+  color: var(--text-0);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+/* ---- Button styles (mirrors host css/base.css .btn/.btn-primary/.btn-ghost) ---- */
+.btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
-  padding: var(--space-1) var(--space-2);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--radius);
-  cursor: pointer;
-  color: var(--text);
-  font-family: inherit;
-  font-size: var(--fs-sm);
-  transition: background var(--transition-fast), border-color var(--transition-fast);
-}
-
-.user-menu-trigger:hover {
-  background: var(--surface);
-  border-color: var(--border-subtle);
-}
-
-.user-name {
-  font-weight: var(--fw-medium);
-  color: var(--text);
-}
-
-.user-dropdown {
-  display: none;
-  position: absolute;
-  right: 0;
-  top: calc(100% + var(--space-2));
-  min-width: 200px;
-  padding: var(--space-2);
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-}
-
-.user-menu.open .user-dropdown {
-  display: block;
-}
-
-.user-dropdown a,
-.user-dropdown button {
-  display: block;
-  width: 100%;
-  text-align: left;
-  padding: var(--space-2) var(--space-3);
-  font-family: inherit;
-  font-size: var(--fs-sm);
-  color: var(--text-muted);
-  background: transparent;
-  border: none;
+  padding: 12px 22px;
   border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-3, #101010);
+  color: var(--text-0);
+  font-family: var(--font-condensed);
+  font-weight: 800;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease,
+    background-color 0.15s ease, color 0.15s ease;
 }
 
-.user-dropdown a:hover,
-.user-dropdown button:hover {
-  background: var(--surface);
-  color: var(--text);
+.btn:hover {
+  border-color: var(--text-0);
+  box-shadow: var(--shadow-glow, 0 0 20px rgba(255, 255, 255, 0.15));
+  transform: translateY(-1px);
 }
 
-.user-dropdown .divider {
-  height: 1px;
-  margin: var(--space-2) 0;
-  background: var(--border-subtle);
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: #f5f5f5;
+  border-color: #f5f5f5;
+  color: #000000;
+}
+
+.btn-primary:hover {
+  background: #ffffff;
+  border-color: #ffffff;
+  box-shadow: 0 0 24px rgba(255, 255, 255, 0.35);
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: var(--text-0);
+}
+
+.btn-ghost:hover {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
 }
 
 /* ---- Focus indicators (a11y) ---- */
-.logo:focus-visible,
-.nav-links a:focus-visible,
-.theme-option:focus-visible,
-.user-menu-trigger:focus-visible,
-.user-dropdown a:focus-visible,
-.user-dropdown button:focus-visible {
+.site-nav__brand:focus-visible,
+.site-nav__link:focus-visible,
+.site-nav__search-trigger:focus-visible,
+.btn:focus-visible {
   outline: none;
-  box-shadow: var(--ring);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
   border-radius: var(--radius-sm);
 }
 
-/* ---- Responsive ---- */
+/* ---- Responsive (mirrors host css/index.css breakpoints) ---- */
 @media (max-width: 768px) {
-  .site-header {
-    padding: var(--space-3) var(--space-4);
+  .site-nav__search.is-open .site-nav__search-form {
+    width: min(220px, 55vw);
   }
-  .site-header .container {
-    flex-wrap: wrap;
-    gap: var(--space-3);
-  }
-  .nav-search {
+}
+
+@media (max-width: 600px) {
+  .site-nav__links {
     order: 3;
-    flex-basis: 100%;
-    max-width: none;
     width: 100%;
-    margin-left: 0;
-  }
-  .theme-switcher {
-    margin-left: auto;
+    justify-content: center;
+    gap: var(--space-3);
   }
 }
 
 @media (max-width: 480px) {
-  /* Save room: hide username text, keep avatar */
-  .user-name {
-    display: none;
+  /* Search overlays the header row instead of pushing layout at narrow widths */
+  .site-nav__search.is-open .site-nav__search-form {
+    position: absolute;
+    right: 0;
+    top: calc(100% + var(--space-2));
+    width: min(260px, 90vw);
+    margin-right: 0;
+    z-index: 60;
   }
-}
-
-/* ---- Logged-out auth actions + logout form ---- */
-.auth-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-.logout-form {
-  margin: 0;
-}
-.logout-form button {
-  width: 100%;
 }

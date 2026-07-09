@@ -2,53 +2,43 @@
 if (!isset($CONFIG)) { require __DIR__ . '/../config.php'; }
 $BASE = $BASE ?? '';
 require_once __DIR__ . '/../lib/auth.php';
-require_once __DIR__ . '/avatar.php';
 auth_start_session();
 $currentUser = auth_current_user();
 
-// Resolve the current page to highlight the matching nav link.
-$navPage = basename($_SERVER['SCRIPT_NAME'] ?? '');
-$navForums = in_array($navPage, ['forums.php', 'category.php', 'thread.php'], true);
-$navHome = ($navPage === 'index.php');
+// Current forum URI, for round-tripping back here after SSO login.
+$navNext = $_SERVER['REQUEST_URI'] ?? '/bbs/';
 ?>
-<header class="site-header">
-  <div class="container">
-    <a class="logo" href="<?= $BASE ?>index.php"><span class="logo-text"><?= htmlspecialchars($CONFIG['SITE_NAME']) ?></span></a>
-    <nav class="nav-links">
-      <a class="<?= $navHome ? 'active' : '' ?>" href="<?= $BASE ?>index.php">Home</a>
-      <a class="<?= $navForums ? 'active' : '' ?>" href="<?= $BASE ?>forums.php">Forums</a>
-    </nav>
-    <input class="nav-search" type="search" aria-label="Search" placeholder="Search <?= htmlspecialchars($CONFIG['SITE_NAME']) ?>...">
-    <div class="theme-switcher">
-      <button class="theme-trigger" id="theme-trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="theme-dropdown" aria-label="Change theme" title="Change theme">
-        <span class="theme-icon" aria-hidden="true"></span>
+<nav class="site-nav">
+  <div class="container site-nav__inner">
+    <a href="/index.php" class="site-nav__brand">THE DEAD LAST</a>
+    <div class="site-nav__links">
+      <a href="#" class="site-nav__link">Game</a>
+      <a href="#" class="site-nav__link">News</a>
+      <a href="/bbs/" class="site-nav__link">Community</a>
+      <a href="#" class="site-nav__link">Support</a>
+      <?php if ($currentUser !== null && auth_is_admin()): ?>
+        <a href="<?= $BASE ?>admin/" class="site-nav__link">Admin</a>
+      <?php endif; ?>
+    </div>
+    <div class="site-nav__search">
+      <button type="button" class="site-nav__search-trigger" id="nav-search-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="nav-search-form" aria-label="Search" title="Search">
+        <svg class="site-nav__search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+          <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
+        </svg>
       </button>
-      <div class="theme-dropdown" id="theme-dropdown" role="menu" aria-label="Theme">
-        <button class="theme-option" type="button" role="menuitemradio" data-theme="midnight">Midnight</button>
-        <button class="theme-option" type="button" role="menuitemradio" data-theme="dusk">Dusk</button>
-        <button class="theme-option" type="button" role="menuitemradio" data-theme="light">Light</button>
-        <button class="theme-option" type="button" role="menuitemradio" data-theme="darkness">Darkness</button>
-      </div>
+      <form class="site-nav__search-form" id="nav-search-form">
+        <input class="site-nav__search-input" id="nav-search-input" type="search" aria-label="Search" placeholder="Search <?= htmlspecialchars($CONFIG['SITE_NAME']) ?>...">
+      </form>
     </div>
-    <?php if ($currentUser !== null): ?>
-    <div class="user-menu">
-      <button class="user-menu-trigger" id="user-menu-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="user-dropdown"><?php render_avatar($currentUser['display_name'], 36); ?><span class="user-name"><?= htmlspecialchars($currentUser['display_name']) ?></span></button>
-      <div class="user-dropdown" id="user-dropdown" role="menu">
-        <a href="<?= $BASE ?>profile.php" role="menuitem">Profile</a>
-        <a href="<?= $BASE ?>settings.php" role="menuitem">Settings</a>
-        <?php if (auth_is_admin()): ?><a href="<?= $BASE ?>admin/" role="menuitem">Admin</a><?php endif; ?>
-        <div class="divider"></div>
-        <form method="post" action="/logout.php" class="logout-form">
-          <?= csrf_field() ?>
-          <button type="submit" role="menuitem">Log out</button>
-        </form>
-      </div>
+    <div class="site-nav__auth">
+      <?php if ($currentUser !== null): ?>
+        <a href="<?= $BASE ?>profile.php?user=<?= urlencode($currentUser['username']) ?>" class="site-nav__link site-nav__username"><?= htmlspecialchars(strtoupper($currentUser['username'])) ?></a>
+        <a href="/logout.php" class="btn btn-ghost site-nav__cta">Logout</a>
+      <?php else: ?>
+        <a href="/bbs/login.php?next=<?= urlencode($navNext) ?>" class="btn btn-ghost site-nav__cta">Login</a>
+        <a href="/bbs/register.php" class="btn btn-primary site-nav__cta">Register</a>
+      <?php endif; ?>
     </div>
-    <?php else: ?>
-    <div class="auth-actions">
-      <a class="btn btn-ghost" href="<?= $BASE ?>login.php">Log in</a>
-      <a class="btn btn-primary" href="<?= $BASE ?>register.php">Register</a>
-    </div>
-    <?php endif; ?>
   </div>
-</header>
+</nav>
