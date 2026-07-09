@@ -1,4 +1,32 @@
 <?php
+/**
+ * Shared site header/nav partial — used by BOTH the host app (root) and the
+ * forum (bbs/, via bbs/partials/header.php) under SSO (shared PHP session).
+ *
+ * Context flags (set by the including page/partial before requiring this
+ * file; all optional, defaults match the host's own usage):
+ *
+ *   $NAV_HIDE_HOME         bool    Omit the HOME link. Default false.
+ *   $NAV_ADMIN_URL         ?string When set, render an ADMIN link pointing
+ *                                  here. Default null (no admin link).
+ *   $NAV_LOGIN_URL         string  href for the Login CTA. Default '/login.php'.
+ *   $NAV_REGISTER_URL      string  href for the Register CTA. Default '/register.php'.
+ *   $NAV_SEARCH_PLACEHOLDER string Placeholder text for the search input.
+ *                                  Default 'Search THE DEAD LAST...'.
+ *
+ * Auth state is resolved directly from the shared session + host DB (same
+ * approach as the host's original nav.php) — both host and forum contexts
+ * share one PHP session and $_SESSION['user_id'] always refers to the HOST
+ * users.id, so this works correctly from either include site.
+ */
+require_once __DIR__ . '/../config.php';
+
+$NAV_HIDE_HOME = $NAV_HIDE_HOME ?? false;
+$NAV_ADMIN_URL = $NAV_ADMIN_URL ?? null;
+$NAV_LOGIN_URL = $NAV_LOGIN_URL ?? '/login.php';
+$NAV_REGISTER_URL = $NAV_REGISTER_URL ?? '/register.php';
+$NAV_SEARCH_PLACEHOLDER = $NAV_SEARCH_PLACEHOLDER ?? 'Search THE DEAD LAST...';
+
 // Nav auth state: resolve the logged-in user (if any) from the shared
 // session. A user_id with no matching DB row is a stale session (e.g. the
 // account was deleted) — treat it as logged out and clear the stale key.
@@ -17,19 +45,35 @@ if (!empty($_SESSION['user_id'])) {
   <div class="container site-nav__inner">
     <a href="/index.php" class="site-nav__brand">THE DEAD LAST</a>
     <div class="site-nav__links">
-      <a href="/index.php" class="site-nav__link">Home</a>
+      <?php if (!$NAV_HIDE_HOME): ?>
+        <a href="/index.php" class="site-nav__link">Home</a>
+      <?php endif; ?>
       <a href="#" class="site-nav__link">Game</a>
       <a href="#" class="site-nav__link">News</a>
       <a href="/bbs/" class="site-nav__link">Community</a>
       <a href="#" class="site-nav__link">Support</a>
+      <?php if ($NAV_ADMIN_URL !== null): ?>
+        <a href="<?= htmlspecialchars($NAV_ADMIN_URL) ?>" class="site-nav__link">Admin</a>
+      <?php endif; ?>
+    </div>
+    <div class="site-nav__search">
+      <button type="button" class="site-nav__search-trigger" id="nav-search-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="nav-search-form" aria-label="Search" title="Search">
+        <svg class="site-nav__search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+          <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
+        </svg>
+      </button>
+      <form class="site-nav__search-form" id="nav-search-form">
+        <input class="site-nav__search-input" id="nav-search-input" type="search" aria-label="Search" placeholder="<?= htmlspecialchars($NAV_SEARCH_PLACEHOLDER) ?>">
+      </form>
     </div>
     <div class="site-nav__auth">
       <?php if ($navUser): ?>
         <a href="/bbs/profile.php?user=<?= urlencode($navUser['username']) ?>" class="site-nav__link site-nav__username"><?= htmlspecialchars(strtoupper($navUser['username'])) ?></a>
         <a href="/logout.php" class="btn btn-ghost site-nav__cta">Logout</a>
       <?php else: ?>
-        <a href="/login.php" class="btn btn-ghost site-nav__cta">Login</a>
-        <a href="/register.php" class="btn btn-primary site-nav__cta">Register</a>
+        <a href="<?= htmlspecialchars($NAV_LOGIN_URL) ?>" class="btn btn-ghost site-nav__cta">Login</a>
+        <a href="<?= htmlspecialchars($NAV_REGISTER_URL) ?>" class="btn btn-primary site-nav__cta">Register</a>
       <?php endif; ?>
     </div>
   </div>

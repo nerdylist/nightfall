@@ -1,9 +1,11 @@
-/* nav.css — top header, matches the host site's .site-nav header 1:1, plus a
-   forum-only expanding search icon.
-   FLAT + SHARP: hairline borders, crisp type, near-zero shadow, fast micro-interactions. */
+/* site-nav.css — shared header/nav, used by BOTH the host site and the
+   forum (bbs/). Single source of truth for .site-nav* markup styling.
+   FLAT + SHARP: hairline borders, crisp type, near-zero shadow, fast
+   micro-interactions. */
 
-/* Host site brand font (see /css/base.css) — same-origin under /bbs pages,
-   so the root-absolute URL resolves correctly here too. */
+/* Brand font. Declared here (in addition to css/base.css) so forum pages,
+   which do not load base.css, still get it. @font-face redeclaration is a
+   harmless no-op where both are loaded (host pages). */
 @font-face {
   font-family: "Night of the Deads";
   src: url("/fonts/night-of-the-deads.ttf") format("truetype");
@@ -12,7 +14,7 @@
   font-display: swap;
 }
 
-/* ---- Header bar (mirrors host css/index.css .site-nav) ---- */
+/* ---- Header bar ---- */
 .site-nav {
   border-bottom: 1px solid var(--border-subtle);
   background: rgba(0, 0, 0, 0.85);
@@ -162,7 +164,8 @@
   letter-spacing: 0.06em;
 }
 
-/* ---- Button styles (mirrors host css/base.css .btn/.btn-primary/.btn-ghost) ---- */
+/* ---- Button styles (mirrors host css/base.css .btn/.btn-primary/.btn-ghost;
+   forum pages don't load base.css so need these here too) ---- */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -227,7 +230,7 @@
   border-radius: var(--radius-sm);
 }
 
-/* ---- Responsive (mirrors host css/index.css breakpoints) ---- */
+/* ---- Responsive ---- */
 @media (max-width: 768px) {
   .site-nav__search.is-open .site-nav__search-form {
     width: min(220px, 55vw);

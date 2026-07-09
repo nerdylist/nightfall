@@ -13,6 +13,7 @@ $pageCss = $pageCss ?? [];
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= htmlspecialchars($pageTitle) ?></title>
   <link rel="stylesheet" href="<?= htmlspecialchars(asset_url('/css/base.css')) ?>">
+  <link rel="stylesheet" href="<?= htmlspecialchars(asset_url('/css/site-nav.css')) ?>">
   <?php foreach ($pageCss as $css): ?>
   <link rel="stylesheet" href="<?= htmlspecialchars(asset_url($css)) ?>">
   <?php endforeach; ?>

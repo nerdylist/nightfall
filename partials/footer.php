@@ -11,6 +11,7 @@
 </footer>
 <?php $pageJs = $pageJs ?? []; ?>
 <script src="<?= htmlspecialchars(asset_url('/js/base.js')) ?>"></script>
+<script src="<?= htmlspecialchars(asset_url('/js/nav-search.js')) ?>"></script>
 <?php foreach ($pageJs as $js): ?>
 <script src="<?= htmlspecialchars(asset_url($js)) ?>"></script>
 <?php endforeach; ?>

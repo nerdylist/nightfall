@@ -10,7 +10,7 @@ $EXTRA_CSS = $EXTRA_CSS ?? [];
 <title><?= htmlspecialchars($CONFIG['SITE_NAME']) ?></title>
 <link rel="stylesheet" href="<?= $BASE ?>css/themes.css">
 <link rel="stylesheet" href="<?= $BASE ?>css/general.css">
-<link rel="stylesheet" href="<?= $BASE ?>css/nav.css">
+<link rel="stylesheet" href="/css/site-nav.css?v=<?= (int) @filemtime(__DIR__ . '/../../css/site-nav.css') ?>">
 <link rel="stylesheet" href="<?= $BASE ?>css/forum.css">
 <link rel="stylesheet" href="<?= $BASE ?>css/avatar.css">
 <link rel="stylesheet" href="<?= $BASE ?>css/thread.css">

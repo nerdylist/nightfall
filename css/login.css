@@ -1,74 +1,5 @@
 /* THE DEAD LAST — login page (mirrors register.css shell + auth card) */
 
-.site-nav {
-  border-bottom: 1px solid var(--border-subtle);
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(6px);
-}
-
-.site-nav__inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding-top: var(--space-4);
-  padding-bottom: var(--space-4);
-  flex-wrap: wrap;
-}
-
-.site-nav__brand {
-  font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  font-size: 1.3rem;
-  color: var(--text-0);
-  transition: color 0.18s ease;
-}
-
-.site-nav__brand:hover {
-  color: var(--text-0);
-  text-shadow: 0 0 16px rgba(255, 255, 255, 0.5);
-}
-
-.site-nav__links {
-  display: flex;
-  align-items: center;
-  gap: var(--space-5);
-  flex-wrap: wrap;
-}
-
-.site-nav__link {
-  color: var(--text-1);
-  font-family: var(--font-condensed);
-  font-weight: 700;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  transition: color 0.18s ease;
-}
-
-.site-nav__link:hover,
-.site-nav__link:focus-visible {
-  color: var(--text-0);
-}
-
-.site-nav__auth {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.site-nav__cta {
-  padding: 8px 18px;
-  font-size: 0.85rem;
-}
-
-.site-nav__username {
-  color: var(--text-0);
-  font-weight: 800;
-  letter-spacing: 0.06em;
-}
-
 .site-footer {
   border-top: 1px solid var(--border-subtle);
   padding: var(--space-5) 0;
@@ -167,10 +98,4 @@
   color: var(--text-0);
   text-decoration: underline;
   text-underline-offset: 2px;
-}
-
-@media (max-width: 600px) {
-  .site-nav__link {
-    display: none;
-  }
 }
