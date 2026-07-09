@@ -25,6 +25,7 @@ $pageCss = $pageCss ?? [];
     <nav class="keeper-header__nav">
       <a href="/keeper/dashboard.php" class="keeper-header__link">Dashboard</a>
       <a href="/keeper/meshy.php" class="keeper-header__link">Meshy</a>
+      <a href="/keeper/forum-users.php" class="keeper-header__link">Forum Users</a>
       <a href="/index.php" class="keeper-header__link text-muted">Back to site</a>
     </nav>
   </div>

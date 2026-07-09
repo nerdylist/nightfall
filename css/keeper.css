@@ -150,6 +150,21 @@ body.keeper {
   background: var(--bg-2);
 }
 
+.keeper-flash {
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-5);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+  color: var(--text-1);
+  font-size: 0.85rem;
+}
+
+.keeper-action-group {
+  display: flex;
+  gap: var(--space-2);
+}
+
 .keeper-footer {
   border-top: 1px solid var(--border-subtle);
   padding: var(--space-5) 0;
