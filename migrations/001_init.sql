@@ -1,4 +1,4 @@
--- GRAVE RISING — migration 001: initial schema
+-- THE DEAD LAST — migration 001: initial schema
 -- Executable source of truth for the database structure.
 -- Applied automatically by web/bin/setup-db.php and recorded in
 -- schema_migrations. See web/schema.sql for a reference-only pointer.

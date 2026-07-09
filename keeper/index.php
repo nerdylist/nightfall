@@ -3,7 +3,7 @@ require_once __DIR__ . '/../config.php';
 
 session_start();
 
-$pageTitle = 'Keeper Login — Grave Rising Admin';
+$pageTitle = 'Keeper Login — The Dead Last Admin';
 $pageCss = [];
 $keeperLoginError = '';
 

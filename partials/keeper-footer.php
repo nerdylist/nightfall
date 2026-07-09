@@ -1,6 +1,6 @@
 <footer class="keeper-footer">
   <div class="container">
-    <span class="text-muted">Keeper admin &mdash; Grave Rising prototype</span>
+    <span class="text-muted">Keeper admin &mdash; The Dead Last prototype</span>
   </div>
 </footer>
 <?php $pageJs = $pageJs ?? []; ?>

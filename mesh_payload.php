@@ -1,9 +1,9 @@
 <?php
 /**
- * GRAVE RISING — Meshy webhook receiver.
+ * THE DEAD LAST — Meshy webhook receiver.
  *
  * This is the URL registered in the Meshy dashboard as the account webhook
- * (MESHY_PAYLOAD_URL = https://graverising.com/mesh_payload.php). Meshy POSTs
+ * (MESHY_PAYLOAD_URL = https://thedeadlast.com/mesh_payload.php). Meshy POSTs
  * the task object JSON here whenever an image-to-3d or rigging task changes
  * state. We authenticate with MESHY_WEBHOOK_SECRET (shared secret in the URL
  * ?secret=..., or an HMAC signature header if Meshy ever sends one), then

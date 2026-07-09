@@ -1,4 +1,4 @@
-/* GRAVE RISING — login page (mirrors register.css shell + auth card) */
+/* THE DEAD LAST — login page (mirrors register.css shell + auth card) */
 
 .site-nav {
   border-bottom: 1px solid var(--border-subtle);
@@ -14,9 +14,10 @@
 }
 
 .site-nav__brand {
+  font-family: var(--font-display);
   font-weight: 700;
-  letter-spacing: 0.08em;
-  font-size: 1rem;
+  letter-spacing: 0.06em;
+  font-size: 1.3rem;
   color: var(--text-0);
 }
 

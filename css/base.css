@@ -1,4 +1,12 @@
-/* GRAVE RISING — base tokens & resets, shared across public site + Keeper */
+/* THE DEAD LAST — base tokens & resets, shared across public site + Keeper */
+
+@font-face {
+  font-family: "Night of the Deads";
+  src: url("/fonts/night-of-the-deads.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   /* Ultra-dark noir palette */
@@ -14,12 +22,18 @@
   --text-2: #808088;
   --text-muted: #55555b;
 
-  /* Single muted accent: sickly desaturated bone-green */
-  --accent: #7a9280;
-  --accent-dim: #5a6d60;
-  --accent-glow: rgba(122, 146, 128, 0.18);
+  /* Two-faction accent system */
+  /* Zombie / undead: sickly desaturated toxic green */
+  --accent: #7fae7a;
+  --accent-dim: #5c7d59;
+  --accent-glow: rgba(127, 174, 122, 0.18);
 
-  --danger: #8a5a52;
+  /* Human / warm signal: muted blood-rust red */
+  --danger: #a5453a;
+  --danger-dim: #7a352d;
+  --danger-glow: rgba(165, 69, 58, 0.18);
+
+  --font-display: "Night of the Deads", var(--font-sans);
 
   --radius-sm: 4px;
   --radius-md: 8px;
@@ -52,12 +66,39 @@ html {
 }
 
 body {
+  position: relative;
   background: var(--bg-0);
   color: var(--text-0);
   font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.5;
   min-height: 100vh;
+}
+
+/* Subtle film-grain / scanline texture, reusable across the site */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.6),
+      rgba(255, 255, 255, 0.6) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.4),
+      rgba(0, 0, 0, 0.4) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+  mix-blend-mode: overlay;
 }
 
 img, svg {
@@ -166,6 +207,17 @@ textarea.field {
 
 .btn-primary:hover {
   box-shadow: var(--shadow-glow);
+}
+
+.btn-danger {
+  background: linear-gradient(180deg, var(--danger-dim), #4d2620);
+  border-color: var(--danger-dim);
+  color: #f2eeee;
+}
+
+.btn-danger:hover {
+  border-color: var(--danger-dim);
+  box-shadow: 0 0 24px var(--danger-glow);
 }
 
 .btn-block {

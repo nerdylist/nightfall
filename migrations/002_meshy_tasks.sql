@@ -1,4 +1,4 @@
--- GRAVE RISING — migration 002: Meshy backlog task events
+-- THE DEAD LAST — migration 002: Meshy backlog task events
 -- Stores webhook events delivered by Meshy (image-to-3d + rigging tasks) so the
 -- local models/characters/meshy-queue.sh puller can fetch completed tasks and
 -- assemble the {name}_{m|f}.zip skins that build.sh imports.

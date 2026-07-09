@@ -2,7 +2,7 @@
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/lib/auth.php';
 
-$pageTitle = 'Register — Grave Rising';
+$pageTitle = 'Register — The Dead Last';
 $pageCss = ['/css/register.css'];
 $pageJs = ['/js/register.js'];
 

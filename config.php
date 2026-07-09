@@ -1,6 +1,6 @@
 <?php
 /**
- * GRAVE RISING — config loader
+ * THE DEAD LAST — config loader
  *
  * Parses web/.env, exposes values via env(), and wires in the real
  * SQLite connection helper (web/lib/db.php). Use grave_db() to get a

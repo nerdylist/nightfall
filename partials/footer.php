@@ -1,6 +1,6 @@
 <footer class="site-footer">
   <div class="container site-footer__inner">
-    <span class="text-muted">&copy; <?= date('Y') ?> Living Dead Studios. GRAVE RISING.</span>
+    <span class="text-muted">&copy; <?= date('Y') ?> Living Dead Studios. THE DEAD LAST.</span>
     <span class="text-muted">Survival is only half of the game.</span>
   </div>
 </footer>

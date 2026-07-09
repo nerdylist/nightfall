@@ -1,4 +1,4 @@
-/* GRAVE RISING — landing page */
+/* THE DEAD LAST — landing page */
 
 .site-nav {
   border-bottom: 1px solid var(--border-subtle);
@@ -14,9 +14,10 @@
 }
 
 .site-nav__brand {
+  font-family: var(--font-display);
   font-weight: 700;
-  letter-spacing: 0.08em;
-  font-size: 1rem;
+  letter-spacing: 0.06em;
+  font-size: 1.3rem;
   color: var(--text-0);
 }
 
@@ -43,7 +44,7 @@
   position: relative;
   padding: var(--space-8) 0 var(--space-7);
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(122, 146, 128, 0.08), transparent 60%),
+    radial-gradient(ellipse at 50% 0%, rgba(127, 174, 122, 0.08), transparent 60%),
     var(--bg-0);
   border-bottom: 1px solid var(--border-subtle);
   overflow: hidden;
@@ -80,26 +81,33 @@
 }
 
 .hero__title {
-  font-size: clamp(3rem, 10vw, 6.5rem);
-  font-weight: 800;
-  letter-spacing: 0.03em;
+  margin-bottom: var(--space-5);
+}
+
+.hero__title-pre {
+  display: block;
+  font-size: clamp(1rem, 2.4vw, 1.4rem);
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--text-1);
+  margin-bottom: var(--space-2);
+}
+
+.hero__title-line {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(3.2rem, 11vw, 7.5rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   line-height: 0.95;
   color: var(--text-0);
   text-shadow:
     0 0 1px rgba(237, 237, 238, 0.4),
-    2px 0 0 rgba(122, 146, 128, 0.25),
+    2px 0 0 rgba(127, 174, 122, 0.25),
     -2px 1px 0 rgba(0, 0, 0, 0.6),
     0 6px 24px rgba(0, 0, 0, 0.7);
-  margin-bottom: var(--space-5);
-}
-
-.hero__title-line {
-  display: block;
-}
-
-.hero__title-line:nth-child(2) {
-  color: var(--text-1);
 }
 
 .hero__tagline {
@@ -132,9 +140,107 @@
 }
 
 .pitch__heading {
-  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 1.05rem;
   margin-bottom: var(--space-2);
   color: var(--accent);
+}
+
+.sides {
+  padding: var(--space-7) 0;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-1);
+}
+
+.sides__heading {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  text-align: center;
+  color: var(--text-0);
+  margin-bottom: var(--space-6);
+}
+
+.sides__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.sides__panel {
+  padding: var(--space-5);
+  border-top: 3px solid var(--border-strong);
+}
+
+.sides__panel p {
+  margin-bottom: var(--space-2);
+}
+
+.sides__panel p:last-child {
+  margin-bottom: 0;
+}
+
+.sides__panel--human {
+  border-top-color: var(--danger-dim);
+  background: linear-gradient(180deg, var(--danger-glow), transparent 40%), var(--bg-1);
+}
+
+.sides__panel--zombie {
+  border-top-color: var(--accent-dim);
+  background: linear-gradient(180deg, var(--accent-glow), transparent 40%), var(--bg-1);
+}
+
+.sides__panel-heading {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 1.05rem;
+  margin-bottom: var(--space-3);
+}
+
+.sides__panel--human .sides__panel-heading {
+  color: var(--danger);
+}
+
+.sides__panel--zombie .sides__panel-heading {
+  color: var(--accent);
+}
+
+.cta-strip {
+  position: relative;
+  padding: var(--space-7) 0;
+  border-top: 1px solid var(--border-subtle);
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(127, 174, 122, 0.06), transparent 65%),
+    var(--bg-0);
+  overflow: hidden;
+}
+
+.cta-strip__inner {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.cta-strip__line {
+  font-size: 1.2rem;
+  color: var(--text-1);
+  font-style: italic;
+  letter-spacing: 0.01em;
+}
+
+.cta-strip__actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .site-footer {
@@ -152,6 +258,10 @@
 
 @media (max-width: 768px) {
   .pitch__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sides__grid {
     grid-template-columns: 1fr;
   }
 }

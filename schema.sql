@@ -1,4 +1,4 @@
--- GRAVE RISING — SQLite schema (reference only)
+-- THE DEAD LAST — SQLite schema (reference only)
 --
 -- This file is NOT executed. The executable source of truth is the
 -- numbered migration set in web/migrations/ (001_init.sql, 002_..., ...),

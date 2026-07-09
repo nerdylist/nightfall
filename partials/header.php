@@ -3,7 +3,7 @@
  * Shared public-site header partial.
  * Expects optional $pageTitle and $pageCss (array of extra css files) to be set before include.
  */
-$pageTitle = $pageTitle ?? 'Grave Rising';
+$pageTitle = $pageTitle ?? 'The Dead Last';
 $pageCss = $pageCss ?? [];
 ?>
 <!doctype html>

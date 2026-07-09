@@ -1,6 +1,6 @@
-# Grave Rising — Web Backend
+# The Dead Last — Web Backend
 
-Plain PHP + SQLite backend for graverising.com. No framework, no Composer/npm
+Plain PHP + SQLite backend for thedeadlast.com. No framework, no Composer/npm
 dependencies. Serves the public site (register/login), the Keeper admin
 area, and a JSON API used by the Unity game client to register/login.
 
@@ -63,7 +63,7 @@ guarded by `MESHY_WEBHOOK_SECRET` (add it to the server `.env`).
 
 - `POST /mesh_payload.php` — the **Meshy account webhook receiver**. Register
   it in the Meshy dashboard (API settings → Webhooks) as
-  `https://graverising.com/mesh_payload.php?secret=<MESHY_WEBHOOK_SECRET>`.
+  `https://thedeadlast.com/mesh_payload.php?secret=<MESHY_WEBHOOK_SECRET>`.
   It authenticates the shared secret (query `?secret=` or `X-Meshy-Secret`
   header; also verifies an `X-Meshy-Signature` HMAC-SHA256 if present),
   then upserts the delivered task object into `meshy_tasks`.

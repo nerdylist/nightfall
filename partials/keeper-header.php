@@ -3,7 +3,7 @@
  * Shared Keeper (admin) header partial. Separate from the public site header.
  * Expects optional $pageTitle and $pageCss.
  */
-$pageTitle = $pageTitle ?? 'Keeper — Grave Rising Admin';
+$pageTitle = $pageTitle ?? 'Keeper — The Dead Last Admin';
 $pageCss = $pageCss ?? [];
 ?>
 <!doctype html>
