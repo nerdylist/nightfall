@@ -5,7 +5,8 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-6);
-  /* main now supplies the top padding; keep only the bottom gap before footer. */
+  /* Top gap off the sticky header matches the column gap; bottom gap before footer. */
+  margin-top: var(--space-6);
   margin-bottom: var(--space-6);
 }
 
