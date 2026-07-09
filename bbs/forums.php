@@ -11,8 +11,8 @@ include __DIR__ . '/partials/header.php';
 ?>
 <main class="container">
   <div class="section-head">
-    <h2 class="section-title">All Forums</h2>
-    <span class="section-hint"><?= count($data['categories']) ?> forums</span>
+    <h2 class="section-title">Community</h2>
+    <span class="section-hint"><?= count($data['categories']) ?> FORUMS</span>
   </div>
 
   <section class="forum-rows">
