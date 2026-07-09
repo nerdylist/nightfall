@@ -401,17 +401,17 @@ a:focus-visible {
 
 .community__col--model {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
   position: relative;
 }
 
 .community__model {
-  width: 140%;
+  width: 160%;
   aspect-ratio: 1 / 1;
-  margin-left: -20%;
-  margin-right: -20%;
-  margin-bottom: -80px;
+  margin-left: -30%;
+  margin-right: -30%;
+  margin-bottom: -20px;
   position: relative;
   z-index: 5;
 }
@@ -561,7 +561,7 @@ a:focus-visible {
     max-width: 380px;
     margin-left: auto;
     margin-right: auto;
-    margin-bottom: -30px;
+    margin-bottom: 0;
   }
 }
 

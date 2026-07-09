@@ -14,8 +14,8 @@
   --bg-1: #050505;
   --bg-2: #0a0a0a;
   --bg-3: #101010;
-  --border-subtle: #1f1f1f;
-  --border-strong: #2c2c2c;
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.12);
 
   --text-0: #ffffff;
   --text-1: #d6d6d6;
@@ -260,6 +260,8 @@ textarea.field {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   box-shadow: none;
+  border-image: url('/assets/images/grunge-border.png') 24 round;
+  border-image-width: 1px;
 }
 
 .text-muted {
