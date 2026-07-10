@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3D model grab/rotate + news click-through test</title>
+<!-- The home page serves from the site root; ./assets/horde-up.glb in
+     js/home-hero-model.js resolves against the document base, so mirror
+     the root base here. -->
+<base href="/">
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/css/model-embed.css">
+<script type="importmap">
+{
+	"imports": {
+		"three": "/js/vendor/three.module.js"
+	}
+}
+</script>
+</head>
+<body>
+<main>
+  <section class="community">
+    <div class="container card community__card">
+      <div class="community__col community__col--social">
+        <h2 class="community__heading">Join the Community</h2>
+        <p class="text-muted">Share your story. Find allies. Stay updated.</p>
+        <img src="/assets/images/12.png" alt="Community photo collage" class="community__collage">
+      </div>
+      <div class="community__col community__col--model">
+        <div id="home-hero-model" class="community__model"></div>
+      </div>
+      <div class="community__col community__col--news">
+        <h2 class="community__heading">Latest News</h2>
+        <div class="news-list" id="home-news-list">
+          <a href="#news-1" class="news-item" id="news-1">
+            <img src="/assets/images/9.png" alt="" class="news-item__thumb">
+            <div class="news-item__body">
+              <h3 class="news-item__title">Patch 0.9.4 — The Rot Update Is Live</h3>
+              <p class="news-item__date">July 9, 2026</p>
+              <p class="news-item__blurb text-muted">Dynamic infection spread, two new weapon families, and a full rebalance of melee stamina costs.</p>
+            </div>
+          </a>
+          <a href="#news-2" class="news-item" id="news-2">
+            <img src="/assets/images/10.png" alt="" class="news-item__thumb">
+            <div class="news-item__body">
+              <h3 class="news-item__title">Server Stress Test — Sign-Ups Open Until Friday</h3>
+              <p class="news-item__date">July 7, 2026</p>
+              <p class="news-item__blurb text-muted">Help us break the servers before launch does.</p>
+            </div>
+          </a>
+          <a href="#news-3" class="news-item" id="news-3">
+            <img src="/assets/images/11.png" alt="" class="news-item__thumb">
+            <div class="news-item__body">
+              <h3 class="news-item__title">Developer Update #8: Horde AI Overhaul</h3>
+              <p class="news-item__date">July 5, 2026</p>
+              <p class="news-item__blurb text-muted">The dead are learning. A deep dive.</p>
+            </div>
+          </a>
+          <a href="#news-4" class="news-item" id="news-4">
+            <img src="/assets/images/9.png" alt="" class="news-item__thumb">
+            <div class="news-item__body">
+              <h3 class="news-item__title">Blood Moon Event Announced for August</h3>
+              <p class="news-item__date">July 2, 2026</p>
+              <p class="news-item__blurb text-muted">One night. Triple hordes.</p>
+            </div>
+          </a>
+        </div>
+        <a href="/bbs/category/2" class="btn btn-ghost" id="home-news-all">View All News</a>
+      </div>
+    </div>
+  </section>
+</main>
+<pre id="out">PENDING</pre>
+<script type="module" src="/js/home-hero-model.js"></script>
+<script type="module" src="/tests/rotate-test.js"></script>
+</body>
+</html>

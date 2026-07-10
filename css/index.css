@@ -448,6 +448,26 @@ a:focus-visible {
 }
 
 /*
+ * Invisible drag surface for the 3D model (created by
+ * js/home-hero-model.js). The widget/canvas above is pointer-events: none
+ * so the news links under the canvas overlap stay clickable; this proxy
+ * covers just the model's own column and hands pointer-downs to the
+ * canvas, restoring grab-to-rotate everywhere the bust actually sits.
+ * z-index 6 keeps it above the z-index 5 canvas; it paints nothing.
+ */
+.community__model-grab {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  cursor: grab;
+  touch-action: pan-y pinch-zoom;
+}
+
+.community__model-grab:active {
+  cursor: grabbing;
+}
+
+/*
  * Cap the news column so long feed blurbs can't stretch it across the card:
  * a bare `1fr` grid track has an `auto` minimum, so a nowrap blurb's
  * min-content width would blow the track out. max-width also clamps this
