@@ -113,6 +113,13 @@ if (!function_exists('forum_install')) {
             )"
         );
 
+        $db->exec(
+            "CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT
+            )"
+        );
+
         $db->exec("CREATE INDEX IF NOT EXISTS idx_threads_category ON threads(category_id)");
         $db->exec("CREATE INDEX IF NOT EXISTS idx_posts_thread ON posts(thread_id)");
         $db->exec("CREATE INDEX IF NOT EXISTS idx_chat_thread ON chat_messages(thread_id)");
@@ -343,6 +350,132 @@ if (!function_exists('forum_install')) {
                 ':threads_started' => 0,
                 ':chat_messages' => 0,
                 ':created_at'    => gmdate('c'),
+            ]);
+        }
+
+        // --- Seed "Latest News" feed category (idempotent) ------------------
+        // Powers the host site's /api/feed home-page news feed. Guarded by the
+        // category name, so it never duplicates on subsequent page loads.
+        $newsStmt = $db->prepare('SELECT id FROM categories WHERE name = ?');
+        $newsStmt->execute(['Latest News']);
+        $newsCatId = $newsStmt->fetchColumn();
+
+        if ($newsCatId === false) {
+            $db->beginTransaction();
+
+            $maxSort = (int) $db->query('SELECT COALESCE(MAX(sort_order), 0) FROM categories')->fetchColumn();
+            $db->prepare(
+                'INSERT INTO categories
+                    (name, description, icon, color, featured, sort_order, thread_count, post_count, last_activity, created_at)
+                 VALUES (?, ?, ?, ?, 0, ?, 0, 0, NULL, ?)'
+            )->execute([
+                'Latest News',
+                'Official announcements, patch notes, and dev updates from the team.',
+                '📰',
+                '#f59e0b',
+                $maxSort + 1,
+                gmdate('c'),
+            ]);
+            $newsCatId = (int) $db->lastInsertId();
+
+            // Author: prefer an admin, fall back to the lowest user id.
+            $authorId = $db->query(
+                "SELECT id FROM users WHERE role = 'admin' ORDER BY id LIMIT 1"
+            )->fetchColumn();
+            if ($authorId === false) {
+                $authorId = $db->query('SELECT id FROM users ORDER BY id LIMIT 1')->fetchColumn();
+            }
+            $authorId = (int) $authorId;
+
+            // Demo news threads, newest first ([title, excerpt, body, daysAgo,
+            // replies, views]). Staggered created_at dates make ordering visible.
+            $newsThreads = [
+                [
+                    'Patch 0.9.4 — The Rot Update Is Live',
+                    'Dynamic infection spread, two new weapon families, and a full rebalance of melee stamina costs.',
+                    "Patch 0.9.4 is rolling out to all servers now.\n\nHighlights:\n- Dynamic infection spread: bites now matter. Untreated wounds attract the horde.\n- New weapon families: improvised spears and the Willard Arms bolt-action line.\n- Melee stamina costs rebalanced across the board.\n- Fixed the barricade duplication exploit in Colton Row.\n\nFull notes on the wiki. See you out there, survivors.",
+                    1, 12, 348,
+                ],
+                [
+                    'Server Stress Test — Sign-Ups Open Until Friday',
+                    'Help us break the servers before launch does. 5,000 slots, wave two starts this weekend.',
+                    "Wave two of the server stress test kicks off this weekend and sign-ups are open until Friday night.\n\nWe are targeting 5,000 concurrent survivors across three regions. Everyone who participates gets the \"First Responder\" radio skin at launch.\n\nSign up from your account page. Bring friends. Bring bandages.",
+                    3, 27, 512,
+                ],
+                [
+                    'Developer Update #8: Horde AI Overhaul',
+                    'The dead are learning. A deep dive into the new horde director, sound propagation, and door memory.',
+                    "This month the AI team rebuilt the horde director from scratch.\n\nZombies now share a sound-propagation map: fire a gun in the church district and expect visitors for the next ten minutes. They also remember doors. If a walker saw you slam one, the horde will pile on it instead of wandering off.\n\nNext update we will talk about the new stealth indicators.",
+                    5, 19, 431,
+                ],
+                [
+                    'Blood Moon Event Announced for August',
+                    'One night. Triple hordes. Permadeath rewards. The first seasonal event arrives next month.',
+                    "Our first seasonal event, Blood Moon, lands in August.\n\nFor one in-game night the sky turns red, hordes triple in size, and every kill counts toward town-wide rewards. Survivors who make it to sunrise without dying earn the exclusive Blood Moon flare gun.\n\nDates and server schedule coming in the next dev update.",
+                    8, 34, 689,
+                ],
+                [
+                    'New Map Teaser: Harlow Falls',
+                    'A flooded mill town north of Colton. First look at the drowned district and the rope-bridge crossings.',
+                    "Time for a first look at Harlow Falls, the flooded mill town coming north of Colton.\n\nHalf the town sits underwater. You will cross the drowned district by rooftop and rope bridge while the current drags debris — and worse — through the streets below.\n\nMore screenshots next week. The waterlogged walkers are our favorite thing we have ever shipped.",
+                    10, 22, 566,
+                ],
+                [
+                    'Community Spotlight: Best Base Builds of June',
+                    'The diner fortress, the church bell early-warning rig, and more of your best builds this month.',
+                    "The June community spotlight is here.\n\nThis month's winners include the Last Stop Diner fortress (double kill-corridor entrance), a church bell early-warning system rigged to tripwires, and a rooftop garden that somehow survived three horde nights.\n\nDrop your builds in this thread for a shot at the July spotlight.",
+                    13, 41, 720,
+                ],
+            ];
+
+            $tIns = $db->prepare(
+                'INSERT INTO threads
+                    (category_id, author_id, title, excerpt, replies, views, pinned, locked, hot, last_activity, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, 0, 0, 0, ?, ?, ?)'
+            );
+            $pIns = $db->prepare(
+                'INSERT INTO posts (thread_id, author_id, body, created, created_at)
+                 VALUES (?, ?, ?, ?, ?)'
+            );
+
+            $latest = null;
+            foreach ($newsThreads as $n) {
+                [$title, $excerpt, $body, $daysAgo, $replies, $views] = $n;
+                $when = gmdate('c', time() - ($daysAgo * 86400) - 3600 * ($daysAgo % 5));
+                if ($latest === null) {
+                    $latest = $when;
+                }
+                $tIns->execute([$newsCatId, $authorId, $title, $excerpt, $replies, $views, $when, $when, $when]);
+                $threadId = (int) $db->lastInsertId();
+                $pIns->execute([$threadId, $authorId, $body, $when, $when]);
+            }
+
+            $db->prepare(
+                'UPDATE categories SET thread_count = ?, post_count = ?, last_activity = ? WHERE id = ?'
+            )->execute([count($newsThreads), count($newsThreads), $latest, $newsCatId]);
+
+            $db->commit();
+        }
+        $newsCatId = (int) $newsCatId;
+
+        // --- Seed feed_sections setting (idempotent) ------------------------
+        // JSON mapping of host-site section keys -> forum categories, consumed
+        // by /api/feed and managed in Keeper > Settings. Only inserted when
+        // the key is absent, so admin edits are never overwritten.
+        $hasFeedSections = $db->prepare('SELECT COUNT(*) FROM settings WHERE key = ?');
+        $hasFeedSections->execute(['feed_sections']);
+
+        if ((int) $hasFeedSections->fetchColumn() === 0) {
+            $db->prepare('INSERT INTO settings (key, value) VALUES (?, ?)')->execute([
+                'feed_sections',
+                json_encode([
+                    [
+                        'key'         => 'latest-news',
+                        'label'       => 'Latest News',
+                        'category_id' => $newsCatId,
+                        'limit'       => 4,
+                    ],
+                ]),
             ]);
         }
 

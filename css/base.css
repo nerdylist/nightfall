@@ -39,6 +39,9 @@
   --radius-sm: 2px;
   --radius-md: 4px;
   --radius-lg: 8px;
+  /* Buttons + header search: a touch rounder, echoing the forum's 8px
+     control radius while staying subtler than a pill. */
+  --radius-btn: 6px;
 
   --space-1: 4px;
   --space-2: 8px;
@@ -182,7 +185,7 @@ textarea.field {
   justify-content: center;
   gap: var(--space-2);
   padding: 12px 22px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-btn, 6px);
   border: 1px solid var(--border-strong);
   background: var(--bg-3);
   color: var(--text-0);
@@ -276,4 +279,14 @@ textarea.field {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+/* Footer brand image (partials/footer.php is included by every host page,
+   including 404.php which loads no page CSS, so this lives in base.css).
+   Sized to match the ~20px line box the old text logo rendered at
+   (0.85rem x 1.5 line-height). */
+.site-footer__brand-img {
+  display: block;
+  height: 20px;
+  width: auto;
 }

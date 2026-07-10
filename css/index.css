@@ -285,6 +285,34 @@ a:focus-visible {
   gap: var(--space-6);
   padding: var(--space-6);
   overflow: visible;
+  /*
+   * Anchor + stacking context for the ::before corner glow below: isolation
+   * makes the card its own stacking context so the glow's z-index: -1
+   * paints ABOVE the card's background but BELOW all in-flow content
+   * (collage image, news links) and the z-index: 5 model overlay.
+   */
+  position: relative;
+  isolation: isolate;
+}
+
+/*
+ * Subtle dark-gray radial glow pinned to the card's bottom-left corner,
+ * sitting behind the community collage image. Absolutely positioned, so it
+ * adds zero layout size; pointer-events: none so it can never intercept
+ * clicks.
+ */
+.community__card::before {
+  content: "";
+  position: absolute;
+  left: -44px;
+  bottom: -110px;
+  width: 440px;
+  height: 440px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(115, 115, 125, 0.22) 0%, rgba(90, 90, 100, 0.12) 45%, transparent 72%);
+  filter: blur(32px);
+  z-index: -1;
+  pointer-events: none;
 }
 
 .community__col {
@@ -308,30 +336,76 @@ a:focus-visible {
   margin: var(--space-2) 0 var(--space-4);
 }
 
+/*
+ * Circular social badges (Discord / X / Telegram): same 40px footprint the
+ * old placeholder images had. Glyphs are the self-hosted FontAwesome brand
+ * SVGs (see dev/icons.txt) rendered via CSS mask: the FA files are
+ * black-fill, so masking lets the badge color them light-on-dark through
+ * background-color (and brighten on hover via the anchor's currentColor).
+ */
 .community__social {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-2);
+  color: var(--text-1);
   opacity: 0.8;
 }
 
-.community__social img {
-  width: 40px;
-  height: 40px;
+.social-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.social-icon--discord {
+  -webkit-mask-image: url('https://nerd.biz/assets/fa/svgs/brands/discord.svg');
+  mask-image: url('https://nerd.biz/assets/fa/svgs/brands/discord.svg');
+}
+
+.social-icon--x {
+  -webkit-mask-image: url('https://nerd.biz/assets/fa/svgs/brands/x-twitter.svg');
+  mask-image: url('https://nerd.biz/assets/fa/svgs/brands/x-twitter.svg');
+}
+
+.social-icon--telegram {
+  -webkit-mask-image: url('https://nerd.biz/assets/fa/svgs/brands/telegram.svg');
+  mask-image: url('https://nerd.biz/assets/fa/svgs/brands/telegram.svg');
 }
 
 .community__social:hover,
 .community__social:focus-visible {
   opacity: 1;
+  color: var(--text-0);
+  border-color: var(--border-strong);
   filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
 }
 
+/*
+ * Bare image (card border/shadow removed). The transform enlarges it,
+ * tilts it 20 degrees counter-clockwise, and nudges it toward the card's
+ * bottom-left corner WITHOUT affecting layout (transforms don't reflow),
+ * so the card/section height is unchanged. Rotate/scale are about the
+ * element center, so the bottom-left ::before glow stays centered behind
+ * it.
+ */
 .community__collage {
   width: 90%;
   max-width: 320px;
   margin-top: auto;
   align-self: center;
-  transform: rotate(-3deg);
-  border: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-md);
+  transform: translate(-22px, 22px) rotate(-20deg) scale(1.35);
 }
 
 .community__col--model {
@@ -341,6 +415,18 @@ a:focus-visible {
   position: relative;
 }
 
+/*
+ * The zombie bust is intentionally oversized for wow factor. The box keeps
+ * its ORIGINAL sizing (width/margins below) so the three.js viewer computes
+ * its natural canvas size, then transform: scale() blows him up WITHOUT
+ * reflowing the layout — transforms don't affect layout, so the columns
+ * keep their positions and his shoulders/hand simply render over the
+ * neighboring community and news columns (the card already has
+ * overflow: visible). z-index lifts him above the neighbors, and
+ * pointer-events: none lets clicks/hovers pass straight through the
+ * transparent canvas to the news links underneath — the model keeps its
+ * continuous auto-rotation.
+ */
 .community__model {
   width: 160%;
   aspect-ratio: 1 / 1;
@@ -349,16 +435,45 @@ a:focus-visible {
   margin-bottom: -20px;
   position: relative;
   z-index: 5;
+  /*
+   * Scale tuned so the RENDERED size stays ~711px (1.6x the pre-enlargement
+   * 444px baseline): capping the news column widened this grid track, so
+   * the 160% layout box is now ~528px and 528 x 1.35 ≈ 713 — the size the
+   * user approved. translateY pulls him up ~50px toward the top of the
+   * card (applied after the scale, so the visual shift is exactly 50px).
+   */
+  transform: translateY(-50px) scale(1.35);
+  transform-origin: 50% 50%;
+  pointer-events: none;
 }
 
+/*
+ * Cap the news column so long feed blurbs can't stretch it across the card:
+ * a bare `1fr` grid track has an `auto` minimum, so a nowrap blurb's
+ * min-content width would blow the track out. max-width also clamps this
+ * column's min-content contribution to its track, restoring the roughly
+ * equal three-column proportions of the original hardcoded items, and
+ * min-width: 0 lets the content shrink so the .news-item__blurb ellipsis
+ * below can actually trigger.
+ */
 .community__col--news {
   gap: var(--space-4);
+  max-width: 420px;
+  min-width: 0;
 }
 
 .news-list {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  min-height: 200px; /* reserve space while the live feed loads */
+}
+
+/* Quiet fallback rendered by js/home-news.js when the feed is unavailable. */
+.news-list__empty {
+  font-size: 0.85rem;
+  color: var(--text-2);
+  padding: var(--space-2);
 }
 
 .news-item {
@@ -494,9 +609,8 @@ a:focus-visible {
   .community__model {
     width: 100%;
     max-width: 380px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 0;
+    margin: 0 auto;
+    transform: none; /* single-column layout: nothing to overlap, keep natural size */
   }
 }
 

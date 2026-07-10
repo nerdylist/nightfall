@@ -2,6 +2,7 @@
 require_once __DIR__ . '/config.php';
 $pageTitle = 'The Dead Last — Survival is only half of the game.';
 $pageCss = ['/css/index.css'];
+$pageJs = ['/js/home-news.js'];
 include __DIR__ . '/partials/header.php';
 ?>
 <link rel="stylesheet" href="<?= htmlspecialchars(asset_url('/css/model-embed.css')) ?>">
@@ -90,10 +91,15 @@ include __DIR__ . '/partials/header.php';
         <h2 class="community__heading">Join the Community</h2>
         <p class="text-muted">Share your story. Find allies. Stay updated.</p>
         <div class="community__socials">
-          <a href="#" class="community__social" aria-label="Discord"><img src="/assets/images/13.png" alt=""></a>
-          <a href="#" class="community__social" aria-label="Twitter"><img src="/assets/images/14.png" alt=""></a>
-          <a href="#" class="community__social" aria-label="YouTube"><img src="/assets/images/15.png" alt=""></a>
-          <a href="#" class="community__social" aria-label="Reddit"><img src="/assets/images/16.png" alt=""></a>
+          <a href="https://discord.gg/thedeadlast" target="_blank" rel="noopener" class="community__social" aria-label="Discord">
+            <span class="social-icon social-icon--discord" aria-hidden="true"></span>
+          </a>
+          <a href="https://x.com/thedeadlast" target="_blank" rel="noopener" class="community__social" aria-label="X">
+            <span class="social-icon social-icon--x" aria-hidden="true"></span>
+          </a>
+          <a href="https://t.me/thedeadlast" target="_blank" rel="noopener" class="community__social" aria-label="Telegram">
+            <span class="social-icon social-icon--telegram" aria-hidden="true"></span>
+          </a>
         </div>
         <img src="/assets/images/12.png" alt="Community photo collage" class="community__collage">
       </div>
@@ -102,33 +108,8 @@ include __DIR__ . '/partials/header.php';
       </div>
       <div class="community__col community__col--news">
         <h2 class="community__heading">Latest News</h2>
-        <div class="news-list">
-          <a href="#" class="news-item">
-            <img src="/assets/images/9.png" alt="" class="news-item__thumb">
-            <div class="news-item__body">
-              <h3 class="news-item__title">Server Stress Test &mdash; May 25</h3>
-              <p class="news-item__date">May 18, 2025</p>
-              <p class="news-item__blurb text-muted">Sign up now and help us stress test the servers before launch.</p>
-            </div>
-          </a>
-          <a href="#" class="news-item">
-            <img src="/assets/images/10.png" alt="" class="news-item__thumb">
-            <div class="news-item__body">
-              <h3 class="news-item__title">Developer Update #7</h3>
-              <p class="news-item__date">May 12, 2025</p>
-              <p class="news-item__blurb text-muted">New AI behaviors, weapon balance, and more.</p>
-            </div>
-          </a>
-          <a href="#" class="news-item">
-            <img src="/assets/images/11.png" alt="" class="news-item__thumb">
-            <div class="news-item__body">
-              <h3 class="news-item__title">New Map Teaser</h3>
-              <p class="news-item__date">May 5, 2025</p>
-              <p class="news-item__blurb text-muted">Take a look at our newest location coming soon.</p>
-            </div>
-          </a>
-        </div>
-        <a href="#" class="btn btn-ghost">View All News</a>
+        <div class="news-list" id="home-news-list"></div>
+        <a href="/bbs/forums" class="btn btn-ghost" id="home-news-all">View All News</a>
       </div>
     </div>
   </section>

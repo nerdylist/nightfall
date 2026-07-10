@@ -1,0 +1,55 @@
+/* THE DEAD LAST — Keeper > Settings (compact editable feed-sections table) */
+
+.keeper-settings-hint {
+  font-size: 0.85rem;
+  margin: calc(-1 * var(--space-3)) 0 var(--space-4);
+}
+
+.keeper-settings-hint code {
+  padding: 1px 6px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+}
+
+/* Compact inputs inside the table (base .field padding is too tall here). */
+.keeper-settings-table td {
+  padding: 8px 10px;
+}
+
+.keeper-settings-table .field {
+  padding: 7px 10px;
+  font-size: 0.88rem;
+  min-width: 140px;
+}
+
+.keeper-settings-table select.field {
+  min-width: 170px;
+}
+
+.keeper-settings-limit {
+  width: 74px;
+  min-width: 0 !important;
+}
+
+.keeper-settings-delete {
+  text-align: center;
+}
+
+.keeper-settings-delete input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.keeper-settings-new td {
+  background: var(--bg-2);
+}
+
+.keeper-settings-actions {
+  margin-top: var(--space-4);
+  display: flex;
+  justify-content: flex-end;
+}
