@@ -346,6 +346,15 @@ if (!function_exists('require_login')) {
 
 if (!function_exists('require_admin')) {
     function require_admin() {
+        // Keeper SSO: the host Keeper admin (keeper/index.php sets
+        // $_SESSION['keeper_admin'] on the same shared PHPSESSID/'/' session
+        // cookie) is trusted as a forum admin — no host user account needed.
+        // Admin pages never reference the current user's identity (only
+        // partials/header.php does, and it null-checks), so no stand-in user
+        // row is required.
+        if (!empty($_SESSION['keeper_admin'])) {
+            return;
+        }
         if (!auth_is_admin()) {
             if (!auth_is_logged_in()) {
                 header('Location: /login?next=' . urlencode($_SERVER['REQUEST_URI'] ?? '/index.php'));
