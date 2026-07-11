@@ -23,7 +23,7 @@ include __DIR__ . '/partials/header.php';
       <h1 class="hero__title">
         <img src="/assets/logo.png" alt="THE DEAD LAST" width="960" height="870" class="hero__logo">
       </h1>
-      <p class="hero__tagline">Survival is only half the game.</p>
+      <p class="hero__tagline">Game of the Living Dead</p>
       <div class="hero__actions">
         <a href="/register" class="btn btn-primary">Create Survivor</a>
         <a href="#" class="btn btn-ghost btn-trailer"><span class="btn-trailer__glyph">&#9658;</span> Watch Trailer</a>
