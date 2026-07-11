@@ -3,10 +3,13 @@
  * Schema installer + seeder for the Nexus forum SQLite database.
  *
  * forum_install(PDO $db): array
- *   - Creates all tables and indexes (IF NOT EXISTS).
+ *   - Creates all content tables and indexes (IF NOT EXISTS). Users live in
+ *     the HOST database (single userbase), attached by forum_db() as
+ *     host.users — this installer never creates a users table.
  *   - Seeds the mock data set (data/mock.php) once, guarded by an empty
- *     users table.
- *   - Seeds an admin account from .env (idempotent).
+ *     categories table; mock users are seeded into host.users (find-or-create
+ *     by username) and content author ids remapped to the real host ids.
+ *   - Seeds an admin account from .env into host.users (idempotent).
  *   - Returns per-table row counts. Produces NO output.
  *
  * When this file is invoked directly (CLI or web), it runs the installer
@@ -28,24 +31,10 @@ if (!function_exists('forum_install')) {
         global $CONFIG;
 
         // --- Schema ---------------------------------------------------------
-        $db->exec(
-            "CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT UNIQUE NOT NULL,
-                email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                display_name TEXT,
-                bio TEXT,
-                role TEXT NOT NULL DEFAULT 'user',
-                status TEXT NOT NULL DEFAULT 'active',
-                reputation INTEGER DEFAULT 0,
-                join_date TEXT,
-                threads_started INTEGER DEFAULT 0,
-                chat_messages INTEGER DEFAULT 0,
-                created_at TEXT
-            )"
-        );
-
+        // No users table here: the single userbase lives in the host database
+        // (attached as host.users by forum_db()), so author_id/user_id columns
+        // carry no REFERENCES clause — SQLite cannot enforce foreign keys
+        // across attached databases.
         $db->exec(
             "CREATE TABLE IF NOT EXISTS categories (
                 id INTEGER PRIMARY KEY,
@@ -66,7 +55,7 @@ if (!function_exists('forum_install')) {
             "CREATE TABLE IF NOT EXISTS threads (
                 id INTEGER PRIMARY KEY,
                 category_id INTEGER NOT NULL REFERENCES categories(id),
-                author_id INTEGER NOT NULL REFERENCES users(id),
+                author_id INTEGER NOT NULL,
                 title TEXT NOT NULL,
                 excerpt TEXT,
                 replies INTEGER DEFAULT 0,
@@ -84,7 +73,7 @@ if (!function_exists('forum_install')) {
             "CREATE TABLE IF NOT EXISTS posts (
                 id INTEGER PRIMARY KEY,
                 thread_id INTEGER NOT NULL REFERENCES threads(id),
-                author_id INTEGER NOT NULL REFERENCES users(id),
+                author_id INTEGER NOT NULL,
                 body TEXT NOT NULL,
                 created TEXT,
                 created_at TEXT
@@ -95,7 +84,7 @@ if (!function_exists('forum_install')) {
             "CREATE TABLE IF NOT EXISTS chat_messages (
                 id INTEGER PRIMARY KEY,
                 thread_id INTEGER NOT NULL REFERENCES threads(id),
-                author_id INTEGER NOT NULL REFERENCES users(id),
+                author_id INTEGER NOT NULL,
                 text TEXT NOT NULL,
                 timestamp TEXT,
                 created_at TEXT
@@ -106,7 +95,7 @@ if (!function_exists('forum_install')) {
             "CREATE TABLE IF NOT EXISTS reactions (
                 id INTEGER PRIMARY KEY,
                 post_id INTEGER REFERENCES posts(id),
-                user_id INTEGER NOT NULL REFERENCES users(id),
+                user_id INTEGER NOT NULL,
                 emoji TEXT NOT NULL,
                 created_at TEXT,
                 UNIQUE(post_id, user_id, emoji)
@@ -179,45 +168,38 @@ if (!function_exists('forum_install')) {
             }
         }
 
-        // --- Migration: users.tdl_user_id (idempotent) ----------------------
-        // SSO shadow-user link to the HOST users table. Safe to run on every
-        // page load and on an existing populated forum.db (runs only in the
-        // column-add branch). SQLite treats multiple NULLs as distinct, so a
-        // UNIQUE index tolerates all the unlinked mock/admin rows.
-        $hasTdl = false;
-        foreach ($db->query('PRAGMA table_info(users)') as $col) {
-            if ($col['name'] === 'tdl_user_id') {
-                $hasTdl = true;
-                break;
-            }
-        }
-        if (!$hasTdl) {
-            $db->exec('ALTER TABLE users ADD COLUMN tdl_user_id INTEGER');
-            $db->exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_tdl ON users(tdl_user_id)');
-        }
+        // --- Seed mock data (guarded by empty categories table) -------------
+        // Users are seeded into host.users (find-or-create by username) and a
+        // mock-id -> host-id map remaps every seeded author reference, so the
+        // seed stays correct regardless of what ids the host table hands out.
+        $catCount = (int) $db->query('SELECT COUNT(*) FROM categories')->fetchColumn();
 
-        // --- Seed mock data (guarded by empty users table) ------------------
-        $userCount = (int) $db->query('SELECT COUNT(*) FROM users')->fetchColumn();
-
-        if ($userCount === 0) {
+        if ($catCount === 0) {
             $mock = require __DIR__ . '/data/mock.php';
             $now  = gmdate('c');
             $hash = password_hash('password123', PASSWORD_DEFAULT);
 
             $db->beginTransaction();
 
-            // Users
+            // Users (into the shared host userbase)
+            $uFind = $db->prepare('SELECT id FROM host.users WHERE username = :username');
             $uStmt = $db->prepare(
-                'INSERT INTO users
-                    (id, username, email, password_hash, display_name, bio, role, status,
+                'INSERT INTO host.users
+                    (username, email, password_hash, display_name, bio, role, status,
                      reputation, join_date, threads_started, chat_messages, created_at)
                  VALUES
-                    (:id, :username, :email, :password_hash, :display_name, :bio, :role, :status,
+                    (:username, :email, :password_hash, :display_name, :bio, :role, :status,
                      :reputation, :join_date, :threads_started, :chat_messages, :created_at)'
             );
+            $seedIdMap = [];
             foreach ($mock['users'] as $u) {
+                $uFind->execute([':username' => $u['username']]);
+                $existingId = $uFind->fetchColumn();
+                if ($existingId !== false) {
+                    $seedIdMap[(int) $u['id']] = (int) $existingId;
+                    continue;
+                }
                 $uStmt->execute([
-                    ':id'              => $u['id'],
                     ':username'        => $u['username'],
                     ':email'           => $u['username'] . '@nexus.test',
                     ':password_hash'   => $hash,
@@ -231,6 +213,7 @@ if (!function_exists('forum_install')) {
                     ':chat_messages'   => $u['chat_messages'],
                     ':created_at'      => $now,
                 ]);
+                $seedIdMap[(int) $u['id']] = (int) $db->lastInsertId();
             }
 
             // Categories
@@ -267,7 +250,7 @@ if (!function_exists('forum_install')) {
                 $tStmt->execute([
                     ':id'            => $t['id'],
                     ':category_id'   => $t['category_id'],
-                    ':author_id'     => $t['author_id'],
+                    ':author_id'     => $seedIdMap[(int) $t['author_id']] ?? (int) $t['author_id'],
                     ':title'         => $t['title'],
                     ':excerpt'       => $t['excerpt'],
                     ':replies'       => $t['replies'],
@@ -291,7 +274,7 @@ if (!function_exists('forum_install')) {
             foreach ($mock['posts'] as $p) {
                 $pStmt->execute([
                     ':thread_id'  => $p['thread_id'],
-                    ':author_id'  => $p['author_id'],
+                    ':author_id'  => $seedIdMap[(int) $p['author_id']] ?? (int) $p['author_id'],
                     ':body'       => $p['body'],
                     ':created'    => $p['created'],
                     ':created_at' => $now,
@@ -309,7 +292,7 @@ if (!function_exists('forum_install')) {
                 $mStmt->execute([
                     ':id'         => $m['id'],
                     ':thread_id'  => $m['thread_id'],
-                    ':author_id'  => $m['author_id'],
+                    ':author_id'  => $seedIdMap[(int) $m['author_id']] ?? (int) $m['author_id'],
                     ':text'       => $m['text'],
                     ':timestamp'  => $m['timestamp'],
                     ':created_at' => $now,
@@ -320,8 +303,10 @@ if (!function_exists('forum_install')) {
         }
 
         // --- Seed admin (separate idempotent guard) -------------------------
+        // Lives in host.users: with the single userbase this account can log
+        // in on the host site directly and is a forum admin (role = admin).
         $adminStmt = $db->prepare(
-            'SELECT COUNT(*) FROM users WHERE email = :email OR username = :username'
+            'SELECT COUNT(*) FROM host.users WHERE email = :email OR username = :username'
         );
         $adminStmt->execute([
             ':email'    => $CONFIG['ADMIN_EMAIL'],
@@ -331,7 +316,7 @@ if (!function_exists('forum_install')) {
 
         if ($adminExists === 0) {
             $ins = $db->prepare(
-                'INSERT INTO users
+                'INSERT INTO host.users
                     (username, email, password_hash, display_name, role, status,
                      reputation, join_date, threads_started, chat_messages, created_at)
                  VALUES
@@ -380,10 +365,10 @@ if (!function_exists('forum_install')) {
 
             // Author: prefer an admin, fall back to the lowest user id.
             $authorId = $db->query(
-                "SELECT id FROM users WHERE role = 'admin' ORDER BY id LIMIT 1"
+                "SELECT id FROM host.users WHERE role = 'admin' ORDER BY id LIMIT 1"
             )->fetchColumn();
             if ($authorId === false) {
-                $authorId = $db->query('SELECT id FROM users ORDER BY id LIMIT 1')->fetchColumn();
+                $authorId = $db->query('SELECT id FROM host.users ORDER BY id LIMIT 1')->fetchColumn();
             }
             $authorId = (int) $authorId;
 
@@ -480,8 +465,8 @@ if (!function_exists('forum_install')) {
         }
 
         // --- Row counts -----------------------------------------------------
-        $counts = [];
-        foreach (['users', 'categories', 'threads', 'posts', 'chat_messages', 'reactions'] as $table) {
+        $counts = ['users' => (int) $db->query('SELECT COUNT(*) FROM host.users')->fetchColumn()];
+        foreach (['categories', 'threads', 'posts', 'chat_messages', 'reactions'] as $table) {
             $counts[$table] = (int) $db->query('SELECT COUNT(*) FROM ' . $table)->fetchColumn();
         }
 

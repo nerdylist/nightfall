@@ -29,15 +29,15 @@ function check($label, $cond)
 
 // --- Find valid existing ids -------------------------------------------------
 $categoryId = (int) $db->query('SELECT id FROM categories ORDER BY id ASC LIMIT 1')->fetchColumn();
-$authorId   = (int) $db->query("SELECT id FROM users WHERE role = 'admin' ORDER BY id ASC LIMIT 1")->fetchColumn();
+$authorId   = (int) $db->query("SELECT id FROM host.users WHERE role = 'admin' ORDER BY id ASC LIMIT 1")->fetchColumn();
 if ($authorId === 0) {
-    $authorId = (int) $db->query('SELECT id FROM users ORDER BY id ASC LIMIT 1')->fetchColumn();
+    $authorId = (int) $db->query('SELECT id FROM host.users ORDER BY id ASC LIMIT 1')->fetchColumn();
 }
 
 echo "Using category_id={$categoryId}, author_id={$authorId}\n";
 
 // --- Snapshot counters before ------------------------------------------------
-$startedBefore = (int) $db->query("SELECT threads_started FROM users WHERE id = {$authorId}")->fetchColumn();
+$startedBefore = (int) $db->query("SELECT threads_started FROM host.users WHERE id = {$authorId}")->fetchColumn();
 $tcBefore      = (int) $db->query("SELECT thread_count FROM categories WHERE id = {$categoryId}")->fetchColumn();
 $pcBefore      = (int) $db->query("SELECT post_count FROM categories WHERE id = {$categoryId}")->fetchColumn();
 
@@ -83,7 +83,7 @@ check('post.created is display string', ($post['created'] ?? null) === 'just now
 check('post.created_at is ISO 8601', (bool) preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+00:00$/', (string) ($post['created_at'] ?? '')));
 
 // --- Assert counters bumped --------------------------------------------------
-$startedAfter = (int) $db->query("SELECT threads_started FROM users WHERE id = {$authorId}")->fetchColumn();
+$startedAfter = (int) $db->query("SELECT threads_started FROM host.users WHERE id = {$authorId}")->fetchColumn();
 $tcAfter      = (int) $db->query("SELECT thread_count FROM categories WHERE id = {$categoryId}")->fetchColumn();
 $pcAfter      = (int) $db->query("SELECT post_count FROM categories WHERE id = {$categoryId}")->fetchColumn();
 
@@ -114,7 +114,7 @@ try {
     $db->prepare('DELETE FROM posts WHERE thread_id = ?')->execute([$threadId]);
     $db->prepare('DELETE FROM threads WHERE id = ?')->execute([$threadId]);
     // Restore counters to their pre-test values.
-    $db->prepare('UPDATE users SET threads_started = ? WHERE id = ?')->execute([$startedBefore, $authorId]);
+    $db->prepare('UPDATE host.users SET threads_started = ? WHERE id = ?')->execute([$startedBefore, $authorId]);
     $db->prepare('UPDATE categories SET thread_count = ?, post_count = ? WHERE id = ?')
        ->execute([$tcBefore, $pcBefore, $categoryId]);
     $db->commit();

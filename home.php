@@ -109,7 +109,7 @@ include __DIR__ . '/partials/header.php';
       <div class="community__col community__col--news">
         <h2 class="community__heading">Latest News</h2>
         <div class="news-list" id="home-news-list"></div>
-        <a href="/bbs/forums" class="btn btn-ghost" id="home-news-all">View All News</a>
+        <a href="/bbs/" class="btn btn-ghost" id="home-news-all">View All News</a>
       </div>
     </div>
   </section>

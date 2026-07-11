@@ -24,7 +24,7 @@ foreach ($categories as $cat) {
 
 // On a fresh GET with no valid category, send the user home.
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && $selectedCategory === null) {
-    header('Location: /bbs/forums');
+    header('Location: /bbs/');
     exit;
 }
 

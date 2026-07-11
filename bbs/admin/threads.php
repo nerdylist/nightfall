@@ -41,11 +41,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $db = forum_db();
 $threads = $db->query(
-    'SELECT threads.*, c.name AS category_name, u.display_name AS author_name
+    "SELECT threads.*, c.name AS category_name,
+            COALESCE(NULLIF(u.display_name, ''), u.username) AS author_name
      FROM threads
      JOIN categories c ON c.id = threads.category_id
-     JOIN users u ON u.id = threads.author_id
-     ORDER BY threads.id DESC'
+     JOIN host.users u ON u.id = threads.author_id
+     ORDER BY threads.id DESC"
 )->fetchAll();
 
 $active = 'threads';

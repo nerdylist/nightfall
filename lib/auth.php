@@ -52,6 +52,10 @@ function grave_create_user(PDO $pdo, string $email, string $username, string $pa
     );
     $stmt->execute(['email' => $email, 'username' => $username, 'password_hash' => $hash]);
 
+    // Single userbase: this row IS the forum user too. Forum columns
+    // (role/status/reputation/counters) carry schema defaults, and the forum
+    // falls back to username/date(created_at) for display_name/join_date at
+    // read time — nothing to provision.
     return (int) $pdo->lastInsertId();
 }
 

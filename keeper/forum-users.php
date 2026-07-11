@@ -10,34 +10,10 @@ if (empty($_SESSION['keeper_admin'])) {
     exit;
 }
 
-/**
- * Open a direct PDO connection to the forum's SQLite database. The forum
- * schema already exists (managed by bbs/db.php + bbs/install.php) — this is
- * a read/write connection for Keeper's own user-management page only, and
- * does not include any bbs/ code.
- */
-if (!function_exists('keeper_forum_db')) {
-    function keeper_forum_db(): PDO
-    {
-        static $pdo = null;
-
-        if ($pdo instanceof PDO) {
-            return $pdo;
-        }
-
-        $dsn = 'sqlite:' . __DIR__ . '/../bbs/forum.db';
-
-        $pdo = new PDO($dsn, null, null, [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        ]);
-
-        $pdo->exec('PRAGMA journal_mode = WAL;');
-        $pdo->exec('PRAGMA foreign_keys = ON;');
-
-        return $pdo;
-    }
-}
+// Single userbase: forum users ARE host users (data/graverising.sqlite),
+// with the forum's profile/moderation columns absorbed into the host users
+// table (migrations/004_forum_user_columns.sql). Keeper manages them through
+// the regular host connection — no forum DB access needed here.
 
 // Keeper-scoped CSRF token (separate from the forum's csrf_token()).
 if (empty($_SESSION['keeper_csrf'])) {
@@ -54,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    $db = keeper_forum_db();
+    $db = grave_db();
     $action = $_POST['action'] ?? '';
     $id = (int) ($_POST['id'] ?? 0);
 
@@ -112,19 +88,17 @@ include __DIR__ . '/../partials/keeper-header.php';
 $flash = $_SESSION['keeper_flash'] ?? null;
 unset($_SESSION['keeper_flash']);
 
-$db = keeper_forum_db();
+$db = grave_db();
 
 $totalForumUsers = (int) $db->query('SELECT COUNT(*) FROM users')->fetchColumn();
 
 $forumUsers = $db->query(
-    'SELECT id, username, display_name, email, tdl_user_id, role, status, reputation, threads_started, join_date
-     FROM users ORDER BY id'
+    "SELECT id, username,
+            COALESCE(NULLIF(display_name, ''), username) AS display_name,
+            email, role, status, reputation, threads_started,
+            COALESCE(join_date, date(created_at)) AS join_date
+     FROM users ORDER BY id"
 )->fetchAll();
-
-$hostUsersById = [];
-foreach (grave_db()->query('SELECT id, username FROM users')->fetchAll() as $hostUser) {
-    $hostUsersById[(int) $hostUser['id']] = $hostUser['username'];
-}
 ?>
 
 <main class="keeper-main">
@@ -152,7 +126,6 @@ foreach (grave_db()->query('SELECT id, username FROM users')->fetchAll() as $hos
               <th>Username</th>
               <th>Display Name</th>
               <th>Email</th>
-              <th>Linked Host User</th>
               <th>Role</th>
               <th>Status</th>
               <th>Reputation</th>
@@ -164,15 +137,12 @@ foreach (grave_db()->query('SELECT id, username FROM users')->fetchAll() as $hos
           <tbody>
             <?php foreach ($forumUsers as $u):
                 $uid = (int) $u['id'];
-                $hostId = $u['tdl_user_id'] !== null ? (int) $u['tdl_user_id'] : null;
-                $hostUsername = ($hostId !== null && isset($hostUsersById[$hostId])) ? $hostUsersById[$hostId] : null;
             ?>
             <tr>
               <td><?= $uid ?></td>
               <td><?= htmlspecialchars($u['username']) ?></td>
               <td><?= htmlspecialchars((string) $u['display_name']) ?></td>
               <td><?= htmlspecialchars((string) $u['email']) ?></td>
-              <td><?= $hostUsername !== null ? htmlspecialchars($hostUsername) : '<span class="text-muted">&mdash;</span>' ?></td>
               <td><?= htmlspecialchars($u['role']) ?></td>
               <td><?= htmlspecialchars($u['status']) ?></td>
               <td><?= (int) $u['reputation'] ?></td>
@@ -197,7 +167,7 @@ foreach (grave_db()->query('SELECT id, username FROM users')->fetchAll() as $hos
             </tr>
             <?php endforeach; ?>
             <?php if (empty($forumUsers)): ?>
-            <tr><td colspan="11" class="text-muted">No forum users found.</td></tr>
+            <tr><td colspan="10" class="text-muted">No forum users found.</td></tr>
             <?php endif; ?>
           </tbody>
         </table>

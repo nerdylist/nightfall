@@ -11,6 +11,7 @@ data/*.sqlite
 data/*.sqlite-journal
 data/*.sqlite-wal
 data/*.sqlite-shm
+data/*.bak-*
 
 # OS cruft
 .DS_Store
@@ -20,6 +21,7 @@ bbs/.env
 bbs/forum.db
 bbs/forum.db-wal
 bbs/forum.db-shm
+bbs/forum.db.bak-*
 bbs/up/*
 !bbs/up/index.html
 !bbs/up/.htaccess

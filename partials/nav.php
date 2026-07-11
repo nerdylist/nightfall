@@ -47,7 +47,7 @@ if (!empty($_SESSION['user_id'])) {
         <a href="/" class="site-nav__link">Home</a>
         <a href="#" class="site-nav__link">Game</a>
         <a href="#" class="site-nav__link">News</a>
-        <a href="/bbs/forums" class="site-nav__link">Community</a>
+        <a href="/bbs/" class="site-nav__link">Community</a>
         <a href="#" class="site-nav__link">Support</a>
         <?php if ($NAV_ADMIN_URL !== null): ?>
           <a href="<?= htmlspecialchars($NAV_ADMIN_URL) ?>" class="site-nav__link">Admin</a>

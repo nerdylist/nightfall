@@ -98,11 +98,11 @@ $opStmt->execute([$id]);
 $op = $opStmt->fetch();
 
 $postsStmt = $db->prepare(
-    'SELECT posts.*, u.display_name AS author_name
+    "SELECT posts.*, COALESCE(NULLIF(u.display_name, ''), u.username) AS author_name
      FROM posts
-     JOIN users u ON u.id = posts.author_id
+     JOIN host.users u ON u.id = posts.author_id
      WHERE thread_id = ?
-     ORDER BY posts.id ASC'
+     ORDER BY posts.id ASC"
 );
 $postsStmt->execute([$id]);
 $posts = $postsStmt->fetchAll();

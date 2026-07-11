@@ -27,9 +27,14 @@
       "description": "Logout"
     },
     {
+      "url": "/bbs",
+      "destination": "bbs/index.php",
+      "description": "Forum: home (forums listing) - normally served directly as bbs/index.php; router fallback"
+    },
+    {
       "url": "/bbs/forums",
       "destination": "bbs/forums.php",
-      "description": "Forum: all forums listing"
+      "description": "Forum: legacy forums URL - 301 redirects to /bbs/"
     },
     {
       "url": "/bbs/write",

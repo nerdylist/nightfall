@@ -21,9 +21,13 @@ if (!function_exists('get_users')) {
     function get_users()
     {
         $rows = forum_db()->query(
-            'SELECT id, username, display_name, bio, join_date, reputation, threads_started, chat_messages
-             FROM users
-             ORDER BY id'
+            "SELECT id, username,
+                    COALESCE(NULLIF(display_name, ''), username) AS display_name,
+                    COALESCE(bio, '') AS bio,
+                    COALESCE(join_date, date(created_at)) AS join_date,
+                    reputation, threads_started, chat_messages
+             FROM host.users
+             ORDER BY id"
         )->fetchAll();
 
         return array_map('forum_shape_user', $rows);
@@ -38,9 +42,13 @@ if (!function_exists('get_users')) {
     function get_user($id)
     {
         $stmt = forum_db()->prepare(
-            'SELECT id, username, display_name, bio, join_date, reputation, threads_started, chat_messages
-             FROM users
-             WHERE id = :id'
+            "SELECT id, username,
+                    COALESCE(NULLIF(display_name, ''), username) AS display_name,
+                    COALESCE(bio, '') AS bio,
+                    COALESCE(join_date, date(created_at)) AS join_date,
+                    reputation, threads_started, chat_messages
+             FROM host.users
+             WHERE id = :id"
         );
         $stmt->execute([':id' => (int) $id]);
         $row = $stmt->fetch();
@@ -300,7 +308,7 @@ if (!function_exists('get_users')) {
             ]);
 
             // Keep denormalized counters the rest of the app reads in sync.
-            $db->prepare('UPDATE users SET threads_started = threads_started + 1 WHERE id = :id')
+            $db->prepare('UPDATE host.users SET threads_started = threads_started + 1 WHERE id = :id')
                ->execute([':id' => $authorId]);
 
             $db->prepare(
@@ -373,7 +381,7 @@ if (!function_exists('get_users')) {
             $id = (int) $db->lastInsertId();
 
             // Keep the denormalized counter the rest of the app reads in sync.
-            $db->prepare('UPDATE users SET chat_messages = chat_messages + 1 WHERE id = :id')
+            $db->prepare('UPDATE host.users SET chat_messages = chat_messages + 1 WHERE id = :id')
                ->execute([':id' => $authorId]);
 
             $db->commit();

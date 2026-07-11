@@ -11,6 +11,13 @@ DirectoryIndex index.php
     RewriteRule ^api/login/?$    api/login/index.php    [L]
     RewriteRule ^api/meshy/?$    api/meshy/index.php    [L]
     RewriteRule ^api/feed/?$     api/feed/index.php     [L]
+    RewriteRule ^api/stats/?$    api/stats/index.php    [L]
+
+    # Forum home lives at /bbs/ (bbs/index.php). Canonicalize the slash-less
+    # form (DirectorySlash is Off, so Apache won't add it itself), and 301 the
+    # legacy /bbs/forums URL to the new canonical forum home.
+    RewriteRule ^bbs$        /bbs/ [R=301,L]
+    RewriteRule ^bbs/forums$ /bbs/ [R=301,L]
 
     # Pretty URLs for the public pages: /register -> register.php, /login ->
     # login.php, etc. Only rewrites when the .php file actually exists and the

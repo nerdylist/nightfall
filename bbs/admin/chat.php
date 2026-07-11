@@ -29,12 +29,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $chatMessages = $db->query(
-    'SELECT cm.*, t.title AS thread_title, u.display_name AS author_name
+    "SELECT cm.*, t.title AS thread_title,
+            COALESCE(NULLIF(u.display_name, ''), u.username) AS author_name
      FROM chat_messages cm
      JOIN threads t ON t.id = cm.thread_id
-     JOIN users u ON u.id = cm.author_id
+     JOIN host.users u ON u.id = cm.author_id
      ORDER BY cm.id DESC
-     LIMIT 50'
+     LIMIT 50"
 )->fetchAll();
 
 $reactionSummary = $db->query(
@@ -45,13 +46,14 @@ $reactionSummary = $db->query(
 )->fetchAll();
 
 $reactions = $db->query(
-    'SELECT r.*, u.display_name AS user_name, t.title AS thread_title
+    "SELECT r.*, COALESCE(NULLIF(u.display_name, ''), u.username) AS user_name,
+            t.title AS thread_title
      FROM reactions r
-     JOIN users u ON u.id = r.user_id
+     JOIN host.users u ON u.id = r.user_id
      LEFT JOIN posts p ON p.id = r.post_id
      LEFT JOIN threads t ON t.id = p.thread_id
      ORDER BY r.id DESC
-     LIMIT 50'
+     LIMIT 50"
 )->fetchAll();
 
 $active = 'chat';

@@ -9,12 +9,23 @@
 --
 -- Current schema (mirrors migrations/001_init.sql):
 
+-- Single userbase: this table serves BOTH the host site and the forum
+-- (/bbs attaches this database and reads it as host.users — see bbs/db.php).
+-- Forum profile/moderation columns were absorbed by 004_forum_user_columns.sql.
 CREATE TABLE IF NOT EXISTS users (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    email         TEXT UNIQUE NOT NULL,
-    username      TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    email           TEXT UNIQUE NOT NULL,
+    username        TEXT UNIQUE NOT NULL,
+    password_hash   TEXT NOT NULL,
+    created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+    display_name    TEXT,                               -- forum display name; falls back to username
+    bio             TEXT,                               -- forum profile blurb
+    role            TEXT    NOT NULL DEFAULT 'user',    -- 'user' | 'admin' (forum admin)
+    status          TEXT    NOT NULL DEFAULT 'active',  -- 'active' | 'banned'
+    reputation      INTEGER NOT NULL DEFAULT 0,         -- forum reputation score
+    join_date       TEXT,                               -- display join date; falls back to date(created_at)
+    threads_started INTEGER NOT NULL DEFAULT 0,         -- denormalized forum counter
+    chat_messages   INTEGER NOT NULL DEFAULT 0          -- denormalized forum counter
 );
 
 CREATE INDEX IF NOT EXISTS idx_users_email    ON users(email);
@@ -51,6 +62,61 @@ CREATE TABLE IF NOT EXISTS meshy_tasks (
 CREATE INDEX IF NOT EXISTS idx_meshy_tasks_task_id  ON meshy_tasks(task_id);
 CREATE INDEX IF NOT EXISTS idx_meshy_tasks_status   ON meshy_tasks(status);
 CREATE INDEX IF NOT EXISTS idx_meshy_tasks_consumed ON meshy_tasks(consumed_at);
+
+-- Player game stats (mirrors migrations/003_player_stats.sql; bank + lives
+-- were added by 005_player_stats_bank_lives.sql).
+-- One lifetime-aggregate row per user, reported by the game server through
+-- the stats ingest API (api/stats/) and shown on /u/{username} profiles and
+-- the leaderboard. Counters only increment; biggest_/longest_ columns take
+-- max(old, new); bank is SET (game-authoritative balance).
+-- See docs/player-stats.md for the stat -> game-event mapping and
+-- docs/game-stats-api.md for the ingest API contract.
+CREATE TABLE IF NOT EXISTS player_stats (
+    user_id              INTEGER PRIMARY KEY,
+    humans_killed        INTEGER NOT NULL DEFAULT 0,
+    zombies_killed       INTEGER NOT NULL DEFAULT 0,
+    times_turned         INTEGER NOT NULL DEFAULT 0,
+    deaths               INTEGER NOT NULL DEFAULT 0,
+    true_deaths          INTEGER NOT NULL DEFAULT 0,
+    redemptions          INTEGER NOT NULL DEFAULT 0,
+    biggest_horde_size   INTEGER NOT NULL DEFAULT 0,
+    longest_life_seconds INTEGER NOT NULL DEFAULT 0,
+    playtime_seconds     INTEGER NOT NULL DEFAULT 0,
+    bank                 INTEGER NOT NULL DEFAULT 0,    -- set: current currency balance (005)
+    lives                INTEGER NOT NULL DEFAULT 0,    -- counter: character starts/restarts (005)
+    updated_at           DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Leaderboard sort indexes (ORDER BY <stat> DESC LIMIT n).
+CREATE INDEX IF NOT EXISTS idx_player_stats_humans_killed  ON player_stats(humans_killed);
+CREATE INDEX IF NOT EXISTS idx_player_stats_zombies_killed ON player_stats(zombies_killed);
+CREATE INDEX IF NOT EXISTS idx_player_stats_biggest_horde  ON player_stats(biggest_horde_size);
+CREATE INDEX IF NOT EXISTS idx_player_stats_longest_life   ON player_stats(longest_life_seconds);
+CREATE INDEX IF NOT EXISTS idx_player_stats_playtime       ON player_stats(playtime_seconds);
+CREATE INDEX IF NOT EXISTS idx_player_stats_bank           ON player_stats(bank);
+
+-- Characters (mirrors migrations/006_characters.sql).
+-- One row per character an account starts (permadeath: True Death ends one,
+-- the player rolls a new survivor). Created via the stats ingest API
+-- (api/stats/), which also increments player_stats.lives. `ref` is an
+-- OPAQUE identifier minted by the game (its own convention, likely
+-- username_id_name) — stored verbatim, never parsed; lookups are by numeric
+-- id or exact-string ref scoped to the user.
+CREATE TABLE IF NOT EXISTS characters (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL,                   -- owning account
+    ref        TEXT NOT NULL,                      -- opaque game-side identifier, stored verbatim
+    name       TEXT,                               -- optional character name, if sent separately
+    skin       TEXT NOT NULL,                      -- skin identifier the character was created with
+    started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    ended_at   DATETIME,                           -- set when the character's run ends
+    outcome    TEXT,                               -- free text for now, e.g. died | turned | true_death
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_characters_user_id ON characters(user_id);
+CREATE INDEX IF NOT EXISTS idx_characters_ref     ON characters(ref);
 
 -- NOTE on admin/Keeper auth: we deliberately do NOT define a separate
 -- "admins" table. Keeper is a single-operator admin area, so a single

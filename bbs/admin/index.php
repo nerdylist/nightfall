@@ -4,7 +4,7 @@ require __DIR__ . '/partials/admin-bootstrap.php';
 $db = forum_db();
 
 $counts = [
-    'Users'         => (int)$db->query('SELECT COUNT(*) FROM users')->fetchColumn(),
+    'Users'         => (int)$db->query('SELECT COUNT(*) FROM host.users')->fetchColumn(),
     'Categories'    => (int)$db->query('SELECT COUNT(*) FROM categories')->fetchColumn(),
     'Threads'       => (int)$db->query('SELECT COUNT(*) FROM threads')->fetchColumn(),
     'Posts'         => (int)$db->query('SELECT COUNT(*) FROM posts')->fetchColumn(),
@@ -12,14 +12,19 @@ $counts = [
     'Reactions'     => (int)$db->query('SELECT COUNT(*) FROM reactions')->fetchColumn(),
 ];
 
-$recentUsers = $db->query('SELECT id, display_name, username, role, status, join_date FROM users ORDER BY id DESC LIMIT 5')->fetchAll();
+$recentUsers = $db->query(
+    "SELECT id, COALESCE(NULLIF(display_name, ''), username) AS display_name,
+            username, role, status, COALESCE(join_date, date(created_at)) AS join_date
+     FROM host.users ORDER BY id DESC LIMIT 5"
+)->fetchAll();
 
 $recentThreads = $db->query(
-    'SELECT t.id, t.title, c.name AS category_name, u.display_name AS author_name
+    "SELECT t.id, t.title, c.name AS category_name,
+            COALESCE(NULLIF(u.display_name, ''), u.username) AS author_name
      FROM threads t
      JOIN categories c ON c.id = t.category_id
-     JOIN users u ON u.id = t.author_id
-     ORDER BY t.id DESC LIMIT 5'
+     JOIN host.users u ON u.id = t.author_id
+     ORDER BY t.id DESC LIMIT 5"
 )->fetchAll();
 
 $active = 'dashboard';
