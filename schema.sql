@@ -131,7 +131,8 @@ CREATE TABLE IF NOT EXISTS settings (
 );
 
 -- NOTE on admin/Keeper auth: we deliberately do NOT define a separate
--- "admins" table. Keeper is a single-operator admin area, so a single
--- credential pair stored in .env (KEEPER_ADMIN_USER / KEEPER_ADMIN_PASS_HASH)
--- is simpler and sufficient. If Keeper ever needs multiple admin accounts,
--- add an `admins` table then (same shape as `users` minus game fields).
+-- "admins" table. Admin is just a role on the `users` row: a user with
+-- `role` = 'admin' (vs 'user') and `status` = 'active' is an admin. Auth is
+-- unified on the single main-site login (/login) — there is no separate
+-- Keeper credential. Keeping the role on the users row (instead of a
+-- dedicated table) means one login and one account list to reason about.

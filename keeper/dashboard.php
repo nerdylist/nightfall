@@ -5,8 +5,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-if (empty($_SESSION['keeper_admin'])) {
-    header('Location: /keeper/index.php');
+if (!grave_is_admin()) {
+    header('Location: /login?next=' . urlencode($_SERVER['REQUEST_URI'] ?? '/keeper/dashboard.php'));
     exit;
 }
 

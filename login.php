@@ -43,6 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
+            // Prevent session fixation: issue a fresh session id now that the
+            // user is authenticating (privilege change). true = delete the old
+            // session file. Matters more with the ~1-year persistent cookie.
+            session_regenerate_id(true);
             $_SESSION['user_id'] = (int) $user['id'];
             $_SESSION['username'] = $user['username'];
             header('Location: ' . $next);

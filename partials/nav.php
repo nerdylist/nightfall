@@ -20,7 +20,13 @@
  */
 require_once __DIR__ . '/../config.php';
 
-$NAV_ADMIN_URL = $NAV_ADMIN_URL ?? null;
+// Default the Admin link to Keeper for admins when no caller set it. An
+// explicit non-null caller value (e.g. the forum's '/bbs/admin/') is preserved
+// by the isset() check; the only recomputed case is a caller's explicit null,
+// which is a non-admin context and resolves back to null anyway.
+if (!isset($NAV_ADMIN_URL)) {
+    $NAV_ADMIN_URL = (function_exists('grave_is_admin') && grave_is_admin()) ? '/keeper/' : null;
+}
 $NAV_LOGIN_URL = $NAV_LOGIN_URL ?? '/login';
 $NAV_REGISTER_URL = $NAV_REGISTER_URL ?? '/register';
 $NAV_SEARCH_PLACEHOLDER = $NAV_SEARCH_PLACEHOLDER ?? 'Search THE DEAD LAST...';

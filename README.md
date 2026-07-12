@@ -7,7 +7,8 @@ area, and a JSON API used by the Unity game client to register/login.
 ## Fresh setup
 
 1. Copy `.env.example` to `.env` and fill in real values (`DB_PATH`,
-   `SESSION_SECRET`, `KEEPER_ADMIN_USER`, `KEEPER_ADMIN_PASS_HASH`).
+   `SESSION_SECRET`). There is no separate admin credential — an admin is just
+   a registered user whose account has `role` = 'admin' (see Keeper below).
 2. Run the DB setup/migration script:
 
    ```sh
@@ -79,9 +80,11 @@ to apply the `002_meshy_tasks.sql` migration.
 
 ## Keeper (admin area)
 
-Single-operator admin login gated by `KEEPER_ADMIN_USER` /
-`KEEPER_ADMIN_PASS_HASH` in `.env` (`password_verify()`), backed by a PHP
-session. The dashboard lists real registered users straight from SQLite.
+There is one login — the main site `/login`. An admin is simply a registered
+user whose account has `role` = 'admin' (promote a user via Keeper > Forum
+Users). Logging in as such a user reveals an "Admin" link in the header and
+grants access to `/keeper/` and the forum admin. The dashboard lists real
+registered users straight from SQLite.
 
 ## Status
 

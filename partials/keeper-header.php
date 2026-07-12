@@ -28,6 +28,7 @@ $pageCss = $pageCss ?? [];
       <a href="/keeper/forum-users.php" class="keeper-header__link">Forum Users</a>
       <a href="/keeper/settings.php" class="keeper-header__link">Settings</a>
       <a href="/index.php" class="keeper-header__link text-muted">Back to site</a>
+      <a href="/logout" class="keeper-header__link">Logout</a>
     </nav>
   </div>
 </header>

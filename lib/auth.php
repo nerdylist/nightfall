@@ -99,4 +99,56 @@ function grave_public_user(array $user): array
     ];
 }
 
+/**
+ * Resolve the currently logged-in host user from the session. Returns the
+ * user row (id, username, email, role, status) or null when nobody is logged
+ * in, the session references a deleted account, or the account is banned — a
+ * banned user is not "logged in" for gating purposes (mirrors the forum's
+ * auth_current_user). Cached per request. Assumes config.php already started
+ * the session; does not call session_start().
+ */
+if (!function_exists('grave_current_user')) {
+    function grave_current_user(): ?array
+    {
+        static $cache = [];
+
+        if (empty($_SESSION['user_id'])) {
+            return null;
+        }
+
+        $id = (int) $_SESSION['user_id'];
+        if (array_key_exists($id, $cache)) {
+            return $cache[$id];
+        }
+
+        $stmt = grave_db()->prepare(
+            'SELECT id, username, email, role, status FROM users WHERE id = :id'
+        );
+        $stmt->execute(['id' => $id]);
+        $user = $stmt->fetch();
+
+        if (!$user || $user['status'] === 'banned') {
+            // Stale session (user gone) or banned account.
+            $cache[$id] = null;
+            return null;
+        }
+
+        $user['id'] = (int) $user['id'];
+        $cache[$id] = $user;
+        return $user;
+    }
+}
+
+/**
+ * True only when an active admin is logged in. Host-owned so admin gating
+ * never depends on bbs/ code (Keeper never includes bbs/).
+ */
+if (!function_exists('grave_is_admin')) {
+    function grave_is_admin(): bool
+    {
+        $user = grave_current_user();
+        return $user !== null && $user['role'] === 'admin' && $user['status'] === 'active';
+    }
+}
+
 class GraveDuplicateError extends RuntimeException {}
