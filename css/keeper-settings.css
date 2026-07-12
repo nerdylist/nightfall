@@ -53,3 +53,40 @@
   display: flex;
   justify-content: flex-end;
 }
+
+/* Stacked settings cards need breathing room between them. */
+.keeper-table-card + .keeper-table-card {
+  margin-top: var(--space-5);
+}
+
+/* Season: two compact date pickers side by side. */
+.keeper-settings-season {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  max-width: 480px;
+}
+
+.keeper-settings-season__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.keeper-settings-season__label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.keeper-settings-season .field {
+  padding: 7px 10px;
+  font-size: 0.88rem;
+  color-scheme: dark;
+}
+
+@media (max-width: 520px) {
+  .keeper-settings-season {
+    grid-template-columns: 1fr;
+  }
+}

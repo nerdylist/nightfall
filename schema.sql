@@ -118,6 +118,18 @@ CREATE TABLE IF NOT EXISTS characters (
 CREATE INDEX IF NOT EXISTS idx_characters_user_id ON characters(user_id);
 CREATE INDEX IF NOT EXISTS idx_characters_ref     ON characters(ref);
 
+-- Settings (mirrors migrations/007_settings.sql).
+-- Generic key/value store for site/game-level configuration on the HOST
+-- database. First consumers: season_start / season_end dates managed from
+-- Keeper > Settings (stored as YYYY-MM-DD text; a key is deleted when
+-- cleared). The forum keeps its own separate settings table in bbs/forum.db
+-- (feed_sections lives there) — this table is host-level config only.
+CREATE TABLE IF NOT EXISTS settings (
+    key        TEXT PRIMARY KEY,                   -- setting name, e.g. season_start
+    value      TEXT NOT NULL,                      -- setting value, stored as text
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP  -- last time the value was written
+);
+
 -- NOTE on admin/Keeper auth: we deliberately do NOT define a separate
 -- "admins" table. Keeper is a single-operator admin area, so a single
 -- credential pair stored in .env (KEEPER_ADMIN_USER / KEEPER_ADMIN_PASS_HASH)

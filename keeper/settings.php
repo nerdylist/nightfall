@@ -46,6 +46,41 @@ function keeper_slugify_key(string $key): string
     return trim((string) $key, '-');
 }
 
+/** True when the value is a real calendar date in YYYY-MM-DD form. */
+function keeper_valid_date(string $value): bool
+{
+    $dt = DateTime::createFromFormat('Y-m-d', $value);
+
+    return $dt instanceof DateTime && $dt->format('Y-m-d') === $value;
+}
+
+/** Read one value from the HOST settings table (null when unset). */
+function keeper_load_host_setting(PDO $db, string $key): ?string
+{
+    $stmt = $db->prepare('SELECT value FROM settings WHERE key = ?');
+    $stmt->execute([$key]);
+    $value = $stmt->fetchColumn();
+
+    return ($value === false) ? null : (string) $value;
+}
+
+/** Upsert a HOST setting; an empty value clears (deletes) the key. */
+function keeper_save_host_setting(PDO $db, string $key, string $value): void
+{
+    if ($value === '') {
+        $stmt = $db->prepare('DELETE FROM settings WHERE key = ?');
+        $stmt->execute([$key]);
+
+        return;
+    }
+
+    $stmt = $db->prepare(
+        'INSERT INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP'
+    );
+    $stmt->execute([$key, $value]);
+}
+
 /** Read the feed_sections list from the forum settings table. */
 function keeper_load_feed_sections(PDO $db): array
 {
@@ -82,6 +117,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // --- Season form (season dates live in the HOST settings table) ---
+    if (isset($_POST['save_season'])) {
+        $start = trim((string) ($_POST['season_start'] ?? ''));
+        $end   = trim((string) ($_POST['season_end'] ?? ''));
+
+        if (($start !== '' && !keeper_valid_date($start)) || ($end !== '' && !keeper_valid_date($end))) {
+            $_SESSION['keeper_flash'] = 'Season dates must be valid dates (YYYY-MM-DD). Nothing was saved.';
+            header('Location: /keeper/settings.php');
+            exit;
+        }
+
+        if ($start !== '' && $end !== '' && $end < $start) {
+            $_SESSION['keeper_flash'] = 'Season End must be on or after Season Start. Nothing was saved.';
+            header('Location: /keeper/settings.php');
+            exit;
+        }
+
+        $hostDb = grave_db();
+        keeper_save_host_setting($hostDb, 'season_start', $start);
+        keeper_save_host_setting($hostDb, 'season_end', $end);
+
+        $_SESSION['keeper_flash'] = 'Season dates saved.';
+        header('Location: /keeper/settings.php');
+        exit;
+    }
+
+    // --- Feed-sections form (forum settings table) ---
     $rows = $_POST['rows'] ?? [];
     if (!is_array($rows)) {
         $rows = [];
@@ -158,6 +220,10 @@ $flash = $_SESSION['keeper_flash'] ?? null;
 unset($_SESSION['keeper_flash']);
 
 $feedSections = keeper_load_feed_sections($db);
+
+$hostDb = grave_db();
+$seasonStart = (string) (keeper_load_host_setting($hostDb, 'season_start') ?? '');
+$seasonEnd   = (string) (keeper_load_host_setting($hostDb, 'season_end') ?? '');
 ?>
 
 <main class="keeper-main">
@@ -167,6 +233,30 @@ $feedSections = keeper_load_feed_sections($db);
     <?php if ($flash): ?>
     <p class="keeper-flash"><?= htmlspecialchars($flash) ?></p>
     <?php endif; ?>
+
+    <div class="card keeper-table-card">
+      <h2 class="keeper-table-card__heading">Season</h2>
+      <p class="text-muted keeper-settings-hint">The current season window. Leave a date blank to clear it.</p>
+
+      <form method="post" action="/keeper/settings.php" class="keeper-settings-form">
+        <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
+
+        <div class="keeper-settings-season">
+          <label class="keeper-settings-season__field">
+            <span class="keeper-settings-season__label">Season Start</span>
+            <input class="field" type="date" name="season_start" value="<?= htmlspecialchars($seasonStart) ?>" aria-label="Season Start">
+          </label>
+          <label class="keeper-settings-season__field">
+            <span class="keeper-settings-season__label">Season End</span>
+            <input class="field" type="date" name="season_end" value="<?= htmlspecialchars($seasonEnd) ?>" aria-label="Season End">
+          </label>
+        </div>
+
+        <div class="keeper-settings-actions">
+          <button type="submit" name="save_season" value="1" class="btn btn-primary">Save Season</button>
+        </div>
+      </form>
+    </div>
 
     <div class="card keeper-table-card">
       <h2 class="keeper-table-card__heading">Site Feed Sections</h2>
@@ -224,7 +314,7 @@ $feedSections = keeper_load_feed_sections($db);
         </div>
 
         <div class="keeper-settings-actions">
-          <button type="submit" class="btn btn-primary">Save Settings</button>
+          <button type="submit" name="save_feed" value="1" class="btn btn-primary">Save Settings</button>
         </div>
       </form>
     </div>
