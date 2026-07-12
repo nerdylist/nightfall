@@ -16,6 +16,9 @@ data/*.bak-*
 # OS cruft
 .DS_Store
 
+# Local tooling (Claude Code session/config — not part of the project)
+.claude/
+
 # BBS forum (copied app) — same policy: no secrets, no runtime data
 bbs/.env
 bbs/forum.db

@@ -2,7 +2,7 @@ import { initModelEmbed } from './model-embed.js?v=6';
 
 const container = document.getElementById('home-hero-model');
 if (container) {
-	initModelEmbed(container, './assets/horde-up.glb', { size: 'auto' });
+	initModelEmbed(container, '/assets/horde-up.glb', { size: 'auto' });
 
 	/*
 	 * Grab-to-rotate wiring. The widget/canvas is pointer-events: none in
