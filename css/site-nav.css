@@ -34,6 +34,58 @@
   flex-wrap: wrap;
 }
 
+/* Collapsible region. On desktop it's a transparent flex wrapper that lays
+   out the middle (menu+search) / search-trigger / auth exactly as before, so
+   the desktop header is visually unchanged. Below the hamburger breakpoint it
+   becomes a dropdown panel (see the <=1024px block). */
+.site-nav__collapse {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Hamburger toggle — hidden on desktop; revealed at <=1024px. */
+.site-nav__toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  padding: 0 8px;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-btn, 6px);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.site-nav__toggle:hover {
+  border-color: var(--text-0);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.site-nav__toggle-bar {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--text-0);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Animate the bars into an X when open. */
+.site-nav__toggle[aria-expanded="true"] .site-nav__toggle-bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.site-nav__toggle[aria-expanded="true"] .site-nav__toggle-bar:nth-child(2) {
+  opacity: 0;
+}
+.site-nav__toggle[aria-expanded="true"] .site-nav__toggle-bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
 /* ---- Brand ---- */
 .site-nav__brand {
   font-family: var(--font-display);
@@ -270,30 +322,103 @@
   border-radius: var(--radius-btn, 6px);
 }
 
-/* ---- Responsive ---- */
-@media (max-width: 768px) {
-  .site-nav__search.is-open .site-nav__search-form {
-    width: min(220px, 55vw);
+/* ---- Responsive: hamburger on mobile + tablet (<=1024px) ---- */
+@media (max-width: 1024px) {
+  /* Show the hamburger; the brand stays left, toggle goes right. */
+  .site-nav__toggle {
+    display: flex;
   }
-}
 
-@media (max-width: 600px) {
-  .site-nav__links {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-    gap: var(--space-3);
-  }
-}
-
-@media (max-width: 480px) {
-  /* Search overlays the header row instead of pushing layout at narrow widths */
-  .site-nav__search.is-open .site-nav__search-form {
+  /* The collapsible region drops out of the header row into a full-width
+     dropdown panel beneath it. Collapsed by default (max-height 0). */
+  .site-nav__collapse {
     position: absolute;
+    top: 100%;
+    left: 0;
     right: 0;
-    top: calc(100% + var(--space-2));
-    width: min(260px, 90vw);
-    margin-right: 0;
-    z-index: 60;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 0 var(--space-4);
+    background: rgba(0, 0, 0, 0.97);
+    border-bottom: 1px solid var(--border-subtle);
+    backdrop-filter: blur(6px);
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: max-height 0.28s ease, opacity 0.2s ease, padding 0.28s ease;
+  }
+
+  /* Opened by the hamburger (JS toggles .is-open on the nav). */
+  .site-nav.is-menu-open .site-nav__collapse {
+    max-height: min(80vh, 640px);
+    overflow-y: auto;
+    opacity: 1;
+    pointer-events: auto;
+    padding: var(--space-3) var(--space-4) var(--space-4);
+  }
+
+  /* Menu: stack vertically, left-aligned, full width. */
+  .site-nav__middle {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    position: static;
+  }
+
+  .site-nav__links {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0;
+    flex: none;
+    width: 100%;
+    flex-wrap: nowrap;
+  }
+
+  .site-nav__link {
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 1rem;
+  }
+
+  /* In the panel the search is a plain full-width input; hide the icon
+     trigger and the desktop overlay behavior entirely. */
+  .site-nav__search {
+    display: none;
+  }
+
+  .site-nav__search-form {
+    position: static;
+    transform: none;
+    width: 100%;
+    opacity: 1;
+    overflow: visible;
+    pointer-events: auto;
+    margin-top: var(--space-3);
+  }
+
+  .site-nav__search-input {
+    width: 100%;
+  }
+
+  /* Auth: stack full-width CTAs below the menu/search. */
+  .site-nav__auth {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+
+  .site-nav__cta {
+    width: 100%;
+    text-align: center;
+  }
+
+  .site-nav__username {
+    padding: var(--space-2) 0;
+    text-align: center;
   }
 }

@@ -48,38 +48,50 @@ if (!empty($_SESSION['user_id'])) {
 <nav class="site-nav">
   <div class="container site-nav__inner">
     <a href="/" class="site-nav__brand"><img src="/assets/brand.png" alt="THE DEAD LAST" class="site-nav__brand-img"></a>
-    <div class="site-nav__middle">
-      <div class="site-nav__links">
-        <a href="/" class="site-nav__link">Home</a>
-        <a href="#" class="site-nav__link">Game</a>
-        <a href="#" class="site-nav__link">News</a>
-        <a href="/shop" class="site-nav__link">Shop</a>
-        <a href="/bbs/" class="site-nav__link">Community</a>
-        <a href="#" class="site-nav__link">Support</a>
-        <?php if ($NAV_ADMIN_URL !== null): ?>
-          <a href="<?= htmlspecialchars($NAV_ADMIN_URL) ?>" class="site-nav__link">Admin</a>
+
+    <!-- Hamburger toggle: shown only on mobile + tablet (<=1024px) via CSS. -->
+    <button type="button" class="site-nav__toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-collapse" aria-label="Menu">
+      <span class="site-nav__toggle-bar" aria-hidden="true"></span>
+      <span class="site-nav__toggle-bar" aria-hidden="true"></span>
+      <span class="site-nav__toggle-bar" aria-hidden="true"></span>
+    </button>
+
+    <!-- Collapsible region: inline on desktop; a dropdown panel under the
+         hamburger on mobile/tablet. Holds the menu, search, and auth. -->
+    <div class="site-nav__collapse" id="nav-collapse">
+      <div class="site-nav__middle">
+        <div class="site-nav__links">
+          <a href="/" class="site-nav__link">Home</a>
+          <a href="#" class="site-nav__link">Game</a>
+          <a href="#" class="site-nav__link">News</a>
+          <a href="/shop" class="site-nav__link">Shop</a>
+          <a href="/bbs/" class="site-nav__link">Community</a>
+          <a href="#" class="site-nav__link">Support</a>
+          <?php if ($NAV_ADMIN_URL !== null): ?>
+            <a href="<?= htmlspecialchars($NAV_ADMIN_URL) ?>" class="site-nav__link">Admin</a>
+          <?php endif; ?>
+        </div>
+        <form class="site-nav__search-form" id="nav-search-form">
+          <input class="site-nav__search-input" id="nav-search-input" type="search" aria-label="Search" placeholder="<?= htmlspecialchars($NAV_SEARCH_PLACEHOLDER) ?>">
+        </form>
+      </div>
+      <div class="site-nav__search">
+        <button type="button" class="site-nav__search-trigger" id="nav-search-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="nav-search-form" aria-label="Search" title="Search">
+          <svg class="site-nav__search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+            <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="site-nav__auth">
+        <?php if ($navUser): ?>
+          <a href="/bbs/profile/<?= urlencode($navUser['username']) ?>" class="site-nav__link site-nav__username"><?= htmlspecialchars(strtoupper($navUser['username'])) ?></a>
+          <a href="/logout" class="btn btn-ghost site-nav__cta">Logout</a>
+        <?php else: ?>
+          <a href="<?= htmlspecialchars($NAV_LOGIN_URL) ?>" class="btn btn-ghost site-nav__cta">Login</a>
+          <a href="<?= htmlspecialchars($NAV_REGISTER_URL) ?>" class="btn btn-primary site-nav__cta">Register</a>
         <?php endif; ?>
       </div>
-      <form class="site-nav__search-form" id="nav-search-form">
-        <input class="site-nav__search-input" id="nav-search-input" type="search" aria-label="Search" placeholder="<?= htmlspecialchars($NAV_SEARCH_PLACEHOLDER) ?>">
-      </form>
-    </div>
-    <div class="site-nav__search">
-      <button type="button" class="site-nav__search-trigger" id="nav-search-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="nav-search-form" aria-label="Search" title="Search">
-        <svg class="site-nav__search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-          <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
-        </svg>
-      </button>
-    </div>
-    <div class="site-nav__auth">
-      <?php if ($navUser): ?>
-        <a href="/bbs/profile/<?= urlencode($navUser['username']) ?>" class="site-nav__link site-nav__username"><?= htmlspecialchars(strtoupper($navUser['username'])) ?></a>
-        <a href="/logout" class="btn btn-ghost site-nav__cta">Logout</a>
-      <?php else: ?>
-        <a href="<?= htmlspecialchars($NAV_LOGIN_URL) ?>" class="btn btn-ghost site-nav__cta">Login</a>
-        <a href="<?= htmlspecialchars($NAV_REGISTER_URL) ?>" class="btn btn-primary site-nav__cta">Register</a>
-      <?php endif; ?>
     </div>
   </div>
 </nav>
