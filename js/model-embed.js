@@ -126,10 +126,20 @@ export function initModelEmbed(container, modelUrl, options = {}) {
 		renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 		renderer.setSize(initWidth, initHeight, false);
 		renderer.outputColorSpace = THREE.SRGBColorSpace;
+		// Soft shadow maps for the optional ground shadow (opt-in below).
+		if (options.groundShadow) {
+			renderer.shadowMap.enabled = true;
+			renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+		}
 	}
 
 	// Lighting: neutral ambient + directional so any model is clearly visible.
-	const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+	// Ambient intensity is configurable per-instance (options.ambient) so a
+	// page can brighten a dark model without affecting others; defaults to 0.9.
+	const ambientIntensity = (typeof options.ambient === 'number' && Number.isFinite(options.ambient))
+		? options.ambient
+		: 0.9;
+	const ambientLight = new THREE.AmbientLight(0xffffff, ambientIntensity);
 	scene.add(ambientLight);
 
 	const keyLight = new THREE.DirectionalLight(0xffffff, 1.4);
@@ -140,6 +150,23 @@ export function initModelEmbed(container, modelUrl, options = {}) {
 	fillLight.position.set(-4, -2, -3);
 	scene.add(fillLight);
 
+	// Optional overhead spotlight (opt-in via options.spotlight) — a beam
+	// dropping straight down on the model from high above, for a "spotlit on
+	// stage" look. Aimed at the origin, which is where the model is centered.
+	// When groundShadow is also on, this spotlight casts the ground shadow.
+	if (options.spotlight) {
+		const spotlight = new THREE.SpotLight(0xffffff, 3.2, 0, Math.PI / 7, 0.4, 1.2);
+		spotlight.position.set(0, 12, 2);
+		spotlight.target.position.set(0, 0, 0);
+		if (options.groundShadow) {
+			spotlight.castShadow = true;
+			spotlight.shadow.mapSize.set(1024, 1024);
+			spotlight.shadow.bias = -0.0005;
+		}
+		scene.add(spotlight);
+		scene.add(spotlight.target);
+	}
+
 	// A pivot group we rotate horizontally in response to drag input.
 	const pivot = new THREE.Group();
 	scene.add(pivot);
@@ -149,6 +176,7 @@ export function initModelEmbed(container, modelUrl, options = {}) {
 	let previousPointerX = 0;
 	let cameraDistance = 5;
 	let currentHalfExtents = null; // { cylR, halfH } — exact Y-rotation bounding-cylinder fit extents
+	let groundShadowPlane = null;  // optional shadow-receiving ground plane (options.groundShadow)
 
 	function onPointerDown(event) {
 		isDragging = true;
@@ -320,6 +348,24 @@ export function initModelEmbed(container, modelUrl, options = {}) {
 		const halfH = Math.max(Math.abs(yMin), Math.abs(yMax));
 
 		currentHalfExtents = { cylR: cylR || 1, halfH: halfH || 1 };
+
+		// Optional ground shadow: an invisible plane at the model's feet
+		// (y = -halfH) that only RECEIVES shadow (ShadowMaterial), so the
+		// spotlight casts a soft blob on the "ground" beneath the floating
+		// model. Sized generously around the model's footprint.
+		if (options.groundShadow && !groundShadowPlane) {
+			const r = (cylR || 1) * 4;
+			const geo = new THREE.PlaneGeometry(r, r);
+			const mat = new THREE.ShadowMaterial({ opacity: 0.45 });
+			groundShadowPlane = new THREE.Mesh(geo, mat);
+			groundShadowPlane.rotation.x = -Math.PI / 2; // lay flat
+			groundShadowPlane.receiveShadow = true;
+			scene.add(groundShadowPlane);
+		}
+		if (groundShadowPlane) {
+			groundShadowPlane.position.y = -(halfH || 1);
+		}
+
 		updateCameraFraming();
 	}
 
@@ -336,6 +382,14 @@ export function initModelEmbed(container, modelUrl, options = {}) {
 				// auto-rotating) pivot. See frameCameraToObject() for why
 				// the ordering matters.
 				frameCameraToObject(gltf.scene);
+				// Let the model cast the ground shadow (opt-in).
+				if (options.groundShadow) {
+					gltf.scene.traverse((node) => {
+						if (node.isMesh) {
+							node.castShadow = true;
+						}
+					});
+				}
 				pivot.add(gltf.scene);
 				hideStatus();
 				hideLoader();

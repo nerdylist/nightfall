@@ -281,12 +281,74 @@ textarea.field {
   white-space: nowrap;
 }
 
-/* Footer brand image (partials/footer.php is included by every host page,
-   including 404.php which loads no page CSS, so this lives in base.css).
-   Sized to match the ~20px line box the old text logo rendered at
-   (0.85rem x 1.5 line-height). */
+/* Global site footer (partials/footer.php is included by every host page,
+   including pages that load no page-specific CSS, e.g. 404.php and /shop),
+   so ALL footer styles live here in base.css — the single source of truth.
+   Do not re-declare these in per-page stylesheets. */
+.site-footer {
+  border-top: 1px solid var(--border-subtle);
+  padding: var(--space-5) 0;
+}
+
+.site-footer__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  font-size: 0.85rem;
+}
+
+.site-footer__brand {
+  font-family: var(--font-display);
+  letter-spacing: 0.06em;
+  color: var(--text-0);
+}
+
+.site-footer__brand:hover {
+  color: var(--text-0);
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.5);
+}
+
+/* Footer brand image — sized to match the ~20px line box the old text logo
+   rendered at (0.85rem x 1.5 line-height). */
 .site-footer__brand-img {
   display: block;
   height: 20px;
   width: auto;
+}
+
+.site-footer__links {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.site-footer__link {
+  color: var(--text-2);
+  font-family: var(--font-condensed);
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.site-footer__link:hover,
+.site-footer__link:focus-visible {
+  color: var(--text-0);
+}
+
+.site-footer__copy {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-2);
+}
+
+/* Footer stacks on narrow screens. */
+@media (max-width: 720px) {
+  .site-footer__inner {
+    flex-direction: column;
+    text-align: center;
+  }
 }

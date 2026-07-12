@@ -1,4 +1,4 @@
-import { initModelEmbed } from './model-embed.js?v=3';
+import { initModelEmbed } from './model-embed.js?v=6';
 
 const container = document.getElementById('home-hero-model');
 if (container) {

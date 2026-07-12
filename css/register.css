@@ -1,56 +1,5 @@
-/* THE DEAD LAST — register page (shares .site-footer styles from index.css scope,
-   but register/login are linked separately, so re-declare the minimal shared shell here) */
-
-.site-footer {
-  border-top: 1px solid var(--border-subtle);
-  padding: var(--space-5) 0;
-}
-
-.site-footer__inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  font-size: 0.85rem;
-}
-
-.site-footer__brand {
-  font-family: var(--font-display);
-  letter-spacing: 0.06em;
-  color: var(--text-0);
-}
-
-.site-footer__brand:hover {
-  color: var(--text-0);
-  text-shadow: 0 0 16px rgba(255, 255, 255, 0.5);
-}
-
-.site-footer__links {
-  display: flex;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-}
-
-.site-footer__link {
-  color: var(--text-2);
-  font-family: var(--font-condensed);
-  font-weight: 700;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.site-footer__link:hover,
-.site-footer__link:focus-visible {
-  color: var(--text-0);
-}
-
-.site-footer__copy {
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
+/* THE DEAD LAST — register page (auth card shell). */
+/* Footer styles are global — see .site-footer* in css/base.css. */
 
 .auth {
   padding: var(--space-8) 0;

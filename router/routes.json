@@ -27,6 +27,11 @@
       "description": "Logout"
     },
     {
+      "url": "/shop",
+      "destination": "shop.php",
+      "description": "Shop (placeholder)"
+    },
+    {
       "url": "/bbs",
       "destination": "bbs/index.php",
       "description": "Forum: home (forums listing) - normally served directly as bbs/index.php; router fallback"
