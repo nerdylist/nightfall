@@ -12,6 +12,7 @@ DirectoryIndex index.php
     RewriteRule ^api/meshy/?$    api/meshy/index.php    [L]
     RewriteRule ^api/feed/?$     api/feed/index.php     [L]
     RewriteRule ^api/stats/?$    api/stats/index.php    [L]
+    RewriteRule ^api/season/?$   api/season/index.php   [L]
 
     # Forum home lives at /bbs/ (bbs/index.php). Canonicalize the slash-less
     # form (DirectorySlash is Off, so Apache won't add it itself), and 301 the
