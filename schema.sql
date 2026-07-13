@@ -165,3 +165,25 @@ CREATE INDEX IF NOT EXISTS idx_npc_messages_npc ON npc_messages(npc_name);
 -- unified on the single main-site login (/login) — there is no separate
 -- Keeper credential. Keeping the role on the users row (instead of a
 -- dedicated table) means one login and one account list to reason about.
+
+-- items: mirror of the game's item registry (ItemDatabase). Populated by the
+-- game's editor export via POST /api/items (replaces the set); served by GET
+-- /api/items as JSON. See migrations/009_items.sql.
+CREATE TABLE IF NOT EXISTS items (
+    item_id      TEXT PRIMARY KEY,
+    display_name TEXT NOT NULL,
+    category     TEXT,
+    rarity       TEXT,
+    stackable    INTEGER NOT NULL DEFAULT 0,
+    max_stack    INTEGER NOT NULL DEFAULT 1,
+    power        INTEGER,
+    weight_kg    REAL,
+    value        INTEGER,
+    durability   INTEGER,
+    description  TEXT,
+    used_to      TEXT,
+    thumbnail    TEXT,
+    model        TEXT,
+    extra        TEXT,
+    updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP
+);
