@@ -1,0 +1,71 @@
+/* THE DEAD LAST — Keeper > Messages (NPC talk-bubble line editor) */
+
+.keeper-messages-hint {
+  font-size: 0.85rem;
+  margin: calc(-1 * var(--space-3)) 0 var(--space-4);
+}
+
+.keeper-messages-hint code {
+  padding: 1px 6px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+}
+
+/* Stacked NPC cards need breathing room between them. */
+.keeper-table-card + .keeper-table-card {
+  margin-top: var(--space-5);
+}
+
+/* Role chip next to an NPC's name. */
+.keeper-messages-role {
+  margin-left: var(--space-2);
+  padding: 2px 8px;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  background: var(--bg-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
+/* Compact rows; the line input takes the remaining width. */
+.keeper-messages-table td {
+  padding: 8px 10px;
+  vertical-align: middle;
+}
+
+.keeper-messages-table .field {
+  padding: 7px 10px;
+  font-size: 0.88rem;
+  width: 100%;
+}
+
+/* Narrow, centered On / Delete columns. */
+.keeper-messages-col-on,
+.keeper-messages-col-del {
+  width: 64px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.keeper-messages-table input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+/* Highlighted "add a new line" row. */
+.keeper-messages-new td {
+  background: var(--bg-2);
+}
+
+.keeper-messages-actions {
+  margin-top: var(--space-4);
+  display: flex;
+  justify-content: flex-end;
+}

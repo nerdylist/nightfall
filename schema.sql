@@ -130,6 +130,35 @@ CREATE TABLE IF NOT EXISTS settings (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP  -- last time the value was written
 );
 
+-- NPC talk-bubble messages (mirrors migrations/008_npc_messages.sql).
+-- Central authoring (Keeper > Messages) of the lines generic NPCs speak in
+-- overhead talk bubbles. npc_roster is the DYNAMIC spawnable-character list,
+-- refreshed by Keeper's "Update roster" button which fetches the game's
+-- roster endpoint (env GAME_ROSTER_URL); characters missing from a fetch are
+-- marked active = 0 (kept, lines preserved). npc_messages holds the lines,
+-- many per NPC; the game pulls enabled lines and picks random ones.
+CREATE TABLE IF NOT EXISTS npc_roster (
+    name       TEXT PRIMARY KEY,                       -- character name, e.g. "Eddie" (join key)
+    gender     TEXT,                                   -- 'm' | 'f' (optional)
+    role       TEXT,                                   -- 'human' | 'zombie' | 'npc' | 'base' (optional)
+    height     REAL,                                   -- from the game roster (optional)
+    active     INTEGER NOT NULL DEFAULT 1,             -- 1 = in latest fetched roster; 0 = gone (lines kept)
+    seen_at    DATETIME DEFAULT CURRENT_TIMESTAMP      -- last roster fetch this NPC appeared in
+);
+
+CREATE TABLE IF NOT EXISTS npc_messages (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    npc_name   TEXT NOT NULL,                          -- FK -> npc_roster.name (the speaker)
+    body       TEXT NOT NULL,                          -- the line spoken in the talk bubble
+    enabled    INTEGER NOT NULL DEFAULT 1,             -- 1 = eligible; 0 = kept but muted
+    weight     INTEGER NOT NULL DEFAULT 1,             -- optional relative pick weight (>=1)
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (npc_name) REFERENCES npc_roster(name) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_npc_messages_npc ON npc_messages(npc_name);
+
 -- NOTE on admin/Keeper auth: we deliberately do NOT define a separate
 -- "admins" table. Admin is just a role on the `users` row: a user with
 -- `role` = 'admin' (vs 'user') and `status` = 'active' is an admin. Auth is
