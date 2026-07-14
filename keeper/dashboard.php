@@ -16,49 +16,23 @@ include __DIR__ . '/../partials/keeper-header.php';
 
 $pdo = grave_db();
 
-$totalUsers = (int) $pdo->query('SELECT COUNT(*) AS c FROM users')->fetch()['c'];
-
-$stmt = $pdo->query('SELECT id, email, username, created_at FROM users ORDER BY created_at DESC');
-$registeredUsers = $stmt->fetchAll();
+$totalUsers  = (int) $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
+$totalItems  = (int) $pdo->query('SELECT COUNT(*) FROM items')->fetchColumn();
 ?>
 
 <main class="keeper-main">
   <div class="container">
     <h1 class="keeper-page-title">Dashboard</h1>
 
-    <p class="keeper-dashboard-links">
-      <a href="/keeper/items.php" class="btn btn-ghost">View Items Table</a>
-    </p>
-
     <div class="keeper-stats">
-      <div class="card keeper-stat-tile">
-        <p class="keeper-stat-tile__label text-muted">Total Registered Users</p>
+      <a href="/keeper/users.php" class="card keeper-stat-tile keeper-stat-tile--link">
+        <p class="keeper-stat-tile__label text-muted">Total Users</p>
         <p class="keeper-stat-tile__value"><?= number_format($totalUsers) ?></p>
-      </div>
-    </div>
-
-    <div class="card keeper-table-card">
-      <h2 class="keeper-table-card__heading">Registered Users</h2>
-      <div class="keeper-table-scroll">
-        <table class="keeper-table">
-          <thead>
-            <tr>
-              <th>Email</th>
-              <th>Username</th>
-              <th>Created Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php foreach ($registeredUsers as $user): ?>
-            <tr>
-              <td><?= htmlspecialchars($user['email']) ?></td>
-              <td><?= htmlspecialchars($user['username']) ?></td>
-              <td><?= htmlspecialchars($user['created_at']) ?></td>
-            </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
-      </div>
+      </a>
+      <a href="/keeper/items.php" class="card keeper-stat-tile keeper-stat-tile--link">
+        <p class="keeper-stat-tile__label text-muted">Items</p>
+        <p class="keeper-stat-tile__value"><?= number_format($totalItems) ?></p>
+      </a>
     </div>
   </div>
 </main>

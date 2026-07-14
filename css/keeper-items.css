@@ -1,7 +1,104 @@
 /* THE DEAD LAST — Keeper > Items (read-only game item catalog view) */
 
-.keeper-table-card + .keeper-table-card {
-  margin-top: var(--space-5);
+/* Even spacing between every card/category. Uses a bottom margin (not the
+   "+ adjacency" selector) so a non-card node between cards — e.g. the hidden
+   <datalist>s before the first category — never swallows the gap. */
+.keeper-main .keeper-table-card {
+  margin-bottom: var(--space-5);
+}
+
+/* ---- Toolbar (button bar under the heading) ---- */
+.keeper-items-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--keeper-line, rgba(255,255,255,0.12));
+}
+
+.keeper-items-toolbar__count {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.keeper-items-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* ---- Modal (Add / Edit item) ---- */
+.keeper-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--space-6) var(--space-4);
+  overflow-y: auto;
+}
+
+.keeper-modal[hidden] {
+  display: none;
+}
+
+.keeper-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(3px);
+}
+
+.keeper-modal__panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 780px;
+  margin: auto;
+  background: var(--keeper-panel, #0a0a0a);
+  border: 1px solid var(--keeper-line, rgba(255,255,255,0.14));
+  border-radius: var(--radius-md, 10px);
+  padding: var(--space-5) var(--space-6) var(--space-6);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+}
+
+.keeper-modal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.keeper-modal__title {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 1.3rem;
+  color: var(--keeper-ink, #fff);
+  margin: 0;
+}
+
+.keeper-modal__close {
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--keeper-ink-3, rgba(255,255,255,0.45));
+  text-decoration: none;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm, 6px);
+}
+
+.keeper-modal__close:hover {
+  color: var(--keeper-ink, #fff);
+  background: var(--keeper-panel-2, #131313);
+}
+
+.keeper-modal__desc {
+  font-size: 0.85rem;
+  margin: 6px 0 var(--space-4);
 }
 
 /* Top bar: hint text on the left, Update button on the right. */

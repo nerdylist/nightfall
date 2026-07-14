@@ -1,131 +1,367 @@
-/* THE DEAD LAST — Keeper admin area (separate look from public site, shares base tokens) */
+/* THE DEAD LAST — Keeper admin. Full-screen shell with a fixed left sidebar
+   and a scrolling center content column. Black & white motif: pure black
+   surfaces, hairline borders for elevation, white as the only "accent". */
+
+:root {
+  --keeper-sidebar-w: 248px;
+  --keeper-rail-w: 300px;
+  --keeper-bg: #000;
+  --keeper-panel: #0a0a0a;
+  --keeper-panel-2: #131313;
+  --keeper-line: rgba(255, 255, 255, 0.12);
+  --keeper-line-soft: rgba(255, 255, 255, 0.07);
+  --keeper-ink: #fff;
+  --keeper-ink-2: rgba(255, 255, 255, 0.72);
+  --keeper-ink-3: rgba(255, 255, 255, 0.45);
+}
 
 body.keeper {
-  background: var(--bg-0);
+  background: var(--keeper-bg);
+  color: var(--keeper-ink-2);
+  margin: 0;
 }
 
-.keeper-header {
-  border-bottom: 1px solid var(--border-subtle);
-  background: var(--bg-1);
+/* ---- Shell layout ---- */
+.keeper-shell {
+  height: 100vh;
+  display: grid;
+  grid-template-columns: var(--keeper-sidebar-w) minmax(0, 1fr) var(--keeper-rail-w);
+  overflow: hidden; /* the shell owns the viewport; .keeper-main scrolls inside */
 }
 
-.keeper-header__inner {
+/* ---- Sidebar ---- */
+.keeper-sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--keeper-panel);
+  border-right: 1px solid var(--keeper-line);
+  overflow-y: auto;
+}
+
+.keeper-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  border-bottom: 1px solid var(--keeper-line-soft);
+}
+
+.keeper-brand__logo {
+  display: block;
+  width: 100%;
+  max-width: 170px;
+  height: auto;
+  object-fit: contain;
+  /* logo.png is already white artwork with transparency — no filter needed. */
+}
+
+.keeper-brand__tag {
+  font-family: var(--font-condensed);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: var(--keeper-ink-3);
+  padding-left: 0.28em;
+}
+
+/* ---- Nav ---- */
+.keeper-nav {
+  flex: 1 1 auto;
+  padding: var(--space-4) var(--space-3);
+}
+
+.keeper-nav__group + .keeper-nav__group {
+  margin-top: var(--space-4);
+}
+
+.keeper-nav__heading {
+  margin: 0 0 6px;
+  padding: 0 var(--space-2);
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--keeper-ink-3);
+}
+
+.keeper-nav__link {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: var(--space-4);
-  padding-bottom: var(--space-4);
+  gap: var(--space-2);
+  padding: 8px var(--space-2);
+  border-radius: var(--radius-sm, 6px);
+  color: var(--keeper-ink-2);
+  font-size: 0.9rem;
+  border-left: 2px solid transparent;
+  transition: background-color 0.14s ease, color 0.14s ease, border-color 0.14s ease;
 }
 
-.keeper-header__brand {
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  font-size: 0.95rem;
-  color: var(--accent);
+.keeper-nav__link:hover {
+  background: var(--keeper-panel-2);
+  color: var(--keeper-ink);
 }
 
-.keeper-header__nav {
+.keeper-nav__link.is-active {
+  background: var(--keeper-panel-2);
+  color: var(--keeper-ink);
+  border-left-color: var(--keeper-ink);
+  font-weight: 600;
+}
+
+/* "Coming soon" / external (Phase-2 mocked forum) links read dimmer. */
+.keeper-nav__link--soon {
+  color: var(--keeper-ink-3);
+}
+
+.keeper-nav__link--soon:hover {
+  color: var(--keeper-ink-2);
+}
+
+.keeper-nav__soon {
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
+.keeper-nav__link--muted {
+  color: var(--keeper-ink-3);
+  font-size: 0.82rem;
+}
+
+.keeper-sidebar__footer {
+  padding: var(--space-3) var(--space-3) var(--space-4);
+  border-top: 1px solid var(--keeper-line-soft);
   display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ---- Content column ---- */
+/* Content column is a fixed-height app pane: header (top) and footer (bottom)
+   stay put, only .keeper-main scrolls between them. */
+.keeper-content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ---- Top header — pinned at the top of the content column, between sidebars. ---- */
+.keeper-header {
+  flex: 0 0 auto;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 60px;
+  padding: var(--space-3) var(--space-6);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--keeper-line);
+}
+
+.keeper-header__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.keeper-header__title {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 1.05rem;
+  color: var(--keeper-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.keeper-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 0 0 auto;
+}
+
+/* ---- Right sidebar (rail) — mirrors the left nav: full-height, sticky. ---- */
+.keeper-rail {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  overflow-y: auto;
+  background: var(--keeper-panel);
+  border-left: 1px solid var(--keeper-line);
+  padding: var(--space-5) var(--space-4);
+  display: flex;
+  flex-direction: column;
   gap: var(--space-4);
 }
 
-.keeper-header__link {
-  font-size: 0.88rem;
-  color: var(--text-1);
+.keeper-rail__panel {
+  background: var(--keeper-panel-2);
+  border: 1px solid var(--keeper-line-soft);
+  border-radius: var(--radius-md, 10px);
+  padding: var(--space-4);
 }
 
-.keeper-header__link:hover {
-  color: var(--text-0);
+.keeper-rail__title {
+  font-size: 0.95rem;
+  color: var(--keeper-ink);
+  margin: 0 0 var(--space-2);
 }
 
+.keeper-rail__empty {
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+/* The only scrolling region: fills the space between header and footer. */
 .keeper-main {
-  padding: var(--space-6) 0 var(--space-7);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-6) var(--space-6) var(--space-7);
+  width: 100%;
+}
+
+/* Pages using .container inside .keeper-main shouldn't re-constrain/pad it. */
+.keeper-main .container {
+  max-width: none;
+  padding: 0;
 }
 
 .keeper-main--centered {
   display: flex;
   align-items: center;
-  min-height: calc(100vh - 130px);
+  justify-content: center;
 }
 
 .keeper-page-title {
-  font-size: 1.4rem;
-  margin-bottom: var(--space-5);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 1.7rem;
+  color: var(--keeper-ink);
+  margin: 0 0 var(--space-5);
 }
 
-/* Quick-link row under a page title (e.g. dashboard shortcuts). */
 .keeper-dashboard-links {
   margin: calc(-1 * var(--space-3)) 0 var(--space-5);
 }
 
-.keeper-login-card {
-  max-width: 420px;
-  margin: 0 auto;
-  padding: var(--space-6);
+/* ---- Mobile top bar + hamburger (hidden on desktop) ---- */
+.keeper-topbar {
+  display: none;
 }
 
-.keeper-login-card__heading {
-  font-size: 1.3rem;
-  margin-bottom: var(--space-1);
+.keeper-topbar__logo {
+  height: 30px;
+  width: auto;
+  object-fit: contain;
 }
 
-.keeper-login-card__sub {
-  margin-bottom: var(--space-5);
-  font-size: 0.88rem;
-}
-
-.keeper-login-card__form {
-  display: flex;
+.keeper-topbar__toggle {
+  display: inline-flex;
   flex-direction: column;
-  gap: var(--space-3);
+  justify-content: center;
+  gap: 5px;
+  width: 42px;
+  height: 42px;
+  padding: 0 9px;
+  background: transparent;
+  border: 1px solid var(--keeper-line);
+  border-radius: var(--radius-sm, 6px);
+  cursor: pointer;
 }
 
-.keeper-login-card__note {
-  margin-top: var(--space-4);
-  font-size: 0.78rem;
-  text-align: center;
+.keeper-topbar__bar {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--keeper-ink);
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-.keeper-login-card__note a {
-  color: var(--accent);
+.keeper-topbar__toggle[aria-expanded="true"] .keeper-topbar__bar:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.keeper-topbar__toggle[aria-expanded="true"] .keeper-topbar__bar:nth-child(2) { opacity: 0; }
+.keeper-topbar__toggle[aria-expanded="true"] .keeper-topbar__bar:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+.keeper-scrim {
+  display: none;
 }
 
+/* =====================================================================
+   Components (shared by all pages) — restyled for the B&W motif.
+   ===================================================================== */
+
+/* Login card (keeper/index.php is a redirect shim now, but keep for safety). */
+.keeper-login-card { max-width: 420px; margin: 0 auto; padding: var(--space-6); }
+.keeper-login-card__heading { font-size: 1.3rem; margin-bottom: var(--space-1); color: var(--keeper-ink); }
+.keeper-login-card__sub { margin-bottom: var(--space-5); font-size: 0.88rem; }
+.keeper-login-card__form { display: flex; flex-direction: column; gap: var(--space-3); }
+
+/* Cards / panels — flat black with a hairline border. */
+.card,
+.keeper-table-card {
+  background: var(--keeper-panel);
+  border: 1px solid var(--keeper-line);
+  border-radius: var(--radius-md, 10px);
+  padding: var(--space-5);
+}
+
+.keeper-table-card__heading {
+  font-size: 1.05rem;
+  color: var(--keeper-ink);
+  margin: 0 0 var(--space-4);
+}
+
+/* Stat tiles. */
 .keeper-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 260px));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 240px));
   gap: var(--space-4);
   margin-bottom: var(--space-5);
 }
 
-.keeper-stat-tile {
-  padding: var(--space-4) var(--space-5);
+.keeper-stat-tile { padding: var(--space-4) var(--space-5); }
+
+/* Clickable stat tiles (dashboard shortcuts). */
+.keeper-stat-tile--link {
+  display: block;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.keeper-stat-tile--link:hover {
+  border-color: var(--keeper-ink);
+  background: var(--keeper-panel-2);
 }
 
 .keeper-stat-tile__label {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
+  color: var(--keeper-ink-3);
   margin-bottom: var(--space-2);
 }
 
 .keeper-stat-tile__value {
   font-size: 2rem;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--keeper-ink);
 }
 
-.keeper-table-card {
-  padding: var(--space-5);
-}
-
-.keeper-table-card__heading {
-  font-size: 1.05rem;
-  margin-bottom: var(--space-4);
-}
-
-.keeper-table-scroll {
-  overflow-x: auto;
-}
+/* Tables. */
+.keeper-table-scroll { overflow-x: auto; }
 
 .keeper-table {
   width: 100%;
@@ -136,48 +372,127 @@ body.keeper {
 .keeper-table th {
   text-align: left;
   padding: 10px 14px;
-  color: var(--text-2);
+  color: var(--keeper-ink-3);
   font-weight: 600;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border-strong);
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--keeper-line);
   white-space: nowrap;
 }
 
 .keeper-table td {
   padding: 12px 14px;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--keeper-line-soft);
   white-space: nowrap;
 }
 
-.keeper-table tbody tr:hover {
-  background: var(--bg-2);
-}
+.keeper-table tbody tr:hover { background: var(--keeper-panel-2); }
 
+/* Flash banner. */
 .keeper-flash {
   padding: var(--space-3) var(--space-4);
   margin-bottom: var(--space-5);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  background: var(--bg-2);
-  color: var(--text-1);
+  border: 1px solid var(--keeper-line);
+  border-left: 3px solid var(--keeper-ink);
+  border-radius: var(--radius-sm, 6px);
+  background: var(--keeper-panel-2);
+  color: var(--keeper-ink);
   font-size: 0.85rem;
 }
 
-.keeper-action-group {
-  display: flex;
-  gap: var(--space-2);
-}
+.keeper-action-group { display: flex; gap: var(--space-2); }
 
+/* Footer strip inside the content column. */
+/* Footer pinned at the bottom of the content column (does not scroll). */
 .keeper-footer {
-  border-top: 1px solid var(--border-subtle);
-  padding: var(--space-5) 0;
-  font-size: 0.85rem;
+  flex: 0 0 auto;
+  padding: var(--space-3) var(--space-6);
+  border-top: 1px solid var(--keeper-line-soft);
+  font-size: 0.8rem;
+  color: var(--keeper-ink-3);
 }
 
-@media (max-width: 600px) {
-  .keeper-header__link.text-muted {
-    display: none;
+/* =====================================================================
+   Responsive — collapsible sidebar (<= 900px).
+   ===================================================================== */
+@media (max-width: 900px) {
+  /* Back to normal page scroll: the fixed-height app-shell model is desktop
+     only. On mobile the content + rail stack and the page scrolls as usual. */
+  .keeper-shell {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
+  }
+
+  .keeper-content {
+    height: auto;
+    overflow: visible;
+  }
+
+  .keeper-main {
+    overflow-y: visible;
+  }
+
+  /* Header still sticks to the top of the viewport on scroll (below the mobile
+     top bar), which is fine and useful on mobile. */
+  .keeper-header {
+    position: sticky;
+    top: 0;
+  }
+
+  /* Rail drops BELOW the content (no longer a full-height sticky column). */
+  .keeper-rail {
+    position: static;
+    height: auto;
+    border-left: 0;
+    border-top: 1px solid var(--keeper-line);
+  }
+
+  .keeper-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+    background: var(--keeper-panel);
+    border-bottom: 1px solid var(--keeper-line);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  /* Sidebar slides in from the left as an overlay. */
+  .keeper-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(280px, 82vw);
+    height: 100vh;
+    z-index: 60;
+    transform: translateX(-100%);
+    transition: transform 0.24s ease;
+  }
+
+  .keeper-shell.is-nav-open .keeper-sidebar {
+    transform: translateX(0);
+  }
+
+  .keeper-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 50;
+    border: 0;
+    padding: 0;
+  }
+
+  .keeper-main {
+    padding: var(--space-5) var(--space-4) var(--space-6);
+  }
+
+  .keeper-footer {
+    padding: var(--space-4) var(--space-4);
   }
 }

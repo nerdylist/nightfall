@@ -10,10 +10,15 @@ if (!grave_is_admin()) {
     exit;
 }
 
-// Single userbase: forum users ARE host users (data/graverising.sqlite),
-// with the forum's profile/moderation columns absorbed into the host users
-// table (migrations/004_forum_user_columns.sql). Keeper manages them through
-// the regular host connection — no forum DB access needed here.
+/**
+ * Keeper > Users — the single user-management screen.
+ *
+ * There is ONE userbase: the host `users` table (data/graverising.sqlite) serves
+ * both the site and the forum, with the forum's profile/moderation columns
+ * absorbed into it (migrations/004_forum_user_columns.sql). This page manages
+ * every user (promote/demote admin role, ban/unban) — it replaces the old
+ * "Forum Users" screen and the dashboard's read-only user list.
+ */
 
 // Keeper-scoped CSRF token (separate from the forum's csrf_token()).
 if (empty($_SESSION['keeper_csrf'])) {
@@ -26,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!is_string($token) || !hash_equals($keeperCsrf, $token)) {
         $_SESSION['keeper_flash'] = 'Invalid request. Please try again.';
-        header('Location: /keeper/forum-users.php');
+        header('Location: /keeper/users.php');
         exit;
     }
 
@@ -39,8 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $target = $stmt->fetch();
 
     if (!$target) {
-        $_SESSION['keeper_flash'] = 'Forum user not found.';
-        header('Location: /keeper/forum-users.php');
+        $_SESSION['keeper_flash'] = 'User not found.';
+        header('Location: /keeper/users.php');
         exit;
     }
 
@@ -52,36 +57,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'toggle_role') {
         if ($target['role'] === 'admin' && $isLastActiveAdmin) {
             $_SESSION['keeper_flash'] = 'Cannot demote the last active admin.';
-            header('Location: /keeper/forum-users.php');
+            header('Location: /keeper/users.php');
             exit;
         }
         $newRole = ($target['role'] === 'admin') ? 'user' : 'admin';
         $upd = $db->prepare('UPDATE users SET role = ? WHERE id = ?');
         $upd->execute([$newRole, $id]);
-        $_SESSION['keeper_flash'] = 'Forum user role updated.';
-        header('Location: /keeper/forum-users.php');
+        $_SESSION['keeper_flash'] = 'User role updated.';
+        header('Location: /keeper/users.php');
         exit;
     }
 
     if ($action === 'toggle_status') {
         if ($target['status'] === 'active' && $isLastActiveAdmin) {
             $_SESSION['keeper_flash'] = 'Cannot ban the last active admin.';
-            header('Location: /keeper/forum-users.php');
+            header('Location: /keeper/users.php');
             exit;
         }
         $newStatus = ($target['status'] === 'active') ? 'banned' : 'active';
         $upd = $db->prepare('UPDATE users SET status = ? WHERE id = ?');
         $upd->execute([$newStatus, $id]);
-        $_SESSION['keeper_flash'] = 'Forum user status updated.';
-        header('Location: /keeper/forum-users.php');
+        $_SESSION['keeper_flash'] = 'User status updated.';
+        header('Location: /keeper/users.php');
         exit;
     }
 
-    header('Location: /keeper/forum-users.php');
+    header('Location: /keeper/users.php');
     exit;
 }
 
-$pageTitle = 'Forum Users — Keeper';
+$pageTitle = 'Users — Keeper';
 $pageCss = [];
 include __DIR__ . '/../partials/keeper-header.php';
 
@@ -90,9 +95,11 @@ unset($_SESSION['keeper_flash']);
 
 $db = grave_db();
 
-$totalForumUsers = (int) $db->query('SELECT COUNT(*) FROM users')->fetchColumn();
+$totalUsers  = (int) $db->query('SELECT COUNT(*) FROM users')->fetchColumn();
+$adminUsers  = (int) $db->query("SELECT COUNT(*) FROM users WHERE role = 'admin' AND status = 'active'")->fetchColumn();
+$bannedUsers = (int) $db->query("SELECT COUNT(*) FROM users WHERE status = 'banned'")->fetchColumn();
 
-$forumUsers = $db->query(
+$users = $db->query(
     "SELECT id, username,
             COALESCE(NULLIF(display_name, ''), username) AS display_name,
             email, role, status, reputation, threads_started,
@@ -103,7 +110,7 @@ $forumUsers = $db->query(
 
 <main class="keeper-main">
   <div class="container">
-    <h1 class="keeper-page-title">Forum Users</h1>
+    <h1 class="keeper-page-title">Users</h1>
 
     <?php if ($flash): ?>
     <p class="keeper-flash"><?= htmlspecialchars($flash) ?></p>
@@ -111,13 +118,21 @@ $forumUsers = $db->query(
 
     <div class="keeper-stats">
       <div class="card keeper-stat-tile">
-        <p class="keeper-stat-tile__label text-muted">Total Forum Users</p>
-        <p class="keeper-stat-tile__value"><?= number_format($totalForumUsers) ?></p>
+        <p class="keeper-stat-tile__label text-muted">Total Users</p>
+        <p class="keeper-stat-tile__value"><?= number_format($totalUsers) ?></p>
+      </div>
+      <div class="card keeper-stat-tile">
+        <p class="keeper-stat-tile__label text-muted">Admins</p>
+        <p class="keeper-stat-tile__value"><?= number_format($adminUsers) ?></p>
+      </div>
+      <div class="card keeper-stat-tile">
+        <p class="keeper-stat-tile__label text-muted">Banned</p>
+        <p class="keeper-stat-tile__value"><?= number_format($bannedUsers) ?></p>
       </div>
     </div>
 
     <div class="card keeper-table-card">
-      <h2 class="keeper-table-card__heading">Forum Users</h2>
+      <h2 class="keeper-table-card__heading">All Users</h2>
       <div class="keeper-table-scroll">
         <table class="keeper-table">
           <thead>
@@ -135,7 +150,7 @@ $forumUsers = $db->query(
             </tr>
           </thead>
           <tbody>
-            <?php foreach ($forumUsers as $u):
+            <?php foreach ($users as $u):
                 $uid = (int) $u['id'];
             ?>
             <tr>
@@ -150,13 +165,13 @@ $forumUsers = $db->query(
               <td><?= htmlspecialchars((string) $u['join_date']) ?></td>
               <td>
                 <div class="keeper-action-group">
-                  <form method="post" action="/keeper/forum-users.php">
+                  <form method="post" action="/keeper/users.php">
                     <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
                     <input type="hidden" name="action" value="toggle_role">
                     <input type="hidden" name="id" value="<?= $uid ?>">
                     <button class="btn" type="submit"><?= $u['role'] === 'admin' ? 'Demote' : 'Promote' ?></button>
                   </form>
-                  <form method="post" action="/keeper/forum-users.php">
+                  <form method="post" action="/keeper/users.php">
                     <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
                     <input type="hidden" name="action" value="toggle_status">
                     <input type="hidden" name="id" value="<?= $uid ?>">
@@ -166,8 +181,8 @@ $forumUsers = $db->query(
               </td>
             </tr>
             <?php endforeach; ?>
-            <?php if (empty($forumUsers)): ?>
-            <tr><td colspan="10" class="text-muted">No forum users found.</td></tr>
+            <?php if (empty($users)): ?>
+            <tr><td colspan="10" class="text-muted">No users found.</td></tr>
             <?php endif; ?>
           </tbody>
         </table>

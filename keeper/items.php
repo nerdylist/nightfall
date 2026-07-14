@@ -302,6 +302,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $pageTitle = 'Items — Keeper';
 $pageCss = ['/css/keeper-items.css'];
+$pageJs = ['/js/keeper-items.js'];
 include __DIR__ . '/../partials/keeper-header.php';
 
 $flash = $_SESSION['keeper_flash'] ?? null;
@@ -360,22 +361,27 @@ function keeper_rarity_class(?string $rarity): string
     <p class="keeper-flash"><?= htmlspecialchars($flash) ?></p>
     <?php endif; ?>
 
-    <div class="card keeper-table-card">
-      <div class="keeper-items-bar">
-        <p class="text-muted keeper-items-hint">
-          The in-game item catalog (<strong><?= count($items) ?></strong> item<?= count($items) === 1 ? '' : 's' ?>). The game pushes its registry to <code>/api/items</code>; press <strong>Update</strong> to re-fetch the catalog from <code><?= htmlspecialchars($itemsUrl) ?></code>.
-        </p>
+    <!-- Button bar: catalog count + actions. -->
+    <div class="keeper-items-toolbar">
+      <p class="text-muted keeper-items-toolbar__count"><strong><?= count($items) ?></strong> item<?= count($items) === 1 ? '' : 's' ?> in the catalog</p>
+      <div class="keeper-items-toolbar__actions">
+        <button type="button" class="btn btn-primary" data-open-item-modal>Add Item</button>
         <form method="post" action="/keeper/items.php" class="keeper-items-form">
           <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
-          <button type="submit" name="update_items" value="1" class="btn btn-primary">Update</button>
+          <button type="submit" name="update_items" value="1" class="btn btn-ghost">Update</button>
         </form>
       </div>
     </div>
 
-    <!-- Add / edit item form. Prefilled when ?edit=<item_id>. -->
-    <div class="card keeper-table-card" id="add">
-      <h2 class="keeper-table-card__heading"><?= $editItem ? 'Edit Item' : 'Add Item' ?></h2>
-      <p class="text-muted keeper-items-hint">Items are authored here; the game ingests this catalog at build time. Item ID is lowercase letters, numbers and underscores.</p>
+    <!-- Add / edit item modal. Opened by "Add Item", or auto-opens on ?edit=. -->
+    <div class="keeper-modal<?= $editItem ? ' is-open' : '' ?>" id="item-modal" role="dialog" aria-modal="true" aria-labelledby="item-modal-title"<?= $editItem ? '' : ' hidden' ?>>
+      <div class="keeper-modal__backdrop" data-close-item-modal></div>
+      <div class="keeper-modal__panel" role="document">
+        <div class="keeper-modal__head">
+          <h2 class="keeper-modal__title" id="item-modal-title"><?= $editItem ? 'Edit Item' : 'Add Item' ?></h2>
+          <a href="/keeper/items.php" class="keeper-modal__close" aria-label="Close" data-close-item-modal>&times;</a>
+        </div>
+        <p class="text-muted keeper-modal__desc"><?= $editItem ? 'Update this item. Item ID is lowercase letters, numbers and underscores.' : 'Add a new item to the system. Item ID is lowercase letters, numbers and underscores; the game ingests this catalog at build time.' ?></p>
 
       <form method="post" action="/keeper/items.php" class="keeper-items-editor">
         <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
@@ -450,13 +456,12 @@ function keeper_rarity_class(?string $rarity): string
         </label>
 
         <div class="keeper-items-actions">
-          <?php if ($editItem): ?>
-          <a href="/keeper/items.php" class="btn btn-ghost">Cancel</a>
-          <?php endif; ?>
+          <a href="/keeper/items.php" class="btn btn-ghost" data-close-item-modal>Cancel</a>
           <button type="submit" name="save_item" value="1" class="btn btn-primary"><?= $editItem ? 'Save Item' : 'Add Item' ?></button>
         </div>
       </form>
-    </div>
+      </div><!-- /.keeper-modal__panel -->
+    </div><!-- /.keeper-modal -->
 
     <datalist id="item-categories"><?php foreach (KEEPER_ITEM_CATEGORIES as $c): ?><option value="<?= htmlspecialchars($c) ?>"><?php endforeach; ?></datalist>
     <datalist id="item-rarities"><?php foreach (KEEPER_ITEM_RARITIES as $r): ?><option value="<?= htmlspecialchars($r) ?>"><?php endforeach; ?></datalist>

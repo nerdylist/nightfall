@@ -11,8 +11,8 @@ if (!grave_is_admin()) {
 }
 
 /**
- * Open a direct PDO connection to the forum's SQLite database (same pattern
- * as keeper/forum-users.php — Keeper never includes bbs/ code).
+ * Open a direct PDO connection to the forum's SQLite database — Keeper never
+ * includes bbs/ code, it connects directly.
  */
 if (!function_exists('keeper_forum_db')) {
     function keeper_forum_db(): PDO
