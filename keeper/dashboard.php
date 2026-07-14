@@ -26,6 +26,10 @@ $registeredUsers = $stmt->fetchAll();
   <div class="container">
     <h1 class="keeper-page-title">Dashboard</h1>
 
+    <p class="keeper-dashboard-links">
+      <a href="/keeper/items.php" class="btn btn-ghost">View Items Table</a>
+    </p>
+
     <div class="keeper-stats">
       <div class="card keeper-stat-tile">
         <p class="keeper-stat-tile__label text-muted">Total Registered Users</p>

@@ -1,0 +1,125 @@
+/* THE DEAD LAST — Keeper > Items (read-only game item catalog view) */
+
+.keeper-table-card + .keeper-table-card {
+  margin-top: var(--space-5);
+}
+
+/* Top bar: hint text on the left, Update button on the right. */
+.keeper-items-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.keeper-items-hint {
+  font-size: 0.85rem;
+  margin: 0;
+  flex: 1 1 320px;
+}
+
+.keeper-items-hint code {
+  padding: 1px 6px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+}
+
+.keeper-items-form {
+  flex: 0 0 auto;
+}
+
+/* Category heading count badge. */
+.keeper-items-count {
+  margin-left: var(--space-2);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Table. */
+.keeper-items-table td,
+.keeper-items-table th {
+  padding: 8px 10px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.keeper-items-thumb-cell {
+  width: 40px;
+  padding-right: 0;
+}
+
+.keeper-items-thumb {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  display: block;
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+}
+
+/* Item name + id stacked. */
+.keeper-items-name {
+  display: block;
+  font-weight: 600;
+}
+
+.keeper-items-id {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono, ui-monospace, monospace);
+}
+
+/* Description: allow it to wrap and take remaining width, but keep the row compact. */
+.keeper-items-desc {
+  white-space: normal;
+  max-width: 340px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* Rarity chips. */
+.keeper-items-rarity {
+  display: inline-block;
+  padding: 2px 9px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.keeper-items-rarity--common {
+  color: var(--text-muted);
+  background: var(--bg-2);
+  border-color: var(--border-subtle);
+}
+
+.keeper-items-rarity--uncommon {
+  color: #7ee787;
+  background: rgba(126, 231, 135, 0.10);
+  border-color: rgba(126, 231, 135, 0.35);
+}
+
+.keeper-items-rarity--rare {
+  color: #79c0ff;
+  background: rgba(121, 192, 255, 0.10);
+  border-color: rgba(121, 192, 255, 0.35);
+}
+
+.keeper-items-rarity--epic {
+  color: #d2a8ff;
+  background: rgba(210, 168, 255, 0.12);
+  border-color: rgba(210, 168, 255, 0.40);
+}
+
+.keeper-items-rarity--legendary {
+  color: #ffa657;
+  background: rgba(255, 166, 87, 0.12);
+  border-color: rgba(255, 166, 87, 0.40);
+}
