@@ -123,3 +123,113 @@
   background: rgba(255, 166, 87, 0.12);
   border-color: rgba(255, 166, 87, 0.40);
 }
+
+/* ---- Add / edit form ---- */
+.keeper-items-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.keeper-items-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.keeper-items-field--full {
+  margin-bottom: var(--space-3);
+}
+
+.keeper-items-field--full .field,
+.keeper-items-field--full textarea.field {
+  width: 100%;
+}
+
+/* Checkbox field sits inline (label beside the box), aligned to the bottom of its grid cell. */
+.keeper-items-field--check {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  align-self: end;
+  padding-bottom: 9px;
+}
+
+.keeper-items-field--check input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.keeper-items-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.keeper-items-editor .field {
+  padding: 7px 10px;
+  font-size: 0.88rem;
+}
+
+.keeper-items-mono {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.82rem;
+}
+
+.keeper-items-actions {
+  margin-top: var(--space-4);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+/* ---- Row actions (edit / delete) ---- */
+.keeper-items-row-actions {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.keeper-items-row-actions form {
+  display: inline;
+}
+
+.keeper-items-edit {
+  color: var(--text-1);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-right: var(--space-3);
+}
+
+.keeper-items-edit:hover {
+  color: var(--text-0);
+}
+
+.keeper-items-del {
+  background: none;
+  border: none;
+  color: #ff7b72;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+
+.keeper-items-del:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 900px) {
+  .keeper-items-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .keeper-items-grid {
+    grid-template-columns: 1fr;
+  }
+}
