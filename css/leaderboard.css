@@ -1,0 +1,246 @@
+/* THE DEAD LAST — Leaderboard page.
+   Season survival-time standings + today panel + season countdown. Compact,
+   ultra-dark, consistent with the site tokens in base.css. */
+
+.lb {
+  padding-top: var(--space-7);
+  padding-bottom: var(--space-8);
+}
+
+/* ---- Header: titles left, season clock right ---- */
+.lb-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding-bottom: var(--space-5);
+  margin-bottom: var(--space-5);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.lb-title {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-size: clamp(2.2rem, 6vw, 3.4rem);
+  line-height: 1.1;
+}
+
+.lb-subtitle {
+  margin-top: var(--space-2);
+  max-width: 46ch;
+  font-size: 0.92rem;
+}
+
+/* Season countdown card */
+.lb-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  min-width: 220px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  text-align: right;
+}
+
+.lb-clock__label {
+  font-family: var(--font-condensed);
+  font-weight: 800;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-2);
+}
+
+.lb-clock__value {
+  font-family: var(--font-condensed);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.65rem;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  color: var(--text-0);
+  text-shadow: 0 0 18px rgba(255, 255, 255, 0.14);
+}
+
+.lb-clock__value.is-ended {
+  color: var(--danger);
+  text-shadow: 0 0 18px var(--danger-glow);
+}
+
+.lb-clock__window {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ---- Two-column layout: TOP (wide) + TODAY (narrow) ---- */
+.lb-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.lb-panel {
+  background: var(--bg-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.lb-panel__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-2);
+}
+
+.lb-panel__title {
+  font-family: var(--font-condensed);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 1rem;
+}
+
+.lb-panel__hint {
+  font-family: var(--font-condensed);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.72rem;
+}
+
+.lb-empty {
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* ---- Rows ---- */
+.lb-list {
+  list-style: none;
+}
+
+.lb-row {
+  display: grid;
+  grid-template-columns: 2.2rem 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background-color 0.12s ease;
+}
+
+.lb-row:last-child {
+  border-bottom: none;
+}
+
+.lb-row:hover {
+  background: var(--bg-2);
+}
+
+.lb-row--sm {
+  padding: 10px var(--space-4);
+}
+
+.lb-row__rank {
+  font-family: var(--font-condensed);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.05rem;
+  color: var(--text-2);
+  text-align: center;
+}
+
+/* Top 3 get a subtle emphasis (no color — the whole site is grayscale). */
+.lb-row--podium .lb-row__rank {
+  color: var(--text-0);
+  font-size: 1.25rem;
+  text-shadow: 0 0 14px rgba(255, 255, 255, 0.22);
+}
+
+.lb-row--r1 {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05), transparent 60%);
+}
+
+.lb-row__who {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.lb-row__char {
+  font-weight: 600;
+  font-size: 0.98rem;
+  color: var(--text-0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lb-row__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: 0.76rem;
+  line-height: 1.3;
+}
+
+.lb-row__skin {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.lb-row__outcome {
+  color: var(--danger);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.lb-row__time {
+  font-family: var(--font-condensed);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.05rem;
+  color: var(--text-0);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.lb-row--sm .lb-row__time,
+.lb-row--sm .lb-row__rank {
+  font-size: 0.95rem;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+  .lb-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .lb-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .lb-clock {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .lb-row__skin {
+    display: none;
+  }
+}

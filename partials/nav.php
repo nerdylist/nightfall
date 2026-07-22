@@ -64,6 +64,7 @@ if (!empty($_SESSION['user_id'])) {
           <a href="/" class="site-nav__link">Home</a>
           <a href="#" class="site-nav__link">Game</a>
           <a href="#" class="site-nav__link">News</a>
+          <a href="/leaderboard" class="site-nav__link">Leaderboard</a>
           <a href="/shop" class="site-nav__link">Shop</a>
           <a href="/bbs/" class="site-nav__link">Community</a>
           <a href="#" class="site-nav__link">Support</a>

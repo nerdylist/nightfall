@@ -199,3 +199,31 @@ All errors are JSON: `{ "success": false, "error": "..." }`.
 
 On any non-200, nothing was written — safe to retry the whole request
 (but remember counters are deltas: only retry sends that failed).
+
+## Daily playtime buckets (leaderboard metric — added 2026-07-22)
+
+The leaderboard ranks characters by ACTIVE survival time logged per real
+24-hour day (game docs: season-clock-and-leaderboards.md). A stats POST
+with character context (or an inline character create/end) may include:
+
+```json
+"daily_playtime": [ { "date": "2026-08-02", "seconds": 7200 }, ... ]
+```
+
+- Absolute per-day totals (NOT deltas). Server upserts per (character, date)
+  with seconds = MAX(stored, sent) — resends are idempotent and monotonic.
+- Max 40 buckets per post; date = strict YYYY-MM-DD; seconds = int >= 0.
+- Applied buckets echo back as "applied_playtime".
+
+### GET /api/leaderboard (public, no auth)
+
+```json
+{ "success": true,
+  "season": { ...same shape as /api/season + "server_date" },
+  "top":   [ { "rank": 1, "character": { "id", "name", "skin", "outcome",
+               "started_at" }, "username": "maria", "seconds": 20000 }, ... ],
+  "today": [ ...same row shape, today's bucket only... ] }
+```
+
+`top` sums buckets inside the season window (all-time when no season is
+set), dead and living characters both, limit 25. Site page: /leaderboard.

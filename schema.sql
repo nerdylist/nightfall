@@ -118,6 +118,22 @@ CREATE TABLE IF NOT EXISTS characters (
 CREATE INDEX IF NOT EXISTS idx_characters_user_id ON characters(user_id);
 CREATE INDEX IF NOT EXISTS idx_characters_ref     ON characters(ref);
 
+-- Per-character daily playtime buckets (mirrors migrations/010_character_playtime.sql).
+-- The season leaderboard metric: per-character, per-real-day active survival
+-- time. One row per (character, date); the game sends absolute per-day totals
+-- reported via daily_playtime on stat posts and ingest max-merges seconds so
+-- resends are idempotent/monotonic. Season TOP = SUM over the season window;
+-- TODAY = one day's bucket. See docs/game-stats-api.md.
+CREATE TABLE IF NOT EXISTS character_playtime (
+    character_id INTEGER NOT NULL,                   -- FK -> characters.id
+    date         TEXT NOT NULL,                      -- real calendar day, YYYY-MM-DD
+    seconds      INTEGER NOT NULL DEFAULT 0,         -- absolute active seconds that day (max-merged on ingest)
+    PRIMARY KEY (character_id, date),
+    FOREIGN KEY (character_id) REFERENCES characters(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_character_playtime_date ON character_playtime(date);
+
 -- Settings (mirrors migrations/007_settings.sql).
 -- Generic key/value store for site/game-level configuration on the HOST
 -- database. First consumers: season_start / season_end dates managed from

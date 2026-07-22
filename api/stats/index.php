@@ -33,6 +33,14 @@
  *      belonging to the user and echoed back; per-character stat
  *      aggregation is not implemented yet.
  *
+ *      "daily_playtime": [{ "date": "YYYY-MM-DD", "seconds": <int >= 0> }, ...]
+ *      (optional, PER-CHARACTER) — absolute per-real-day active survival time.
+ *      Max 40 buckets/post. UPSERTS each (character, date) with
+ *      seconds = max(stored, sent) so resends are idempotent/monotonic. Needs
+ *      a character: a "character" create/end in this post OR character context
+ *      (character_id/character_ref). Applied buckets are echoed as
+ *      "applied_playtime". Feeds the season/daily leaderboard (api/leaderboard).
+ *
  * GET  /api/stats?username=<name>  -> the player's current stats row
  *      (all zeros if the player has never reported).
  *
@@ -188,6 +196,42 @@ function stats_find_character(PDO $pdo, int $userId, ?int $id, ?string $ref): ?a
     return ($row === false) ? null : $row;
 }
 
+/** Max number of daily_playtime buckets accepted in a single post. */
+const PLAYTIME_MAX_BUCKETS = 40;
+
+/** True when $value is a real calendar date in YYYY-MM-DD form. */
+function stats_valid_date(string $value): bool
+{
+    $dt = DateTime::createFromFormat('Y-m-d', $value);
+
+    return $dt instanceof DateTime && $dt->format('Y-m-d') === $value;
+}
+
+/**
+ * Upsert per-character daily playtime buckets. The game sends ABSOLUTE
+ * per-day totals, so each (character, date) is max-merged — resends are
+ * idempotent and can only move a bucket up (never down). $buckets is the
+ * pre-validated list of ['date' => 'YYYY-MM-DD', 'seconds' => <int >= 0>].
+ */
+function stats_apply_playtime(PDO $pdo, int $characterId, array $buckets): void
+{
+    $stmt = $pdo->prepare(
+        'INSERT INTO character_playtime (character_id, date, seconds)
+         VALUES (:character_id, :date, :seconds)
+         ON CONFLICT(character_id, date) DO UPDATE SET
+           seconds = CASE WHEN excluded.seconds > character_playtime.seconds
+                          THEN excluded.seconds ELSE character_playtime.seconds END'
+    );
+
+    foreach ($buckets as $bucket) {
+        $stmt->execute([
+            'character_id' => $characterId,
+            'date'         => $bucket['date'],
+            'seconds'      => $bucket['seconds'],
+        ]);
+    }
+}
+
 if (!stats_verify_bearer()) {
     grave_json_response(401, ['success' => false, 'error' => 'Unauthorized.']);
 }
@@ -226,9 +270,10 @@ if ($username === '') {
 
 $stats = $input['stats'] ?? null;
 $character = $input['character'] ?? null;
+$hasPlaytime = array_key_exists('daily_playtime', $input);
 
-if (($stats === null || $stats === []) && !is_array($character)) {
-    grave_json_response(400, ['success' => false, 'error' => 'Request must include "stats" and/or "character".']);
+if (($stats === null || $stats === []) && !is_array($character) && !$hasPlaytime) {
+    grave_json_response(400, ['success' => false, 'error' => 'Request must include "stats", "character", and/or "daily_playtime".']);
 }
 
 // ---- Validate the stats object (before touching the database). ----
@@ -329,6 +374,48 @@ if (isset($input['character_id'])) {
     $contextRef = (string) $input['character_ref'];
 }
 
+// ---- Validate daily playtime buckets (optional, per-character). ----
+// [{ "date": "YYYY-MM-DD", "seconds": <int >= 0> }, ...]. The game sends
+// absolute per-day totals; ingest max-merges each (character, date). Requires
+// a character to attach to: a create/end in this post, or character context.
+$cleanPlaytime = [];
+if (array_key_exists('daily_playtime', $input)) {
+    $daily = $input['daily_playtime'];
+    if (!is_array($daily)) {
+        grave_json_response(400, ['success' => false, 'error' => '"daily_playtime" must be an array of {date, seconds}.']);
+    }
+    if (count($daily) > PLAYTIME_MAX_BUCKETS) {
+        grave_json_response(400, [
+            'success' => false,
+            'error'   => 'Too many "daily_playtime" buckets (max ' . PLAYTIME_MAX_BUCKETS . ').',
+        ]);
+    }
+
+    // Collapse duplicate dates within one post by max, so a payload can't
+    // fight itself; the DB conflict resolution then max-merges against stored.
+    foreach ($daily as $bucket) {
+        if (!is_array($bucket) || !isset($bucket['date'], $bucket['seconds'])) {
+            grave_json_response(400, ['success' => false, 'error' => 'Each "daily_playtime" entry needs "date" and "seconds".']);
+        }
+
+        $date = trim((string) $bucket['date']);
+        if (!stats_valid_date($date)) {
+            grave_json_response(400, ['success' => false, 'error' => 'Invalid "daily_playtime" date (expected YYYY-MM-DD): ' . $date]);
+        }
+
+        $secondsRaw = $bucket['seconds'];
+        $isIntegral = is_numeric($secondsRaw) && !is_bool($secondsRaw) && (float) $secondsRaw == (int) $secondsRaw;
+        if (!$isIntegral || (int) $secondsRaw < 0) {
+            grave_json_response(400, ['success' => false, 'error' => 'Playtime "seconds" for ' . $date . ' must be a non-negative integer.']);
+        }
+
+        $seconds = (int) $secondsRaw;
+        if (!isset($cleanPlaytime[$date]) || $seconds > $cleanPlaytime[$date]) {
+            $cleanPlaytime[$date] = $seconds;
+        }
+    }
+}
+
 // ---- Resolve the user, then write. ----
 $userId = stats_user_id($pdo, $username);
 if ($userId === null) {
@@ -342,6 +429,16 @@ if ($contextId !== null || $contextRef !== null) {
         grave_json_response(404, ['success' => false, 'error' => 'Unknown character for this user.']);
     }
     $contextCharacter = stats_character_public($row);
+}
+
+// daily_playtime is per-character — it needs a character to attach to: either
+// the character context on this post, or a character create/end in this post.
+// (A create resolves its id inside the transaction below.)
+if ($cleanPlaytime !== [] && $contextCharacter === null && $characterAction === null) {
+    grave_json_response(400, [
+        'success' => false,
+        'error'   => '"daily_playtime" requires a character: send "character_id"/"character_ref", or a "character" create/end in the same post.',
+    ]);
 }
 
 $characterOut = null;
@@ -381,6 +478,21 @@ try {
         stats_apply($pdo, $userId, $clean);
     }
 
+    if ($cleanPlaytime !== []) {
+        // Attach to the context character if given, else the character
+        // created/ended in this same post. The pre-transaction guard
+        // guarantees one of these exists.
+        $playtimeCharId = ($contextCharacter !== null)
+            ? (int) $contextCharacter['id']
+            : (int) $characterOut['id'];
+
+        $buckets = [];
+        foreach ($cleanPlaytime as $date => $seconds) {
+            $buckets[] = ['date' => $date, 'seconds' => $seconds];
+        }
+        stats_apply_playtime($pdo, $playtimeCharId, $buckets);
+    }
+
     $pdo->commit();
 } catch (Throwable $e) {
     if ($pdo->inTransaction()) {
@@ -404,6 +516,15 @@ if ($contextCharacter !== null) {
 }
 if ($clean !== []) {
     $response['applied'] = $clean;
+}
+if ($cleanPlaytime !== []) {
+    // Echo the buckets as applied (date-sorted), so the game can reconcile.
+    ksort($cleanPlaytime);
+    $applied = [];
+    foreach ($cleanPlaytime as $date => $seconds) {
+        $applied[] = ['date' => $date, 'seconds' => $seconds];
+    }
+    $response['applied_playtime'] = $applied;
 }
 $response['stats'] = stats_row($pdo, $userId);
 

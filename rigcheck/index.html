@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rig Check</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./lib/three.module.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="hud">
+    <span class="title">Rig Check</span>
+    <label>Rig
+      <select id="rigSelect">
+        <option value="models/male.fbx">male.fbx</option>
+        <option value="models/female.fbx">female.fbx</option>
+      </select>
+    </label>
+    <label>Clip
+      <select id="clipSelect"><option value="">— none —</option></select>
+    </label>
+    <button id="pauseBtn" disabled>Pause</button>
+    <input type="file" id="fileInput" accept=".fbx">
+    <span id="status"></span>
+  </div>
+  <canvas id="scene"></canvas>
+  <script type="module" src="viewer.js"></script>
+</body>
+</html>
