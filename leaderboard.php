@@ -250,6 +250,7 @@ include __DIR__ . '/partials/header.php';
         <button type="button"
                 class="lb-boards__tab<?= $first ? ' is-active' : '' ?>"
                 data-board="<?= htmlspecialchars($bKey) ?>"
+                data-scope="<?= htmlspecialchars($bDef['who'] ?? 'both') ?>"
                 title="<?= htmlspecialchars($bDef['blurb']) ?>">
           <img class="lb-boards__icon"
                src="<?= htmlspecialchars($bDef['icon']) ?>"

@@ -103,10 +103,39 @@
     });
   }
 
+  // CATEGORY FILTER (Boss 2026-07-23): USER mode shows only user-scoped
+  // boards, SURVIVOR only survivor-scoped ('both' appears in each); ALL
+  // shows every board. If the active tab is filtered out, the first
+  // visible tab takes over.
+  function filterTabs(key) {
+    var tabsWrap = document.getElementById("lb-board-tabs");
+    if (!tabsWrap) return;
+
+    var activeVisible = false;
+    var firstVisible = null;
+
+    tabsWrap.querySelectorAll(".lb-boards__tab").forEach(function (t) {
+      var scope = t.getAttribute("data-scope") || "both";
+      var show = key === "all" || scope === "both" || scope === key;
+      t.style.display = show ? "" : "none";
+      if (show && !firstVisible) firstVisible = t;
+      if (show && t.classList.contains("is-active")) activeVisible = true;
+    });
+
+    if (!activeVisible && firstVisible) {
+      firstVisible.click();
+    }
+  }
+
   who.addEventListener("click", function (e) {
     var btn = e.target.closest("[data-who]");
-    if (btn) apply(btn.getAttribute("data-who"));
+    if (btn) {
+      var key = btn.getAttribute("data-who");
+      apply(key);
+      filterTabs(key);
+    }
   });
 
   apply("survivor");
+  filterTabs("survivor");
 })();

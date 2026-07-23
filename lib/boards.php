@@ -14,26 +14,26 @@
  */
 
 const TDL_BOARDS = [
-    'maniac'      => ['column' => 'kills_hvh',              'label' => 'Maniac',           'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Most human-on-human kills.', 'icon' => '/assets/images/leaderboards/icon-_0009_maniac.png'],
-    'hunter'      => ['column' => 'hunter_pure_kills',      'label' => 'Hunter',           'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Zombie kills — clean hands, no human blood.', 'icon' => '/assets/images/leaderboards/icon-_0008_hunter.png'],
-    'allie'       => ['column' => 'allie_pure_kills',       'label' => 'Allie',            'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Zombie-vs-zombie kills with no human harmed.', 'icon' => '/assets/images/leaderboards/icon-_0007_allies.png'],
-    'glutton'     => ['column' => 'kills_zvh',              'label' => 'The Glutton',      'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Humans devoured as a zombie.', 'icon' => '/assets/images/leaderboards/icon-_0006_the_glutton.png'],
-    'slugger'     => ['column' => 'bat_kills',              'label' => 'The Slugger',      'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Melee kills with a bat.', 'icon' => '/assets/images/leaderboards/icon-_0005_the_slugger.png'],
-    'patientzero' => ['column' => 'humans_infected',        'label' => 'Patient Zero',     'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Humans infected.', 'icon' => '/assets/images/leaderboards/icon-_0004_patient_zero.png'],
-    'horde'       => ['column' => 'biggest_horde_size',     'label' => 'Biggest Horde',    'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Largest horde led.', 'icon' => '/assets/images/leaderboards/icon-_0003_biggest_horde.png'],
-    'turned'      => ['column' => 'times_turned',           'label' => 'Times Turned',     'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Times gone over to the dead.', 'icon' => '/assets/images/leaderboards/icon-_0002_times_turned.png'],
-    'redemptions' => ['column' => 'redemptions',            'label' => 'Redemptions',      'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Times clawed back to the living.', 'icon' => '/assets/images/leaderboards/icon-_0001_redemptions.png'],
-    'truedeath'   => ['column' => 'true_deaths',            'label' => 'True Deaths',      'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Characters lost forever.', 'icon' => '/assets/images/leaderboards/icon-_0000_true_deaths.png'],
-    'wealthy'     => ['column' => 'bank',                   'label' => 'Most Wealthy',     'dir' => 'DESC', 'fmt' => 'money',    'blurb' => 'Fattest bank account right now.', 'icon' => '/assets/images/leaderboards/icon-_0019_most_wealthy.png'],
-    'banker'      => ['column' => 'banked_total',           'label' => 'The Banker',       'dir' => 'DESC', 'fmt' => 'money',    'blurb' => 'Total cash extracted to the bank.', 'icon' => '/assets/images/leaderboards/icon-_0018_the_banker.png'],
-    'diedrich'    => ['column' => 'died_rich',              'label' => 'Died Rich',        'dir' => 'DESC', 'fmt' => 'money',    'blurb' => 'Most cash dropped in a single death.', 'icon' => '/assets/images/leaderboards/icon-_0017_died_rich.png'],
-    'packrat'     => ['column' => 'chests_looted',          'label' => 'The Packrat',      'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Chests looted.', 'icon' => '/assets/images/leaderboards/icon-_0016_the_packrat.png'],
-    'drifter'     => ['column' => 'distance_m',             'label' => 'The Drifter',      'dir' => 'DESC', 'fmt' => 'distance', 'blurb' => 'Ground covered on foot.', 'icon' => '/assets/images/leaderboards/icon-_0015_the_drifter.png'],
-    'insomniac'   => ['column' => 'insomniac_seconds',      'label' => 'The Insomniac',    'dir' => 'DESC', 'fmt' => 'duration', 'blurb' => 'Longest life with no pause at all.', 'icon' => '/assets/images/leaderboards/icon-_0014_the_insomniac.png'],
-    'ghost'       => ['column' => 'kill_free_life_seconds', 'label' => 'The Ghost',        'dir' => 'DESC', 'fmt' => 'duration', 'blurb' => 'Longest life without a single kill.', 'icon' => '/assets/images/leaderboards/icon-_0013_the_ghost.png'],
-    'lazarus'     => ['column' => 'lazarus_seconds',        'label' => 'Lazarus',          'dir' => 'ASC',  'fmt' => 'duration', 'blurb' => 'Fastest redemption after turning.', 'icon' => '/assets/images/leaderboards/icon-_0012_lazarus.png'],
-    'longwalk'    => ['column' => 'long_walk_seconds',      'label' => 'Long Walk Home',   'dir' => 'DESC', 'fmt' => 'duration', 'blurb' => 'Longest stretch as a zombie — and still made it back.', 'icon' => '/assets/images/leaderboards/icon-_0011_long_walk_home.png'],
-    'darwin'      => ['column' => 'fastest_death_seconds',  'label' => 'Darwin Award',     'dir' => 'ASC',  'fmt' => 'duration', 'blurb' => 'Fastest True Death of the season.', 'icon' => '/assets/images/leaderboards/icon-_0010_darwin_award.png'],
+    'maniac'      => ['column' => 'kills_hvh',              'label' => 'Maniac',           'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Most human-on-human kills.', 'icon' => '/assets/images/leaderboards/icon-_0009_maniac.png', 'who' => 'both'],
+    'hunter'      => ['column' => 'hunter_pure_kills',      'label' => 'Hunter',           'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Zombie kills — clean hands, no human blood.', 'icon' => '/assets/images/leaderboards/icon-_0008_hunter.png', 'who' => 'both'],
+    'allie'       => ['column' => 'allie_pure_kills',       'label' => 'Allie',            'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Zombie-vs-zombie kills with no human harmed.', 'icon' => '/assets/images/leaderboards/icon-_0007_allies.png', 'who' => 'both'],
+    'glutton'     => ['column' => 'kills_zvh',              'label' => 'The Glutton',      'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Humans devoured as a zombie.', 'icon' => '/assets/images/leaderboards/icon-_0006_the_glutton.png', 'who' => 'both'],
+    'slugger'     => ['column' => 'bat_kills',              'label' => 'The Slugger',      'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Melee kills with a bat.', 'icon' => '/assets/images/leaderboards/icon-_0005_the_slugger.png', 'who' => 'both'],
+    'patientzero' => ['column' => 'humans_infected',        'label' => 'Patient Zero',     'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Humans infected.', 'icon' => '/assets/images/leaderboards/icon-_0004_patient_zero.png', 'who' => 'both'],
+    'horde'       => ['column' => 'biggest_horde_size',     'label' => 'Biggest Horde',    'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Largest horde led.', 'icon' => '/assets/images/leaderboards/icon-_0003_biggest_horde.png', 'who' => 'survivor'],
+    'turned'      => ['column' => 'times_turned',           'label' => 'Times Turned',     'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Times gone over to the dead.', 'icon' => '/assets/images/leaderboards/icon-_0002_times_turned.png', 'who' => 'both'],
+    'redemptions' => ['column' => 'redemptions',            'label' => 'Redemptions',      'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Times clawed back to the living.', 'icon' => '/assets/images/leaderboards/icon-_0001_redemptions.png', 'who' => 'both'],
+    'truedeath'   => ['column' => 'true_deaths',            'label' => 'True Deaths',      'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Characters lost forever.', 'icon' => '/assets/images/leaderboards/icon-_0000_true_deaths.png', 'who' => 'user'],
+    'wealthy'     => ['column' => 'bank',                   'label' => 'Most Wealthy',     'dir' => 'DESC', 'fmt' => 'money',    'blurb' => 'Fattest bank account right now.', 'icon' => '/assets/images/leaderboards/icon-_0019_most_wealthy.png', 'who' => 'user'],
+    'banker'      => ['column' => 'banked_total',           'label' => 'The Banker',       'dir' => 'DESC', 'fmt' => 'money',    'blurb' => 'Total cash extracted to the bank.', 'icon' => '/assets/images/leaderboards/icon-_0018_the_banker.png', 'who' => 'both'],
+    'diedrich'    => ['column' => 'died_rich',              'label' => 'Died Rich',        'dir' => 'DESC', 'fmt' => 'money',    'blurb' => 'Most cash dropped in a single death.', 'icon' => '/assets/images/leaderboards/icon-_0017_died_rich.png', 'who' => 'survivor'],
+    'packrat'     => ['column' => 'chests_looted',          'label' => 'The Packrat',      'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Chests looted.', 'icon' => '/assets/images/leaderboards/icon-_0016_the_packrat.png', 'who' => 'both'],
+    'drifter'     => ['column' => 'distance_m',             'label' => 'The Drifter',      'dir' => 'DESC', 'fmt' => 'distance', 'blurb' => 'Ground covered on foot.', 'icon' => '/assets/images/leaderboards/icon-_0015_the_drifter.png', 'who' => 'both'],
+    'insomniac'   => ['column' => 'insomniac_seconds',      'label' => 'The Insomniac',    'dir' => 'DESC', 'fmt' => 'duration', 'blurb' => 'Longest life with no pause at all.', 'icon' => '/assets/images/leaderboards/icon-_0014_the_insomniac.png', 'who' => 'survivor'],
+    'ghost'       => ['column' => 'kill_free_life_seconds', 'label' => 'The Ghost',        'dir' => 'DESC', 'fmt' => 'duration', 'blurb' => 'Longest life without a single kill.', 'icon' => '/assets/images/leaderboards/icon-_0013_the_ghost.png', 'who' => 'survivor'],
+    'lazarus'     => ['column' => 'lazarus_seconds',        'label' => 'Lazarus',          'dir' => 'ASC',  'fmt' => 'duration', 'blurb' => 'Fastest redemption after turning.', 'icon' => '/assets/images/leaderboards/icon-_0012_lazarus.png', 'who' => 'survivor'],
+    'longwalk'    => ['column' => 'long_walk_seconds',      'label' => 'Long Walk Home',   'dir' => 'DESC', 'fmt' => 'duration', 'blurb' => 'Longest stretch as a zombie — and still made it back.', 'icon' => '/assets/images/leaderboards/icon-_0011_long_walk_home.png', 'who' => 'survivor'],
+    'darwin'      => ['column' => 'fastest_death_seconds',  'label' => 'Darwin Award',     'dir' => 'ASC',  'fmt' => 'duration', 'blurb' => 'Fastest True Death of the season.', 'icon' => '/assets/images/leaderboards/icon-_0010_darwin_award.png', 'who' => 'survivor'],
 ];
 
 /** Top rows for one board: [ [username, value], ... ]. ASC boards skip 0 (unset). */
@@ -88,6 +88,27 @@ function tdl_board_rows_survivor(PDO $db, string $key, int $limit = 10): array
  */
 function tdl_board_rows_all(PDO $db, string $key, int $limit = 10): array
 {
+    $who = TDL_BOARDS[$key]['who'] ?? 'both';
+    if ($who === 'user') {
+        $rows = [];
+        foreach (tdl_board_rows($db, $key, $limit) as $r) {
+            $rows[] = ['who' => 'user', 'label' => '@' . $r['username'],
+                       'sub' => '', 'value' => (int) $r['value']];
+        }
+        return $rows;
+    }
+
+    if ($who === 'survivor') {
+        $rows = [];
+        foreach (tdl_board_rows_survivor($db, $key, $limit) as $r) {
+            $name = trim((string) ($r['name'] ?? ''));
+            $rows[] = ['who' => 'survivor',
+                       'label' => $name !== '' ? $name : (string) $r['skin'],
+                       'sub' => '@' . $r['username'], 'value' => (int) $r['value']];
+        }
+        return $rows;
+    }
+
     $rows = [];
     foreach (tdl_board_rows($db, $key, $limit) as $r) {
         $rows[] = ['who' => 'user', 'label' => '@' . $r['username'],
