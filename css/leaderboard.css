@@ -341,3 +341,52 @@
 .lb-list--board {
   max-width: 560px;
 }
+
+/* ---- SURVIVOR | USER | ALL toggle (2026-07-23) ---- */
+.lb-boards__who {
+  display: inline-flex;
+  gap: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.lb-boards__whobtn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: rgba(235, 235, 235, 0.6);
+  font: inherit;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.lb-boards__whobtn:hover { color: #fff; }
+
+.lb-boards__whobtn.is-active {
+  background: rgba(120, 220, 150, 0.12);
+  color: #b8f0c9;
+}
+
+.lb-boards__view { display: none; }
+.lb-boards__view.is-active { display: block; }
+/* No-JS fallback: the first (survivor) view shows. */
+.lb-boards__panel .lb-boards__view:first-of-type:not(.is-active) { display: block; }
+.lb-boards__panel .lb-boards__view.is-active ~ .lb-boards__view:first-of-type { display: none; }
+
+.lb-row__tag {
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(235, 235, 235, 0.55);
+}
+
+.lb-row__tag--survivor {
+  border-color: rgba(120, 220, 150, 0.35);
+  color: rgba(160, 235, 185, 0.8);
+}

@@ -182,6 +182,43 @@ function stats_apply(PDO $pdo, int $userId, array $clean): void
     $stmt->execute(array_merge(['user_id' => $userId], $clean));
 }
 
+/**
+ * SURVIVOR VIEW (012, Boss 2026-07-23 "SURVIVOR | USER | ALL"): mirror the
+ * same validated stat values onto the character's own character_stats row —
+ * identical semantics, keyed by character_id. Called only when the post
+ * carries a character context; 'lives' is user-level and skipped.
+ */
+function stats_apply_character(PDO $pdo, int $characterId, array $clean): void
+{
+    unset($clean['lives']);
+    if ($clean === []) {
+        return;
+    }
+
+    $columns = array_keys($clean);
+    $insertCols = implode(', ', $columns);
+    $placeholders = implode(', ', array_map(fn ($c) => ':' . $c, $columns));
+
+    $updates = [];
+    foreach ($columns as $column) {
+        $updates[] = match (STATS_COLUMNS[$column]) {
+            'counter' => "{$column} = character_stats.{$column} + excluded.{$column}",
+            'max'     => "{$column} = CASE WHEN excluded.{$column} > character_stats.{$column}"
+                       . " THEN excluded.{$column} ELSE character_stats.{$column} END",
+            'min'     => "{$column} = CASE WHEN excluded.{$column} > 0 AND"
+                       . " (character_stats.{$column} = 0 OR excluded.{$column} < character_stats.{$column})"
+                       . " THEN excluded.{$column} ELSE character_stats.{$column} END",
+            'set'     => "{$column} = excluded.{$column}",
+        };
+    }
+
+    $sql = "INSERT INTO character_stats (character_id, {$insertCols}) VALUES (:character_id, {$placeholders})
+            ON CONFLICT(character_id) DO UPDATE SET " . implode(', ', $updates);
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(array_merge(['character_id' => $characterId], $clean));
+}
+
 /** Public shape of a character row for API responses. */
 function stats_character_public(array $row): array
 {
@@ -499,6 +536,19 @@ try {
 
     if ($clean !== []) {
         stats_apply($pdo, $userId, $clean);
+
+        // SURVIVOR VIEW (012): same values onto the character's own row when
+        // this post has a character context (or created/ended one).
+        $statsCharId = null;
+        if ($contextCharacter !== null) {
+            $statsCharId = (int) $contextCharacter['id'];
+        } elseif ($characterOut !== null && isset($characterOut['id'])) {
+            $statsCharId = (int) $characterOut['id'];
+        }
+
+        if ($statsCharId !== null && $statsCharId > 0) {
+            stats_apply_character($pdo, $statsCharId, $clean);
+        }
     }
 
     if ($cleanPlaytime !== []) {

@@ -85,3 +85,28 @@
     });
   });
 })();
+
+/* SURVIVOR | USER | ALL toggle (2026-07-23): switches which identity view
+ * shows inside every board panel. Server rendered all three. */
+(function () {
+  "use strict";
+
+  var who = document.getElementById("lb-board-who");
+  if (!who) return;
+
+  function apply(key) {
+    who.querySelectorAll(".lb-boards__whobtn").forEach(function (b) {
+      b.classList.toggle("is-active", b.getAttribute("data-who") === key);
+    });
+    document.querySelectorAll("[data-who-view]").forEach(function (v) {
+      v.classList.toggle("is-active", v.getAttribute("data-who-view") === key);
+    });
+  }
+
+  who.addEventListener("click", function (e) {
+    var btn = e.target.closest("[data-who]");
+    if (btn) apply(btn.getAttribute("data-who"));
+  });
+
+  apply("survivor");
+})();

@@ -57,6 +57,55 @@ function tdl_board_rows(PDO $db, string $key, int $limit = 10): array
     return $db->query($sql)->fetchAll();
 }
 
+/**
+ * SURVIVOR rows for one board: [ [name, skin, outcome, username, value] ].
+ * Ranks individual characters from character_stats (012).
+ */
+function tdl_board_rows_survivor(PDO $db, string $key, int $limit = 10): array
+{
+    if (!isset(TDL_BOARDS[$key])) {
+        return [];
+    }
+
+    $def = TDL_BOARDS[$key];
+    $col = $def['column']; // registry-only — never user input
+    $dir = $def['dir'] === 'ASC' ? 'ASC' : 'DESC';
+
+    $sql = "SELECT c.name, c.skin, c.outcome, u.username, s.{$col} AS value
+            FROM character_stats s
+            JOIN characters c ON c.id = s.character_id
+            JOIN users u      ON u.id = c.user_id
+            WHERE s.{$col} > 0
+            ORDER BY s.{$col} {$dir}, c.id ASC
+            LIMIT " . (int) $limit;
+
+    return $db->query($sql)->fetchAll();
+}
+
+/**
+ * ALL view: survivor rows + user rows merged into one ranking (each row
+ * tagged 'who' = survivor|user), sorted by value per the board direction.
+ */
+function tdl_board_rows_all(PDO $db, string $key, int $limit = 10): array
+{
+    $rows = [];
+    foreach (tdl_board_rows($db, $key, $limit) as $r) {
+        $rows[] = ['who' => 'user', 'label' => '@' . $r['username'],
+                   'sub' => '', 'value' => (int) $r['value']];
+    }
+    foreach (tdl_board_rows_survivor($db, $key, $limit) as $r) {
+        $name = trim((string) ($r['name'] ?? ''));
+        $rows[] = ['who' => 'survivor',
+                   'label' => $name !== '' ? $name : (string) $r['skin'],
+                   'sub' => '@' . $r['username'], 'value' => (int) $r['value']];
+    }
+
+    $asc = TDL_BOARDS[$key]['dir'] === 'ASC';
+    usort($rows, fn ($a, $b) => $asc ? $a['value'] <=> $b['value'] : $b['value'] <=> $a['value']);
+
+    return array_slice($rows, 0, $limit);
+}
+
 /** Format a board value per its fmt tag. */
 function tdl_board_format(array $def, int $value): string
 {

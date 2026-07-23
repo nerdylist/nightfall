@@ -133,9 +133,15 @@ $todayRows = $todayStmt->fetchAll();
 // rendered server-side (top 10 each); the tab strip just toggles panels, so
 // the section works with JavaScript disabled (first board shown).
 require_once __DIR__ . '/lib/boards.php';
+// Three identity views per board (Boss 2026-07-23: "SURVIVOR | USER | ALL"
+// heading toggle). All server-rendered; the toggle just switches a class.
 $boardData = [];
 foreach (TDL_BOARDS as $bKey => $bDef) {
-    $boardData[$bKey] = tdl_board_rows($db, $bKey, 10);
+    $boardData[$bKey] = [
+        'survivor' => tdl_board_rows_survivor($db, $bKey, 10),
+        'user'     => tdl_board_rows($db, $bKey, 10),
+        'all'      => tdl_board_rows_all($db, $bKey, 10),
+    ];
 }
 
 $pageTitle = 'Leaderboard — The Dead Last';
@@ -231,6 +237,11 @@ include __DIR__ . '/partials/header.php';
   <section class="lb-boards">
     <div class="lb-panel__head">
       <h2 class="lb-panel__title">Season Boards</h2>
+      <div class="lb-boards__who" id="lb-board-who">
+        <button type="button" class="lb-boards__whobtn is-active" data-who="survivor">SURVIVOR</button>
+        <button type="button" class="lb-boards__whobtn" data-who="user">USER</button>
+        <button type="button" class="lb-boards__whobtn" data-who="all">ALL</button>
+      </div>
       <span class="lb-panel__hint text-muted">Every way to be remembered</span>
     </div>
 
@@ -252,21 +263,77 @@ include __DIR__ . '/partials/header.php';
       <div class="lb-boards__panel<?= $first ? ' is-active' : '' ?>"
            data-board-panel="<?= htmlspecialchars($bKey) ?>">
         <p class="lb-boards__blurb text-muted"><?= htmlspecialchars($bDef['blurb']) ?></p>
-        <?php if (empty($boardData[$bKey])): ?>
-          <p class="lb-empty text-muted">Nobody on this board yet. History awaits.</p>
-        <?php else: ?>
-          <ol class="lb-list lb-list--board">
-            <?php foreach ($boardData[$bKey] as $i => $row): $rank = $i + 1; ?>
-              <li class="lb-row lb-row--sm<?= $rank === 1 ? ' lb-row--podium lb-row--r1' : '' ?>">
-                <span class="lb-row__rank"><?= $rank ?></span>
-                <span class="lb-row__who">
-                  <span class="lb-row__char">@<?= htmlspecialchars((string) $row['username']) ?></span>
-                </span>
-                <span class="lb-row__time"><?= htmlspecialchars(tdl_board_format($bDef, (int) $row['value'])) ?></span>
-              </li>
-            <?php endforeach; ?>
-          </ol>
-        <?php endif; ?>
+
+        <!-- SURVIVOR view -->
+        <div class="lb-boards__view" data-who-view="survivor">
+          <?php if (empty($boardData[$bKey]['survivor'])): ?>
+            <p class="lb-empty text-muted">No survivor on this board yet. History awaits.</p>
+          <?php else: ?>
+            <ol class="lb-list lb-list--board">
+              <?php foreach ($boardData[$bKey]['survivor'] as $i => $row): $rank = $i + 1;
+                    $sName = trim((string) ($row['name'] ?? ''));
+                    $sName = $sName !== '' ? $sName : (string) $row['skin']; ?>
+                <li class="lb-row lb-row--sm<?= $rank === 1 ? ' lb-row--podium lb-row--r1' : '' ?>">
+                  <span class="lb-row__rank"><?= $rank ?></span>
+                  <span class="lb-row__who">
+                    <span class="lb-row__char"><?= htmlspecialchars($sName) ?></span>
+                    <span class="lb-row__meta text-muted">
+                      <span class="lb-row__user">@<?= htmlspecialchars((string) $row['username']) ?></span>
+                      <?php if (!empty($row['outcome'])): ?>
+                        <span class="lb-row__outcome">&dagger; <?= htmlspecialchars((string) $row['outcome']) ?></span>
+                      <?php endif; ?>
+                    </span>
+                  </span>
+                  <span class="lb-row__time"><?= htmlspecialchars(tdl_board_format($bDef, (int) $row['value'])) ?></span>
+                </li>
+              <?php endforeach; ?>
+            </ol>
+          <?php endif; ?>
+        </div>
+
+        <!-- USER view -->
+        <div class="lb-boards__view" data-who-view="user">
+          <?php if (empty($boardData[$bKey]['user'])): ?>
+            <p class="lb-empty text-muted">Nobody on this board yet. History awaits.</p>
+          <?php else: ?>
+            <ol class="lb-list lb-list--board">
+              <?php foreach ($boardData[$bKey]['user'] as $i => $row): $rank = $i + 1; ?>
+                <li class="lb-row lb-row--sm<?= $rank === 1 ? ' lb-row--podium lb-row--r1' : '' ?>">
+                  <span class="lb-row__rank"><?= $rank ?></span>
+                  <span class="lb-row__who">
+                    <span class="lb-row__char">@<?= htmlspecialchars((string) $row['username']) ?></span>
+                  </span>
+                  <span class="lb-row__time"><?= htmlspecialchars(tdl_board_format($bDef, (int) $row['value'])) ?></span>
+                </li>
+              <?php endforeach; ?>
+            </ol>
+          <?php endif; ?>
+        </div>
+
+        <!-- ALL view (merged, tagged) -->
+        <div class="lb-boards__view" data-who-view="all">
+          <?php if (empty($boardData[$bKey]['all'])): ?>
+            <p class="lb-empty text-muted">Nobody on this board yet. History awaits.</p>
+          <?php else: ?>
+            <ol class="lb-list lb-list--board">
+              <?php foreach ($boardData[$bKey]['all'] as $i => $row): $rank = $i + 1; ?>
+                <li class="lb-row lb-row--sm<?= $rank === 1 ? ' lb-row--podium lb-row--r1' : '' ?>">
+                  <span class="lb-row__rank"><?= $rank ?></span>
+                  <span class="lb-row__who">
+                    <span class="lb-row__char"><?= htmlspecialchars((string) $row['label']) ?></span>
+                    <span class="lb-row__meta text-muted">
+                      <?php if ($row['sub'] !== ''): ?>
+                        <span class="lb-row__user"><?= htmlspecialchars((string) $row['sub']) ?></span>
+                      <?php endif; ?>
+                      <span class="lb-row__tag lb-row__tag--<?= $row['who'] ?>"><?= $row['who'] === 'survivor' ? 'SURVIVOR' : 'USER' ?></span>
+                    </span>
+                  </span>
+                  <span class="lb-row__time"><?= htmlspecialchars(tdl_board_format($bDef, (int) $row['value'])) ?></span>
+                </li>
+              <?php endforeach; ?>
+            </ol>
+          <?php endif; ?>
+        </div>
       </div>
     <?php $first = false; endforeach; ?>
   </section>
