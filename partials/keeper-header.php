@@ -70,6 +70,7 @@ function keeper_nav_link(string $href, string $label, string $current, bool $ext
 
       <div class="keeper-nav__group">
         <p class="keeper-nav__heading">Game</p>
+        <?= keeper_nav_link('/keeper/leaderboard.php', 'Leaderboard', $keeperCurrent) ?>
         <?= keeper_nav_link('/keeper/items.php', 'Items', $keeperCurrent) ?>
         <?= keeper_nav_link('/keeper/messages.php', 'NPC Messages', $keeperCurrent) ?>
         <?= keeper_nav_link('/keeper/meshy.php', 'Meshy', $keeperCurrent) ?>

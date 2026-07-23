@@ -496,3 +496,15 @@ body.keeper {
     padding: var(--space-4) var(--space-4);
   }
 }
+
+/* Keeper > Leaderboard (2026-07-23): destructive-action button accent. */
+.keeper-btn-danger {
+  border-color: rgba(220, 90, 90, 0.4);
+  color: rgba(235, 150, 150, 0.9);
+}
+
+.keeper-btn-danger:hover {
+  background: rgba(220, 90, 90, 0.12);
+  border-color: rgba(220, 90, 90, 0.6);
+  color: #fff;
+}
