@@ -238,8 +238,12 @@ include __DIR__ . '/partials/header.php';
       <?php $first = true; foreach (TDL_BOARDS as $bKey => $bDef): ?>
         <button type="button"
                 class="lb-boards__tab<?= $first ? ' is-active' : '' ?>"
-                data-board="<?= htmlspecialchars($bKey) ?>">
-          <?= htmlspecialchars($bDef['label']) ?>
+                data-board="<?= htmlspecialchars($bKey) ?>"
+                title="<?= htmlspecialchars($bDef['blurb']) ?>">
+          <img class="lb-boards__icon"
+               src="<?= htmlspecialchars($bDef['icon']) ?>"
+               alt="<?= htmlspecialchars($bDef['label']) ?>" loading="lazy">
+          <span class="lb-boards__tablabel"><?= htmlspecialchars($bDef['label']) ?></span>
         </button>
       <?php $first = false; endforeach; ?>
     </div>
