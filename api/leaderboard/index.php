@@ -42,6 +42,51 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 const LEADERBOARD_LIMIT = 25;
 
+// ---- SEASON BOARDS (2026-07-22): GET /api/leaderboard?board=<key> ranks
+// USERS on one player_stats-backed board (lib/boards.php registry). The
+// no-param response below (survival time) is unchanged. ?board=list
+// enumerates the available boards for consumers (game UI, site tabs).
+if (isset($_GET['board'])) {
+    require_once __DIR__ . '/../../lib/boards.php';
+    $boardKey = (string) $_GET['board'];
+
+    if ($boardKey === 'list') {
+        $list = [];
+        foreach (TDL_BOARDS as $key => $def) {
+            $list[] = ['key' => $key, 'label' => $def['label'],
+                       'dir' => $def['dir'], 'fmt' => $def['fmt'],
+                       'blurb' => $def['blurb']];
+        }
+        grave_json_response(200, ['success' => true, 'boards' => $list]);
+    }
+
+    if (!isset(TDL_BOARDS[$boardKey])) {
+        grave_json_response(404, ['success' => false, 'error' => 'Unknown board.']);
+    }
+
+    try {
+        $db = grave_db();
+        $def = TDL_BOARDS[$boardKey];
+        $rows = tdl_board_rows($db, $boardKey, LEADERBOARD_LIMIT);
+        $top = [];
+        $rank = 0;
+        foreach ($rows as $row) {
+            $top[] = ['rank' => ++$rank,
+                      'username' => (string) $row['username'],
+                      'value' => (int) $row['value'],
+                      'display' => tdl_board_format($def, (int) $row['value'])];
+        }
+
+        grave_json_response(200, ['success' => true,
+            'board' => ['key' => $boardKey, 'label' => $def['label'],
+                        'dir' => $def['dir'], 'fmt' => $def['fmt'],
+                        'blurb' => $def['blurb']],
+            'top' => $top]);
+    } catch (Throwable $e) {
+        grave_json_response(500, ['success' => false, 'error' => 'Server error.']);
+    }
+}
+
 /** Read one host setting (settings table) or null. */
 function leaderboard_setting(PDO $db, string $key): ?string
 {

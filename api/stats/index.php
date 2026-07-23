@@ -67,6 +67,25 @@ const STATS_COLUMNS = [
     'playtime_seconds'     => 'counter',
     'bank'                 => 'set',
     'lives'                => 'counter',
+
+    // Season boards (011, 2026-07-22 — leaderboard-boards-spec.md).
+    'kills_hvz'               => 'counter',
+    'kills_hvh'               => 'counter',
+    'kills_zvz'               => 'counter',
+    'kills_zvh'               => 'counter',
+    'bat_kills'               => 'counter',
+    'humans_infected'         => 'counter',
+    'chests_looted'           => 'counter',
+    'distance_m'              => 'counter',
+    'banked_total'            => 'counter',
+    'hunter_pure_kills'       => 'max',
+    'allie_pure_kills'        => 'max',
+    'died_rich'               => 'max',
+    'insomniac_seconds'       => 'max',
+    'long_walk_seconds'       => 'max',
+    'kill_free_life_seconds'  => 'max',
+    'lazarus_seconds'         => 'min',
+    'fastest_death_seconds'   => 'min',
 ];
 
 /**
@@ -146,6 +165,10 @@ function stats_apply(PDO $pdo, int $userId, array $clean): void
         $updates[] = match (STATS_COLUMNS[$column]) {
             'counter' => "{$column} = player_stats.{$column} + excluded.{$column}",
             'max'     => "{$column} = CASE WHEN excluded.{$column} > player_stats.{$column}"
+                       . " THEN excluded.{$column} ELSE player_stats.{$column} END",
+            // min: 0 means "never set" — first real value wins, then only lower.
+            'min'     => "{$column} = CASE WHEN excluded.{$column} > 0 AND"
+                       . " (player_stats.{$column} = 0 OR excluded.{$column} < player_stats.{$column})"
                        . " THEN excluded.{$column} ELSE player_stats.{$column} END",
             'set'     => "{$column} = excluded.{$column}",
         };

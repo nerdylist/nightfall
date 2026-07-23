@@ -62,3 +62,26 @@
   render();
   var timer = window.setInterval(render, 1000);
 })();
+
+/* SEASON BOARDS (2026-07-22): tab strip toggles the server-rendered board
+ * panels. No fetch — every board's top 10 is already in the page. */
+(function () {
+  "use strict";
+
+  var tabs = document.getElementById("lb-board-tabs");
+  if (!tabs) return;
+
+  tabs.addEventListener("click", function (e) {
+    var btn = e.target.closest("[data-board]");
+    if (!btn) return;
+
+    var key = btn.getAttribute("data-board");
+
+    tabs.querySelectorAll(".lb-boards__tab").forEach(function (t) {
+      t.classList.toggle("is-active", t === btn);
+    });
+    document.querySelectorAll("[data-board-panel]").forEach(function (p) {
+      p.classList.toggle("is-active", p.getAttribute("data-board-panel") === key);
+    });
+  });
+})();

@@ -129,6 +129,15 @@ $todayStmt = $db->prepare(
 $todayStmt->execute(['today' => $serverDate]);
 $todayRows = $todayStmt->fetchAll();
 
+// ---- SEASON BOARDS (2026-07-22): per-user boards from player_stats. All
+// rendered server-side (top 10 each); the tab strip just toggles panels, so
+// the section works with JavaScript disabled (first board shown).
+require_once __DIR__ . '/lib/boards.php';
+$boardData = [];
+foreach (TDL_BOARDS as $bKey => $bDef) {
+    $boardData[$bKey] = tdl_board_rows($db, $bKey, 10);
+}
+
 $pageTitle = 'Leaderboard — The Dead Last';
 $pageCss   = ['/css/leaderboard.css'];
 $pageJs    = ['/js/leaderboard.js'];
@@ -217,5 +226,45 @@ include __DIR__ . '/partials/header.php';
       <?php endif; ?>
     </aside>
   </div>
+
+  <!-- SEASON BOARDS -->
+  <section class="lb-boards">
+    <div class="lb-panel__head">
+      <h2 class="lb-panel__title">Season Boards</h2>
+      <span class="lb-panel__hint text-muted">Every way to be remembered</span>
+    </div>
+
+    <div class="lb-boards__tabs" id="lb-board-tabs">
+      <?php $first = true; foreach (TDL_BOARDS as $bKey => $bDef): ?>
+        <button type="button"
+                class="lb-boards__tab<?= $first ? ' is-active' : '' ?>"
+                data-board="<?= htmlspecialchars($bKey) ?>">
+          <?= htmlspecialchars($bDef['label']) ?>
+        </button>
+      <?php $first = false; endforeach; ?>
+    </div>
+
+    <?php $first = true; foreach (TDL_BOARDS as $bKey => $bDef): ?>
+      <div class="lb-boards__panel<?= $first ? ' is-active' : '' ?>"
+           data-board-panel="<?= htmlspecialchars($bKey) ?>">
+        <p class="lb-boards__blurb text-muted"><?= htmlspecialchars($bDef['blurb']) ?></p>
+        <?php if (empty($boardData[$bKey])): ?>
+          <p class="lb-empty text-muted">Nobody on this board yet. History awaits.</p>
+        <?php else: ?>
+          <ol class="lb-list lb-list--board">
+            <?php foreach ($boardData[$bKey] as $i => $row): $rank = $i + 1; ?>
+              <li class="lb-row lb-row--sm<?= $rank === 1 ? ' lb-row--podium lb-row--r1' : '' ?>">
+                <span class="lb-row__rank"><?= $rank ?></span>
+                <span class="lb-row__who">
+                  <span class="lb-row__char">@<?= htmlspecialchars((string) $row['username']) ?></span>
+                </span>
+                <span class="lb-row__time"><?= htmlspecialchars(tdl_board_format($bDef, (int) $row['value'])) ?></span>
+              </li>
+            <?php endforeach; ?>
+          </ol>
+        <?php endif; ?>
+      </div>
+    <?php $first = false; endforeach; ?>
+  </section>
 </main>
 <?php include __DIR__ . '/partials/footer.php'; ?>
