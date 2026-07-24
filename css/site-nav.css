@@ -173,6 +173,10 @@
 .site-nav__link-icon {
   display: block;
   flex: 0 0 auto;
+  width: 19px;
+  height: 19px;
+  /* FontAwesome SVGs ship black; force white to match the nav ink. */
+  filter: brightness(0) invert(1);
   opacity: 0.82;
   transition: opacity 0.18s ease, transform 0.18s ease;
 }
@@ -284,6 +288,10 @@
 
 .site-nav__search-icon {
   display: block;
+  width: 18px;
+  height: 18px;
+  /* FontAwesome SVGs ship black; force white to match the nav ink. */
+  filter: brightness(0) invert(1);
 }
 
 /* Overlay: anchored to the right edge of the middle region (i.e. at the
