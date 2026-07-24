@@ -16,6 +16,9 @@ data/*.bak-*
 # OS cruft
 .DS_Store
 
+# Local dev reference (self-hosted FontAwesome icon list) — not app code
+icons.txt
+
 # Large media assets (trailer + music) — kept OUT of git; uploaded to the
 # server separately. The Keeper > Media tab scans these folders live.
 assets/video/

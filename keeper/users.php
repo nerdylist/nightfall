@@ -332,27 +332,39 @@ foreach ($db->query('SELECT * FROM player_stats')->fetchAll() as $row) {
                 foreach ($statCols as $c) { $stats[$c] = (int) ($srow[$c] ?? 0); }
                 $statsPayload = htmlspecialchars(json_encode($stats), ENT_QUOTES);
                 ?>
-                <div class="keeper-action-group keeper-users-actions">
-                  <button type="button" class="btn" data-edit-user="<?= $payload ?>">Edit</button>
-                  <button type="button" class="btn" data-edit-stats="<?= $statsPayload ?>">Game Data</button>
+                <div class="keeper-users-actions">
+                  <button type="button" class="keeper-icon-btn" data-edit-user="<?= $payload ?>" title="Edit user" aria-label="Edit user">
+                    <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/pen-to-square.svg" alt="">
+                  </button>
+                  <button type="button" class="keeper-icon-btn" data-edit-stats="<?= $statsPayload ?>" title="Edit game data" aria-label="Edit game data">
+                    <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/gamepad.svg" alt="">
+                  </button>
                   <form method="post" action="/keeper/users.php" class="keeper-users-inline">
                     <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
                     <input type="hidden" name="action" value="toggle_role">
                     <input type="hidden" name="id" value="<?= $uid ?>">
-                    <button class="btn" type="submit"><?= $u['role'] === 'admin' ? 'Demote' : 'Promote' ?></button>
+                    <?php $isAdmin = $u['role'] === 'admin'; ?>
+                    <button class="keeper-icon-btn" type="submit" title="<?= $isAdmin ? 'Demote to user' : 'Promote to admin' ?>" aria-label="<?= $isAdmin ? 'Demote' : 'Promote' ?>">
+                      <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/<?= $isAdmin ? 'arrow-down' : 'arrow-up' ?>.svg" alt="">
+                    </button>
                   </form>
                   <form method="post" action="/keeper/users.php" class="keeper-users-inline">
                     <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
                     <input type="hidden" name="action" value="toggle_status">
                     <input type="hidden" name="id" value="<?= $uid ?>">
-                    <button class="btn" type="submit"><?= $u['status'] === 'active' ? 'Ban' : 'Unban' ?></button>
+                    <?php $isActive = $u['status'] === 'active'; ?>
+                    <button class="keeper-icon-btn<?= $isActive ? '' : ' is-on' ?>" type="submit" title="<?= $isActive ? 'Ban user' : 'Unban user' ?>" aria-label="<?= $isActive ? 'Ban' : 'Unban' ?>">
+                      <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/<?= $isActive ? 'ban' : 'circle-check' ?>.svg" alt="">
+                    </button>
                   </form>
                   <?php if ($uid !== $selfId): ?>
                   <form method="post" action="/keeper/users.php" class="keeper-users-inline" onsubmit="return confirm('Delete <?= htmlspecialchars($u['username'], ENT_QUOTES) ?> permanently? This removes their stats, characters, and forum content.');">
                     <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
                     <input type="hidden" name="action" value="delete_user">
                     <input type="hidden" name="id" value="<?= $uid ?>">
-                    <button class="btn keeper-users-danger" type="submit">Delete</button>
+                    <button class="keeper-icon-btn keeper-icon-btn--danger" type="submit" title="Delete user" aria-label="Delete user">
+                      <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/trash.svg" alt="">
+                    </button>
                   </form>
                   <?php endif; ?>
                 </div>
