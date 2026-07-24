@@ -315,15 +315,16 @@ foreach ($db->query('SELECT * FROM player_stats')->fetchAll() as $row) {
                 ], JSON_UNESCAPED_UNICODE), ENT_QUOTES);
             ?>
             <tr>
-              <td><?= $uid ?></td>
-              <td><?= htmlspecialchars($u['username']) ?></td>
-              <td><?= htmlspecialchars((string) $shown) ?></td>
-              <td><?= htmlspecialchars((string) $u['email']) ?></td>
-              <td><?= htmlspecialchars($u['role']) ?></td>
-              <td><?= htmlspecialchars($u['status']) ?></td>
-              <td><?= (int) $u['reputation'] ?></td>
-              <td><?= (int) $u['threads_started'] ?></td>
-              <td><?= htmlspecialchars((string) $u['join_date']) ?></td>
+              <?php $joined = substr((string) $u['join_date'], 0, 10); // date only ?>
+              <td class="keeper-cell-num"><?= $uid ?></td>
+              <td class="keeper-cell-clamp keeper-cell-clamp--sm" title="<?= htmlspecialchars($u['username']) ?>"><?= htmlspecialchars($u['username']) ?></td>
+              <td class="keeper-cell-clamp keeper-cell-clamp--sm" title="<?= htmlspecialchars((string) $shown) ?>"><?= htmlspecialchars((string) $shown) ?></td>
+              <td class="keeper-cell-clamp" title="<?= htmlspecialchars((string) $u['email']) ?>"><?= htmlspecialchars((string) $u['email']) ?></td>
+              <td class="keeper-cell-nowrap"><?= htmlspecialchars($u['role']) ?></td>
+              <td class="keeper-cell-nowrap"><?= htmlspecialchars($u['status']) ?></td>
+              <td class="keeper-cell-num"><?= (int) $u['reputation'] ?></td>
+              <td class="keeper-cell-num"><?= (int) $u['threads_started'] ?></td>
+              <td class="keeper-cell-nowrap"><?= htmlspecialchars($joined) ?></td>
               <td>
                 <?php
                 // Stats payload for the game-data modal (0-filled if no row).
@@ -332,7 +333,7 @@ foreach ($db->query('SELECT * FROM player_stats')->fetchAll() as $row) {
                 foreach ($statCols as $c) { $stats[$c] = (int) ($srow[$c] ?? 0); }
                 $statsPayload = htmlspecialchars(json_encode($stats), ENT_QUOTES);
                 ?>
-                <div class="keeper-users-actions">
+                <div class="keeper-row-actions">
                   <button type="button" class="keeper-icon-btn" data-edit-user="<?= $payload ?>" title="Edit user" aria-label="Edit user">
                     <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/pen-to-square.svg" alt="">
                   </button>

@@ -120,7 +120,7 @@
 
 .modal-title {
   margin: 0 0 var(--space-5);
-  font-family: var(--font-display);
+  font-family: var(--font-forum-title);
   text-transform: uppercase;
   font-weight: 400;
   font-size: var(--fs-xl);

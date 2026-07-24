@@ -137,21 +137,25 @@ unset($_SESSION['keeper_flash']);
           <tbody>
             <?php foreach ($categories as $cat): ?>
             <tr>
-              <td><?= (int) $cat['id'] ?></td>
+              <td class="keeper-cell-num"><?= (int) $cat['id'] ?></td>
               <td><span class="keeper-bbs-swatch" style="background: <?= htmlspecialchars((string) ($cat['color'] ?: '#7a64f5')) ?>;"></span></td>
-              <td><?= htmlspecialchars((string) $cat['name']) ?></td>
-              <td class="keeper-bbs-desc"><?= htmlspecialchars((string) $cat['description']) ?></td>
-              <td><?= (int) $cat['sort_order'] ?></td>
-              <td><?= !empty($cat['featured']) ? '<span title="Featured">&#9733;</span>' : '<span class="text-muted">—</span>' ?></td>
-              <td><?= (int) $cat['thread_count'] ?></td>
+              <td class="keeper-cell-clamp keeper-cell-clamp--sm" title="<?= htmlspecialchars((string) $cat['name']) ?>"><?= htmlspecialchars((string) $cat['name']) ?></td>
+              <td class="keeper-cell-clamp" title="<?= htmlspecialchars((string) $cat['description']) ?>"><?= htmlspecialchars((string) $cat['description']) ?></td>
+              <td class="keeper-cell-num"><?= (int) $cat['sort_order'] ?></td>
+              <td class="keeper-cell-nowrap"><?= !empty($cat['featured']) ? '<span title="Featured">&#9733;</span>' : '<span class="text-muted">—</span>' ?></td>
+              <td class="keeper-cell-num"><?= (int) $cat['thread_count'] ?></td>
               <td>
-                <div class="keeper-action-group">
-                  <a class="btn" href="/keeper/bbs/category-edit.php?id=<?= (int) $cat['id'] ?>">Edit</a>
+                <div class="keeper-row-actions">
+                  <a class="keeper-icon-btn" href="/keeper/bbs/category-edit.php?id=<?= (int) $cat['id'] ?>" title="Edit category" aria-label="Edit">
+                    <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/pen-to-square.svg" alt="">
+                  </a>
                   <form method="post" action="/keeper/bbs/categories.php" onsubmit="return confirm('Delete this category?');">
                     <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="id" value="<?= (int) $cat['id'] ?>">
-                    <button class="btn keeper-bbs-danger" type="submit">Delete</button>
+                    <button class="keeper-icon-btn keeper-icon-btn--danger" type="submit" title="Delete category" aria-label="Delete">
+                      <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/trash.svg" alt="">
+                    </button>
                   </form>
                 </div>
               </td>

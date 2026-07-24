@@ -508,14 +508,20 @@ function keeper_rarity_class(?string $rarity): string
                 <td><?= $it['weight_kg'] !== null ? htmlspecialchars(rtrim(rtrim(number_format((float) $it['weight_kg'], 2), '0'), '.')) . ' kg' : '<span class="text-muted">—</span>' ?></td>
                 <td><?= $it['value'] !== null ? '$' . (int) $it['value'] : '<span class="text-muted">—</span>' ?></td>
                 <td><?= $it['durability'] !== null ? (int) $it['durability'] : '<span class="text-muted">—</span>' ?></td>
-                <td class="keeper-items-desc"><?= htmlspecialchars((string) ($it['description'] ?? '')) ?></td>
-                <td class="keeper-items-row-actions">
-                  <a href="/keeper/items.php?edit=<?= urlencode((string) $it['item_id']) ?>#add" class="keeper-items-edit">Edit</a>
-                  <form method="post" action="/keeper/items.php" onsubmit="return confirm('Delete <?= htmlspecialchars((string) $it['item_id'], ENT_QUOTES) ?>?');">
-                    <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
-                    <input type="hidden" name="item_id" value="<?= htmlspecialchars((string) $it['item_id']) ?>">
-                    <button type="submit" name="delete_item" value="1" class="keeper-items-del">Delete</button>
-                  </form>
+                <td class="keeper-items-desc keeper-cell-clamp keeper-cell-clamp--lg" title="<?= htmlspecialchars((string) ($it['description'] ?? '')) ?>"><?= htmlspecialchars((string) ($it['description'] ?? '')) ?></td>
+                <td>
+                  <div class="keeper-row-actions">
+                    <a href="/keeper/items.php?edit=<?= urlencode((string) $it['item_id']) ?>#add" class="keeper-icon-btn" title="Edit item" aria-label="Edit">
+                      <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/pen-to-square.svg" alt="">
+                    </a>
+                    <form method="post" action="/keeper/items.php" onsubmit="return confirm('Delete <?= htmlspecialchars((string) $it['item_id'], ENT_QUOTES) ?>?');">
+                      <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
+                      <input type="hidden" name="item_id" value="<?= htmlspecialchars((string) $it['item_id']) ?>">
+                      <button type="submit" name="delete_item" value="1" class="keeper-icon-btn keeper-icon-btn--danger" title="Delete item" aria-label="Delete">
+                        <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/trash.svg" alt="">
+                      </button>
+                    </form>
+                  </div>
                 </td>
               </tr>
               <?php endforeach; ?>

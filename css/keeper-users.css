@@ -1,69 +1,8 @@
 /* THE DEAD LAST — Keeper > Users. Edit/reset/delete + game-data modals. */
 
-/* Compact single-row icon-button actions. */
-.keeper-users-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: nowrap;
-  justify-content: flex-end;
-}
-
-.keeper-users-inline {
-  margin: 0;
-  display: inline-flex;
-}
-
-/* Icon button: small square, dim by default, brightens on hover. */
-.keeper-icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  flex: 0 0 auto;
-  padding: 0;
-  background: transparent;
-  border: 1px solid var(--keeper-line, rgba(255,255,255,0.12));
-  border-radius: var(--radius-sm, 6px);
-  cursor: pointer;
-  transition: background-color 0.14s ease, border-color 0.14s ease;
-}
-
-.keeper-icon-btn:hover {
-  background: var(--keeper-panel-2, #1a1a1a);
-  border-color: var(--keeper-ink-2, rgba(255,255,255,0.6));
-}
-
-.keeper-icon {
-  width: 15px;
-  height: 15px;
-  display: block;
-  /* FA solid SVGs are black — invert to a muted white on the dark UI. */
-  filter: brightness(0) invert(1);
-  opacity: 0.62;
-  transition: opacity 0.14s ease;
-}
-
-.keeper-icon-btn:hover .keeper-icon { opacity: 1; }
-
-/* Ban toggle when the user is banned (unban action) reads "on"/green-ish. */
-.keeper-icon-btn.is-on .keeper-icon { opacity: 0.9; }
-
-/* Delete = red tint. */
-.keeper-icon-btn--danger {
-  border-color: rgba(255, 123, 114, 0.35);
-}
-.keeper-icon-btn--danger:hover {
-  background: #b1352c;
-  border-color: #b1352c;
-}
-.keeper-icon-btn--danger .keeper-icon {
-  /* red-ish: invert to white then tint via drop-shadow trick isn't reliable;
-     keep white and let the red border/hover carry the danger meaning. */
-  opacity: 0.7;
-}
-.keeper-icon-btn--danger:hover .keeper-icon { opacity: 1; }
+/* Icon-button + row-action styles are shared (see css/keeper.css). This page
+   uses .keeper-row-actions and .keeper-icon-btn from there. */
+.keeper-users-inline { margin: 0; display: inline-flex; }
 
 .keeper-users-hint {
   font-size: 0.85rem;

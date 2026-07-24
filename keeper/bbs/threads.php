@@ -91,26 +91,30 @@ unset($_SESSION['keeper_flash']);
           <tbody>
             <?php foreach ($threads as $t): ?>
             <tr>
-              <td><?= (int) $t['id'] ?></td>
-              <td><?= htmlspecialchars((string) $t['title']) ?></td>
-              <td><?= htmlspecialchars((string) $t['category_name']) ?></td>
-              <td><?= htmlspecialchars((string) $t['author_name']) ?></td>
-              <td><?= (int) $t['replies'] ?></td>
-              <td><?= (int) $t['views'] ?></td>
+              <td class="keeper-cell-num"><?= (int) $t['id'] ?></td>
+              <td class="keeper-cell-clamp keeper-cell-clamp--lg" title="<?= htmlspecialchars((string) $t['title']) ?>"><?= htmlspecialchars((string) $t['title']) ?></td>
+              <td class="keeper-cell-clamp keeper-cell-clamp--sm" title="<?= htmlspecialchars((string) $t['category_name']) ?>"><?= htmlspecialchars((string) $t['category_name']) ?></td>
+              <td class="keeper-cell-clamp keeper-cell-clamp--sm" title="<?= htmlspecialchars((string) $t['author_name']) ?>"><?= htmlspecialchars((string) $t['author_name']) ?></td>
+              <td class="keeper-cell-num"><?= (int) $t['replies'] ?></td>
+              <td class="keeper-cell-num"><?= (int) $t['views'] ?></td>
               <td class="keeper-bbs-flags">
                 <?php if ((int) $t['pinned'] === 1): ?><span class="keeper-bbs-badge">Pinned</span><?php endif; ?>
                 <?php if ((int) $t['locked'] === 1): ?><span class="keeper-bbs-badge">Locked</span><?php endif; ?>
                 <?php if ((int) $t['hot'] === 1): ?><span class="keeper-bbs-badge">Hot</span><?php endif; ?>
               </td>
-              <td><?= htmlspecialchars((string) $t['created_at']) ?></td>
+              <td class="keeper-cell-nowrap"><?= htmlspecialchars(substr((string) $t['created_at'], 0, 10)) ?></td>
               <td>
-                <div class="keeper-action-group">
-                  <a class="btn" href="/keeper/bbs/thread-edit.php?id=<?= (int) $t['id'] ?>">Edit</a>
+                <div class="keeper-row-actions">
+                  <a class="keeper-icon-btn" href="/keeper/bbs/thread-edit.php?id=<?= (int) $t['id'] ?>" title="Edit thread" aria-label="Edit">
+                    <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/pen-to-square.svg" alt="">
+                  </a>
                   <form method="post" action="/keeper/bbs/threads.php" onsubmit="return confirm('Delete this thread and all its posts/chat/reactions?');">
                     <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="id" value="<?= (int) $t['id'] ?>">
-                    <button class="btn keeper-bbs-danger" type="submit">Delete</button>
+                    <button class="keeper-icon-btn keeper-icon-btn--danger" type="submit" title="Delete thread" aria-label="Delete">
+                      <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/trash.svg" alt="">
+                    </button>
                   </form>
                 </div>
               </td>

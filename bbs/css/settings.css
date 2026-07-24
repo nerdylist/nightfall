@@ -13,7 +13,7 @@
 
 .settings-group > h3 {
   margin: 0 0 var(--space-1);
-  font-family: var(--font-display);
+  font-family: var(--font-forum-title);
   text-transform: uppercase;
   font-weight: 400;
   font-size: var(--fs-lg);

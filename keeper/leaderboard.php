@@ -175,23 +175,27 @@ function keeper_lb_duration(int $seconds): string
           <tbody>
             <?php foreach ($chars as $c): ?>
             <tr>
-              <td><?= (int) $c['id'] ?></td>
-              <td><?= htmlspecialchars(trim((string) ($c['name'] ?: $c['skin']))) ?></td>
-              <td><?= htmlspecialchars((string) $c['skin']) ?></td>
-              <td>@<?= htmlspecialchars((string) $c['username']) ?></td>
-              <td><?= htmlspecialchars(keeper_lb_duration((int) $c['playtime'])) ?></td>
-              <td><?= (int) $c['kills'] ?></td>
-              <td><?= (int) $c['chests'] ?></td>
-              <td><?= number_format((int) $c['distance']) ?> m</td>
-              <td><?= htmlspecialchars((string) ($c['outcome'] ?: ($c['ended_at'] ? 'ended' : 'alive'))) ?></td>
-              <td><?= htmlspecialchars((string) $c['started_at']) ?></td>
+              <td class="keeper-cell-num"><?= (int) $c['id'] ?></td>
+              <td class="keeper-cell-clamp keeper-cell-clamp--sm" title="<?= htmlspecialchars(trim((string) ($c['name'] ?: $c['skin']))) ?>"><?= htmlspecialchars(trim((string) ($c['name'] ?: $c['skin']))) ?></td>
+              <td class="keeper-cell-clamp keeper-cell-clamp--sm" title="<?= htmlspecialchars((string) $c['skin']) ?>"><?= htmlspecialchars((string) $c['skin']) ?></td>
+              <td class="keeper-cell-clamp keeper-cell-clamp--sm" title="@<?= htmlspecialchars((string) $c['username']) ?>">@<?= htmlspecialchars((string) $c['username']) ?></td>
+              <td class="keeper-cell-num"><?= htmlspecialchars(keeper_lb_duration((int) $c['playtime'])) ?></td>
+              <td class="keeper-cell-num"><?= (int) $c['kills'] ?></td>
+              <td class="keeper-cell-num"><?= (int) $c['chests'] ?></td>
+              <td class="keeper-cell-num"><?= number_format((int) $c['distance']) ?> m</td>
+              <td class="keeper-cell-nowrap"><?= htmlspecialchars((string) ($c['outcome'] ?: ($c['ended_at'] ? 'ended' : 'alive'))) ?></td>
+              <td class="keeper-cell-nowrap"><?= htmlspecialchars(substr((string) $c['started_at'], 0, 10)) ?></td>
               <td>
-                <form method="post" onsubmit="return confirm('Remove this survivor and all their leaderboard data? This cannot be undone.');">
-                  <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
-                  <input type="hidden" name="action" value="delete_character">
-                  <input type="hidden" name="id" value="<?= (int) $c['id'] ?>">
-                  <button type="submit" class="btn btn-ghost keeper-btn-danger">Delete</button>
-                </form>
+                <div class="keeper-row-actions">
+                  <form method="post" onsubmit="return confirm('Remove this survivor and all their leaderboard data? This cannot be undone.');">
+                    <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
+                    <input type="hidden" name="action" value="delete_character">
+                    <input type="hidden" name="id" value="<?= (int) $c['id'] ?>">
+                    <button type="submit" class="keeper-icon-btn keeper-icon-btn--danger" title="Delete survivor" aria-label="Delete">
+                      <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/trash.svg" alt="">
+                    </button>
+                  </form>
+                </div>
               </td>
             </tr>
             <?php endforeach; ?>
@@ -214,20 +218,24 @@ function keeper_lb_duration(int $seconds): string
           <tbody>
             <?php foreach ($userStats as $u): ?>
             <tr>
-              <td>@<?= htmlspecialchars((string) $u['username']) ?></td>
-              <td><?= htmlspecialchars(keeper_lb_duration((int) $u['playtime_seconds'])) ?></td>
-              <td>$<?= number_format((int) $u['bank']) ?></td>
-              <td><?= (int) $u['true_deaths'] ?></td>
-              <td><?= (int) $u['chests_looted'] ?></td>
-              <td><?= number_format((int) $u['distance_m']) ?> m</td>
-              <td><?= htmlspecialchars(keeper_lb_duration((int) $u['insomniac_seconds'])) ?></td>
+              <td class="keeper-cell-clamp keeper-cell-clamp--sm" title="@<?= htmlspecialchars((string) $u['username']) ?>">@<?= htmlspecialchars((string) $u['username']) ?></td>
+              <td class="keeper-cell-num"><?= htmlspecialchars(keeper_lb_duration((int) $u['playtime_seconds'])) ?></td>
+              <td class="keeper-cell-num">$<?= number_format((int) $u['bank']) ?></td>
+              <td class="keeper-cell-num"><?= (int) $u['true_deaths'] ?></td>
+              <td class="keeper-cell-num"><?= (int) $u['chests_looted'] ?></td>
+              <td class="keeper-cell-num"><?= number_format((int) $u['distance_m']) ?> m</td>
+              <td class="keeper-cell-num"><?= htmlspecialchars(keeper_lb_duration((int) $u['insomniac_seconds'])) ?></td>
               <td>
-                <form method="post" onsubmit="return confirm('Zero every board stat for this user? This cannot be undone.');">
-                  <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
-                  <input type="hidden" name="action" value="zero_user_stats">
-                  <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
-                  <button type="submit" class="btn btn-ghost keeper-btn-danger">Zero Stats</button>
-                </form>
+                <div class="keeper-row-actions">
+                  <form method="post" onsubmit="return confirm('Zero every board stat for this user? This cannot be undone.');">
+                    <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
+                    <input type="hidden" name="action" value="zero_user_stats">
+                    <input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
+                    <button type="submit" class="keeper-icon-btn keeper-icon-btn--danger" title="Zero all board stats" aria-label="Zero stats">
+                      <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/eraser.svg" alt="">
+                    </button>
+                  </form>
+                </div>
               </td>
             </tr>
             <?php endforeach; ?>

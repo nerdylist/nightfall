@@ -96,17 +96,21 @@ unset($_SESSION['keeper_flash']);
             <tbody>
               <?php foreach ($chatMessages as $cm): ?>
               <tr>
-                <td><?= htmlspecialchars((string) $cm['thread_title']) ?></td>
-                <td><?= htmlspecialchars((string) $cm['author_name']) ?></td>
-                <td class="keeper-bbs-desc"><?= htmlspecialchars((string) $cm['text']) ?></td>
-                <td><?= htmlspecialchars((string) $cm['timestamp']) ?></td>
+                <td class="keeper-cell-clamp keeper-cell-clamp--sm" title="<?= htmlspecialchars((string) $cm['thread_title']) ?>"><?= htmlspecialchars((string) $cm['thread_title']) ?></td>
+                <td class="keeper-cell-clamp keeper-cell-clamp--sm" title="<?= htmlspecialchars((string) $cm['author_name']) ?>"><?= htmlspecialchars((string) $cm['author_name']) ?></td>
+                <td class="keeper-cell-clamp" title="<?= htmlspecialchars((string) $cm['text']) ?>"><?= htmlspecialchars((string) $cm['text']) ?></td>
+                <td class="keeper-cell-nowrap"><?= htmlspecialchars(substr((string) $cm['timestamp'], 0, 16)) ?></td>
                 <td>
-                  <form method="post" action="/keeper/bbs/chat.php" onsubmit="return confirm('Delete this chat message?');">
-                    <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
-                    <input type="hidden" name="action" value="delete_chat">
-                    <input type="hidden" name="id" value="<?= (int) $cm['id'] ?>">
-                    <button class="btn keeper-bbs-danger" type="submit">Delete</button>
-                  </form>
+                  <div class="keeper-row-actions">
+                    <form method="post" action="/keeper/bbs/chat.php" onsubmit="return confirm('Delete this chat message?');">
+                      <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
+                      <input type="hidden" name="action" value="delete_chat">
+                      <input type="hidden" name="id" value="<?= (int) $cm['id'] ?>">
+                      <button class="keeper-icon-btn keeper-icon-btn--danger" type="submit" title="Delete message" aria-label="Delete">
+                        <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/trash.svg" alt="">
+                      </button>
+                    </form>
+                  </div>
                 </td>
               </tr>
               <?php endforeach; ?>
@@ -136,17 +140,21 @@ unset($_SESSION['keeper_flash']);
             <tbody>
               <?php foreach ($reactions as $r): ?>
               <tr>
-                <td><?= htmlspecialchars((string) $r['emoji']) ?></td>
-                <td><?= htmlspecialchars((string) $r['user_name']) ?></td>
-                <td><?= ($r['thread_title'] !== null && $r['thread_title'] !== '') ? htmlspecialchars((string) $r['thread_title']) : '<span class="text-muted">—</span>' ?></td>
-                <td><?= htmlspecialchars((string) $r['created_at']) ?></td>
+                <td class="keeper-cell-nowrap"><?= htmlspecialchars((string) $r['emoji']) ?></td>
+                <td class="keeper-cell-clamp keeper-cell-clamp--sm" title="<?= htmlspecialchars((string) $r['user_name']) ?>"><?= htmlspecialchars((string) $r['user_name']) ?></td>
+                <td class="keeper-cell-clamp keeper-cell-clamp--sm" title="<?= htmlspecialchars((string) ($r['thread_title'] ?? '')) ?>"><?= ($r['thread_title'] !== null && $r['thread_title'] !== '') ? htmlspecialchars((string) $r['thread_title']) : '<span class="text-muted">—</span>' ?></td>
+                <td class="keeper-cell-nowrap"><?= htmlspecialchars(substr((string) $r['created_at'], 0, 16)) ?></td>
                 <td>
-                  <form method="post" action="/keeper/bbs/chat.php" onsubmit="return confirm('Delete this reaction?');">
-                    <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
-                    <input type="hidden" name="action" value="delete_reaction">
-                    <input type="hidden" name="id" value="<?= (int) $r['id'] ?>">
-                    <button class="btn keeper-bbs-danger" type="submit">Delete</button>
-                  </form>
+                  <div class="keeper-row-actions">
+                    <form method="post" action="/keeper/bbs/chat.php" onsubmit="return confirm('Delete this reaction?');">
+                      <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
+                      <input type="hidden" name="action" value="delete_reaction">
+                      <input type="hidden" name="id" value="<?= (int) $r['id'] ?>">
+                      <button class="keeper-icon-btn keeper-icon-btn--danger" type="submit" title="Delete reaction" aria-label="Delete">
+                        <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/trash.svg" alt="">
+                      </button>
+                    </form>
+                  </div>
                 </td>
               </tr>
               <?php endforeach; ?>

@@ -361,31 +361,94 @@ body.keeper {
 }
 
 /* Tables. */
+/* Tables fit their container; only overflow-scroll as a last resort on very
+   narrow screens. Long values clamp with an ellipsis (+ title tooltip) rather
+   than pushing the table wider than the screen. */
 .keeper-table-scroll { overflow-x: auto; }
 
 .keeper-table {
   width: 100%;
+  table-layout: auto;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
 }
 
 .keeper-table th {
   text-align: left;
-  padding: 10px 14px;
+  padding: 8px 10px;
   color: var(--keeper-ink-3);
   font-weight: 600;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   border-bottom: 1px solid var(--keeper-line);
   white-space: nowrap;
 }
 
 .keeper-table td {
-  padding: 12px 14px;
+  padding: 9px 10px;
   border-bottom: 1px solid var(--keeper-line-soft);
-  white-space: nowrap;
+  vertical-align: middle;
 }
+
+/* Cells that hold potentially-long text clamp to one line with an ellipsis.
+   Pair with a title="" on the cell so the full value is available on hover. */
+.keeper-cell-clamp {
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.keeper-cell-clamp--sm { max-width: 130px; }
+.keeper-cell-clamp--lg { max-width: 320px; }
+
+/* Numeric / short cells never wrap. */
+.keeper-cell-num { white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+.keeper-cell-nowrap { white-space: nowrap; }
+
+/* ---- Shared icon buttons (row actions) ---- */
+.keeper-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--keeper-line, rgba(255,255,255,0.12));
+  border-radius: var(--radius-sm, 6px);
+  cursor: pointer;
+  transition: background-color 0.14s ease, border-color 0.14s ease;
+}
+.keeper-icon-btn:hover {
+  background: var(--keeper-panel-2, #1a1a1a);
+  border-color: var(--keeper-ink-2, rgba(255,255,255,0.6));
+}
+.keeper-icon {
+  width: 14px;
+  height: 14px;
+  display: block;
+  filter: brightness(0) invert(1);   /* FA solid SVGs are black → white */
+  opacity: 0.6;
+  transition: opacity 0.14s ease;
+}
+.keeper-icon-btn:hover .keeper-icon { opacity: 1; }
+.keeper-icon-btn.is-on .keeper-icon { opacity: 0.9; }
+.keeper-icon-btn--danger { border-color: rgba(255, 123, 114, 0.35); }
+.keeper-icon-btn--danger:hover { background: #b1352c; border-color: #b1352c; }
+.keeper-icon-btn--danger .keeper-icon { opacity: 0.7; }
+.keeper-icon-btn--danger:hover .keeper-icon { opacity: 1; }
+
+/* A tidy single-row action cell for icon buttons. */
+.keeper-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+}
+.keeper-row-actions form { margin: 0; display: inline-flex; }
 
 .keeper-table tbody tr:hover { background: var(--keeper-panel-2); }
 

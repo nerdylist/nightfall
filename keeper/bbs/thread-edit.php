@@ -193,16 +193,20 @@ unset($_SESSION['keeper_flash']);
           <tbody>
             <?php foreach ($posts as $p): ?>
             <tr>
-              <td><?= (int) $p['id'] ?></td>
-              <td><?= htmlspecialchars((string) $p['author_name']) ?></td>
-              <td class="keeper-bbs-desc"><?= htmlspecialchars(mb_substr((string) $p['body'], 0, 120)) ?></td>
+              <td class="keeper-cell-num"><?= (int) $p['id'] ?></td>
+              <td class="keeper-cell-clamp keeper-cell-clamp--sm" title="<?= htmlspecialchars((string) $p['author_name']) ?>"><?= htmlspecialchars((string) $p['author_name']) ?></td>
+              <td class="keeper-cell-clamp keeper-cell-clamp--lg" title="<?= htmlspecialchars((string) $p['body']) ?>"><?= htmlspecialchars(mb_substr((string) $p['body'], 0, 120)) ?></td>
               <td>
-                <form method="post" action="/keeper/bbs/thread-edit.php?id=<?= (int) $thread['id'] ?>" onsubmit="return confirm('Delete this post?');">
-                  <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
-                  <input type="hidden" name="action" value="delete_post">
-                  <input type="hidden" name="pid" value="<?= (int) $p['id'] ?>">
-                  <button class="btn keeper-bbs-danger" type="submit">Delete</button>
-                </form>
+                <div class="keeper-row-actions">
+                  <form method="post" action="/keeper/bbs/thread-edit.php?id=<?= (int) $thread['id'] ?>" onsubmit="return confirm('Delete this post?');">
+                    <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
+                    <input type="hidden" name="action" value="delete_post">
+                    <input type="hidden" name="pid" value="<?= (int) $p['id'] ?>">
+                    <button class="keeper-icon-btn keeper-icon-btn--danger" type="submit" title="Delete post" aria-label="Delete">
+                      <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/trash.svg" alt="">
+                    </button>
+                  </form>
+                </div>
               </td>
             </tr>
             <?php endforeach; ?>
