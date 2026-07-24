@@ -191,7 +191,9 @@ include __DIR__ . '/partials/header.php';     // <header class="site-header">
     <?php if (auth_is_logged_in()): ?>
     <div class="chat-composer">
       <textarea id="chat-input" placeholder="Write a message..." rows="1" aria-label="Write a message"></textarea>
-      <button id="chat-send" class="btn btn-primary" type="button">Send</button>
+      <button id="chat-send" class="chat-send" type="button" title="Send" aria-label="Send">
+        <img class="chat-send-icon" src="https://nerd.biz/assets/fa/svgs/solid/paper-plane.svg" alt="">
+      </button>
     </div>
     <?php else: ?>
     <p class="chat-guest-note">Log in to chat.</p>

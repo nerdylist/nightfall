@@ -158,6 +158,101 @@
   color: var(--text-0);
 }
 
+/* ---- Icon links + stylized tooltip (Boss 2026-07-24) ----
+   Desktop: icon-only with a black/white tooltip under the icon on hover.
+   Mobile/tablet (<=1024px, the hamburger panel): icon + label row, no
+   tooltip (touch has no hover). */
+.site-nav__link--icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 0.15rem;
+}
+
+.site-nav__link-icon {
+  display: block;
+  flex: 0 0 auto;
+  opacity: 0.82;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.site-nav__link--icon:hover .site-nav__link-icon,
+.site-nav__link--icon:focus-visible .site-nav__link-icon {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+@media (min-width: 1025px) {
+  /* Icon-only on desktop */
+  .site-nav__links .site-nav__label {
+    display: none;
+  }
+
+  /* Tooltip bubble */
+  .site-nav__link--icon::after {
+    content: attr(data-tip);
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    padding: 0.32rem 0.6rem 0.28rem;
+    background: #060608;
+    color: #f2f2f2;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 4px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(0, 0, 0, 0.9),
+      0 0 14px rgba(255, 255, 255, 0.04);
+    font-family: var(--font-condensed);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.16s ease, transform 0.16s ease;
+    z-index: 60;
+  }
+
+  /* Tooltip arrow */
+  .site-nav__link--icon::before {
+    content: "";
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg) translateY(-2px);
+    width: 8px;
+    height: 8px;
+    background: #060608;
+    border-left: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.16s ease;
+    z-index: 61;
+  }
+
+  .site-nav__link--icon:hover::after,
+  .site-nav__link--icon:focus-visible::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .site-nav__link--icon:hover::before,
+  .site-nav__link--icon:focus-visible::before {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 1024px) {
+  /* Hamburger panel: keep labels beside icons, suppress tooltips. */
+  .site-nav__link--icon::after,
+  .site-nav__link--icon::before {
+    content: none;
+  }
+}
+
 /* ---- Search: icon trigger; the input lives in .site-nav__middle ---- */
 .site-nav__search {
   display: flex;

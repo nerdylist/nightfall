@@ -61,15 +61,42 @@ if (!empty($_SESSION['user_id'])) {
     <div class="site-nav__collapse" id="nav-collapse">
       <div class="site-nav__middle">
         <div class="site-nav__links">
-          <a href="/" class="site-nav__link">Home</a>
-          <a href="/game" class="site-nav__link">Game</a>
-          <a href="#" class="site-nav__link">News</a>
-          <a href="/media" class="site-nav__link">Media</a>
-          <a href="/leaderboard" class="site-nav__link">Leaderboard</a>
-          <a href="/shop" class="site-nav__link">Shop</a>
-          <a href="/bbs/" class="site-nav__link">Community</a>
+          <!-- Desktop: icon-only + stylized tooltip (data-tip). Mobile/tablet
+               (<=1024px): icon + label row inside the hamburger panel, no
+               tooltips (touch has no hover). -->
+          <a href="/" class="site-nav__link site-nav__link--icon" data-tip="Home" aria-label="Home">
+            <svg class="site-nav__link-icon" viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false"><path d="M3 11.5 12 4l9 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 10.5V20h13v-9.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 20v-5h4v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            <span class="site-nav__label">Home</span>
+          </a>
+          <a href="/game" class="site-nav__link site-nav__link--icon" data-tip="The Game" aria-label="Game">
+            <svg class="site-nav__link-icon" viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false"><path d="M6.5 8h11a4.5 4.5 0 0 1 4.4 5.4l-.8 4a2.6 2.6 0 0 1-4.6 1.1L14.6 16H9.4l-1.9 2.5a2.6 2.6 0 0 1-4.6-1.1l-.8-4A4.5 4.5 0 0 1 6.5 8Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8 11v3M6.5 12.5h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="11.6" r="0.6" fill="currentColor" stroke="currentColor"/><circle cx="18" cy="13.4" r="0.6" fill="currentColor" stroke="currentColor"/></svg>
+            <span class="site-nav__label">Game</span>
+          </a>
+          <a href="#" class="site-nav__link site-nav__link--icon" data-tip="News" aria-label="News">
+            <svg class="site-nav__link-icon" viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false"><path d="M4 5h13v14a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2V5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M17 9h3v10a2 2 0 0 1-2 2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 9h7M7 13h7M7 17h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <span class="site-nav__label">News</span>
+          </a>
+          <a href="/media" class="site-nav__link site-nav__link--icon" data-tip="Media" aria-label="Media">
+            <svg class="site-nav__link-icon" viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 5v14M17 5v14M3 9h4M3 15h4M17 9h4M17 15h4" stroke="currentColor" stroke-width="2"/><path d="m11 10 3.5 2-3.5 2v-4Z" fill="currentColor" stroke="currentColor" stroke-linejoin="round"/></svg>
+            <span class="site-nav__label">Media</span>
+          </a>
+          <a href="/leaderboard" class="site-nav__link site-nav__link--icon" data-tip="Leaderboard" aria-label="Leaderboard">
+            <svg class="site-nav__link-icon" viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false"><path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 4h10v6a5 5 0 0 1-10 0V4Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M7 6H4v2a4 4 0 0 0 3 3.9M17 6h3v2a4 4 0 0 1-3 3.9" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            <span class="site-nav__label">Leaderboard</span>
+          </a>
+          <a href="/shop" class="site-nav__link site-nav__link--icon" data-tip="Shop" aria-label="Shop">
+            <svg class="site-nav__link-icon" viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false"><path d="M5 8h14l-1 13H6L5 8Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 11V6a3 3 0 0 1 6 0v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <span class="site-nav__label">Shop</span>
+          </a>
+          <a href="/bbs/" class="site-nav__link site-nav__link--icon" data-tip="Community" aria-label="Community">
+            <svg class="site-nav__link-icon" viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false"><path d="M4 5h12v8H8l-4 4V5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M16 9h4v10l-3-3h-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            <span class="site-nav__label">Community</span>
+          </a>
           <?php if ($NAV_ADMIN_URL !== null): ?>
-            <a href="<?= htmlspecialchars($NAV_ADMIN_URL) ?>" class="site-nav__link">Admin</a>
+            <a href="<?= htmlspecialchars($NAV_ADMIN_URL) ?>" class="site-nav__link site-nav__link--icon" data-tip="Keeper Admin" aria-label="Admin">
+              <svg class="site-nav__link-icon" viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 10 4-1.6 7-5.6 7-10V6l-7-3Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9.5 12l2 2 3.5-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="site-nav__label">Admin</span>
+            </a>
           <?php endif; ?>
         </div>
         <form class="site-nav__search-form" id="nav-search-form">
