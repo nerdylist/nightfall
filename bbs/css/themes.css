@@ -1,6 +1,33 @@
 /* themes.css — palette + theme-independent design tokens
    ONLY this file may contain raw hex palette values. */
 
+/* Layered "Shadow of the Deads" display face (self-hosted). Two variants meant
+   to overlay at the same position: Under = backing/shadow layer, Over = face.
+   See .forum-title-layered in forum.css for the stacking. */
+@font-face {
+  font-family: "Shadow of the Deads Over";
+  src: url("/fonts/Shadow of the Deads Over.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Shadow of the Deads Under";
+  src: url("/fonts/Shadow of the Deads Under.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Page / section headings (e.g. "COMMUNITY", category hero titles). */
+@font-face {
+  font-family: "Young Frankenstein";
+  src: url("/fonts/youngfrank.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* ---- Spacing scale (theme-independent) ---- */
   --space-1: 4px;
@@ -27,7 +54,11 @@
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   /* Forum-specific title face (Google Font, loaded in partials/head.php).
      Applied only to forum titles — the shared site nav keeps --font-display. */
-  --font-forum-title: "Freckle Face", var(--font-display);
+  /* Forum + page/section titles: Young Frankenstein (self-hosted). Layered
+     forum/thread titles use the explicit Shadow of the Deads Over/Under fonts
+     and fall back to this. */
+  --font-forum-title: "Young Frankenstein", var(--font-display);
+  --font-page-title: "Young Frankenstein", var(--font-display);
 
   --fs-xs: 0.75rem;
   --fs-sm: 0.8125rem;

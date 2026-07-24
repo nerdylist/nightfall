@@ -20,7 +20,8 @@ include __DIR__ . '/partials/header.php';     // <header class="site-header">
       <a class="forum-row" href="/bbs/category/<?= (int)$category['id'] ?>" style="--cat-color: <?= forum_category_color($category) ?>;">
         <span class="forum-row-badge cat-badge<?= forum_category_badge_is_image($category) ? ' is-image' : '' ?>"><?= forum_category_badge($category) ?></span>
         <span class="forum-row-main">
-          <span class="forum-row-name"><?= htmlspecialchars($category['name'] ?? '') ?></span>
+          <?php $catName = htmlspecialchars($category['name'] ?? ''); ?>
+          <span class="forum-row-name forum-title-layered" data-title="<?= $catName ?>"><?= $catName ?></span>
           <span class="forum-row-desc"><?= htmlspecialchars($category['description'] ?? '') ?></span>
         </span>
         <span class="forum-row-stats">

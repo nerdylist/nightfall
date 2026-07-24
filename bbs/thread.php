@@ -112,7 +112,8 @@ include __DIR__ . '/partials/header.php';     // <header class="site-header">
           </a>
         <?php endif; ?>
       </div>
-      <h1 class="op-title"><?= htmlspecialchars($thread['title'] ?? 'Thread') ?></h1>
+      <?php $opTitle = htmlspecialchars($thread['title'] ?? 'Thread'); ?>
+      <h1 class="op-title forum-title-layered" data-title="<?= $opTitle ?>"><?= $opTitle ?></h1>
       <div class="op-stats">
         <span><?= (int)($thread['replies'] ?? 0) ?> replies</span>
         <span><?= (int)($thread['views'] ?? 0) ?> views</span>

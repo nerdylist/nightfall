@@ -1,6 +1,34 @@
 /* forum.css — hero, section head, category grid/cards, category toolbar, thread list/rows
    FLAT + SHARP: hairline borders, crisp editorial type, near-zero shadow, fast micro-interactions. */
 
+/* ---- Layered "Shadow of the Deads" title (Forum + Thread titles) ----
+   The element itself paints the UNDER layer (dark gray backing). A ::before,
+   pinned to the exact same box, paints the OVER layer (white face) from the
+   element's data-title attribute so the two chromatic variants register on top
+   of each other. Requires markup: <h_ class="… forum-title-layered"
+   data-title="Same Text">Same Text</h_>. */
+/* Doubled class raises specificity so this beats .forum-row-name / .op-title
+   (single-class rules that also set font-family + color, and load later). */
+.forum-title-layered.forum-title-layered {
+  position: relative;
+  font-family: "Shadow of the Deads Under", var(--font-forum-title);
+  color: #ffffff; /* under / backing layer — white */
+}
+.forum-title-layered.forum-title-layered::before {
+  content: attr(data-title);
+  position: absolute;
+  inset: 0;
+  font-family: "Shadow of the Deads Over", var(--font-forum-title);
+  color: #000000; /* over / face layer — black */
+  /* inherit the base layer's box exactly so the two variants register */
+  text-transform: inherit;
+  letter-spacing: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  pointer-events: none;
+}
+
 /* ---- Hero ---- */
 .hero {
   /* main already supplies top padding; keep the hero's own top space small. */
@@ -24,7 +52,7 @@
 .hero-title {
   margin: 0 0 var(--space-4);
   max-width: 18ch;
-  font-family: var(--font-forum-title);
+  font-family: var(--font-page-title);
   text-transform: uppercase;
   font-weight: 400;
   font-size: var(--fs-3xl);
@@ -85,7 +113,7 @@
 
 .section-title {
   margin: 0;
-  font-family: var(--font-forum-title);
+  font-family: var(--font-page-title);
   text-transform: uppercase;
   font-weight: 400;
   font-size: var(--fs-xl);
@@ -339,7 +367,7 @@
   font-family: var(--font-forum-title);
   text-transform: uppercase;
   font-weight: 400;
-  font-size: var(--fs-xl);
+  font-size: var(--fs-lg);
   letter-spacing: -0.01em;
   color: var(--text);
 }

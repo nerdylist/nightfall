@@ -61,7 +61,8 @@ include __DIR__ . '/partials/header.php';     // <header class="site-header">
       <div class="cat-info"<?php if ($category !== null): ?> style="--cat-color: <?= forum_category_color($category) ?>;"<?php endif; ?>>
         <div class="cat-info-head">
           <?php if ($category !== null): ?><span class="cat-badge<?= forum_category_badge_is_image($category) ? ' is-image' : '' ?>"><?= forum_category_badge($category) ?></span><?php endif; ?>
-          <h1 class="cat-info-name"><?= htmlspecialchars($category['name'] ?? 'Forum') ?></h1>
+          <?php $catInfoName = htmlspecialchars($category['name'] ?? 'Forum'); ?>
+          <h1 class="cat-info-name forum-title-layered" data-title="<?= $catInfoName ?>"><?= $catInfoName ?></h1>
         </div>
         <p class="cat-info-desc"><?= htmlspecialchars($category['description'] ?? '') ?></p>
         <dl class="cat-info-stats">
