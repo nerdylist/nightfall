@@ -164,7 +164,7 @@ include __DIR__ . '/partials/header.php';     // <header class="site-header">
     <div class="post-reactions" aria-label="Reactions"></div>
   </article>
 
-  <section class="chat" data-user-name="<?= htmlspecialchars($currentUserName) ?>" data-user-initials="<?= htmlspecialchars($currentUserInitials) ?>" data-user-id="<?= (int)$data['current_user'] ?>" data-thread-id="<?= (int)$threadId ?>" data-csrf="<?= htmlspecialchars(csrf_token()) ?>" data-can-post="<?= auth_is_logged_in() ? '1' : '' ?>" data-last-id="<?= (int)$lastChatId ?>">
+  <section class="chat" data-user-name="<?= htmlspecialchars($currentUserName) ?>" data-user-initials="<?= htmlspecialchars($currentUserInitials) ?>" data-user-id="<?= (int)$data['current_user'] ?>" data-thread-id="<?= (int)$threadId ?>" data-csrf="<?= htmlspecialchars(csrf_token()) ?>" data-can-post="<?= auth_is_logged_in() ? '1' : '' ?>" data-last-id="<?= (int)$lastChatId ?>" data-endpoint="<?= htmlspecialchars(($BASE ?? '/bbs/') . 'chat.php') ?>">
     <div class="chat-header"><span>Live Chat</span></div>
     <div class="chat-messages" aria-live="polite">
       <?php if (empty($threadChat)): ?>

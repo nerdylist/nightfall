@@ -33,6 +33,9 @@
 
     var threadId = parseInt(chat.getAttribute('data-thread-id'), 10) || 0;
     var csrf = chat.getAttribute('data-csrf') || '';
+    // Absolute endpoint — thread pages use friendly URLs (/bbs/thread/N), so a
+    // relative 'chat.php' would resolve to /bbs/thread/chat.php and fail.
+    var endpoint = chat.getAttribute('data-endpoint') || '/bbs/chat.php';
     var canPost = chat.getAttribute('data-can-post') === '1';
     var lastId = parseInt(chat.getAttribute('data-last-id'), 10) || 0;
     var userId = parseInt(chat.getAttribute('data-user-id'), 10) || 0;
@@ -125,7 +128,7 @@
       fd.append('thread_id', threadId);
       fd.append('text', text);
 
-      fetch('chat.php', { method: 'POST', body: fd }).then(function (r) {
+      fetch(endpoint, { method: 'POST', body: fd }).then(function (r) {
         if (!r.ok) {
           throw new Error('send');
         }
@@ -172,7 +175,7 @@
         return;
       }
       polling = true;
-      fetch('chat.php?thread_id=' + threadId + '&after_id=' + lastId).then(function (r) {
+      fetch(endpoint + '?thread_id=' + threadId + '&after_id=' + lastId).then(function (r) {
         return r.json();
       }).then(function (d) {
         (d.messages || []).forEach(function (m) {
