@@ -1,0 +1,157 @@
+/* THE DEAD LAST — Keeper > Users. Edit/reset/delete + game-data modals. */
+
+.keeper-users-actions {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.keeper-users-inline { margin: 0; display: inline; }
+
+.keeper-users-danger {
+  color: #ff7b72;
+  border-color: rgba(255, 123, 114, 0.4);
+}
+.keeper-users-danger:hover {
+  color: #fff;
+  background: #b1352c;
+  border-color: #b1352c;
+}
+
+.keeper-users-hint {
+  font-size: 0.85rem;
+  margin: 0 0 var(--space-4);
+}
+
+/* ---- Modal (shared pattern) ---- */
+.keeper-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--space-6) var(--space-4);
+  overflow-y: auto;
+}
+.keeper-modal[hidden] { display: none; }
+
+.keeper-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(3px);
+}
+
+.keeper-modal__panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 620px;
+  margin: auto;
+  background: var(--keeper-panel, #0a0a0a);
+  border: 1px solid var(--keeper-line, rgba(255,255,255,0.14));
+  border-radius: var(--radius-md, 10px);
+  padding: var(--space-5) var(--space-6) var(--space-6);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+}
+.keeper-modal__panel--wide { max-width: 820px; }
+
+.keeper-modal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.keeper-modal__title {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 1.2rem;
+  color: var(--keeper-ink, #fff);
+  margin: 0;
+}
+
+.keeper-modal__close {
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--keeper-ink-3, rgba(255,255,255,0.45));
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm, 6px);
+}
+.keeper-modal__close:hover { color: var(--keeper-ink, #fff); background: var(--keeper-panel-2, #131313); }
+
+/* ---- Forms ---- */
+.keeper-users-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3) var(--space-4);
+}
+
+.keeper-users-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+.keeper-users-field--wide { grid-column: 1 / -1; }
+
+.keeper-users-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.keeper-users-form .field {
+  padding: 7px 10px;
+  font-size: 0.88rem;
+  width: 100%;
+}
+
+.keeper-users-modal-actions {
+  margin-top: var(--space-4);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+.keeper-users-hr {
+  border: none;
+  border-top: 1px solid var(--keeper-line-soft, rgba(255,255,255,0.08));
+  margin: var(--space-5) 0 var(--space-4);
+}
+
+.keeper-users-reset { display: block; }
+
+/* ---- Game-data stat groups ---- */
+.keeper-users-statgroup {
+  border: 1px solid var(--keeper-line-soft, rgba(255,255,255,0.08));
+  border-radius: var(--radius-sm, 6px);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  margin: 0 0 var(--space-4);
+}
+
+.keeper-users-statgroup legend {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  padding: 0 6px;
+}
+
+.keeper-users-statgrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3) var(--space-4);
+}
+
+body.keeper-modal-open { overflow: hidden; }
+
+@media (max-width: 720px) {
+  .keeper-users-grid { grid-template-columns: 1fr; }
+  .keeper-users-statgrid { grid-template-columns: 1fr 1fr; }
+}

@@ -1,0 +1,172 @@
+/* THE DEAD LAST — Keeper > Forum admin (categories / threads / chat).
+   Ported from the old bbs/admin panel into the Keeper shell. */
+
+.keeper-main .keeper-table-card {
+  margin-bottom: var(--space-5);
+}
+
+.keeper-bbs-count {
+  margin-left: var(--space-2);
+  font-size: 0.75rem;
+  color: var(--keeper-ink-3, rgba(255,255,255,0.45));
+  font-weight: 600;
+}
+
+/* ---- Forms (create/edit) ---- */
+.keeper-bbs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.keeper-bbs-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.keeper-bbs-field--wide { grid-column: span 2; }
+.keeper-bbs-field--full {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: var(--space-3);
+}
+
+.keeper-bbs-field--check {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  align-self: end;
+  padding-bottom: 9px;
+}
+
+.keeper-bbs-field--check input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.keeper-bbs-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.keeper-bbs-form .field {
+  padding: 7px 10px;
+  font-size: 0.88rem;
+  width: 100%;
+}
+
+.keeper-bbs-form textarea.field {
+  width: 100%;
+  resize: vertical;
+}
+
+.keeper-bbs-color {
+  padding: 2px !important;
+  height: 34px;
+  width: 56px;
+  cursor: pointer;
+}
+
+.keeper-bbs-checks {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-3);
+  font-size: 0.9rem;
+  color: var(--text-1);
+}
+
+.keeper-bbs-checks label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.keeper-bbs-checks input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+}
+
+.keeper-bbs-actions {
+  margin-top: var(--space-4);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+/* ---- Table extras ---- */
+.keeper-bbs-desc {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  max-width: 320px;
+  white-space: normal;
+}
+
+.keeper-bbs-swatch {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+  vertical-align: middle;
+}
+
+/* Flag / reaction badges. */
+.keeper-bbs-flags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.keeper-bbs-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-1);
+  background: var(--bg-2, #0a0a0a);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.keeper-bbs-reaction-summary {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+/* Danger (delete) button. */
+.keeper-bbs-danger {
+  color: #ff7b72;
+  border-color: rgba(255, 123, 114, 0.4);
+}
+
+.keeper-bbs-danger:hover {
+  color: #fff;
+  background: #b1352c;
+  border-color: #b1352c;
+}
+
+.keeper-bbs-link {
+  color: var(--text-1);
+}
+.keeper-bbs-link:hover { color: var(--text-0); }
+
+@media (max-width: 720px) {
+  .keeper-bbs-grid { grid-template-columns: 1fr; }
+  .keeper-bbs-field--wide { grid-column: span 1; }
+}

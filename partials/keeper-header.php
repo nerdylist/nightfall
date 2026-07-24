@@ -78,17 +78,11 @@ function keeper_nav_link(string $href, string $label, string $current, bool $ext
       </div>
 
       <div class="keeper-nav__group">
-        <p class="keeper-nav__heading">Community</p>
-        <!-- Forum moderation — mocked; migrates from /bbs/admin/ in Phase 2. -->
-        <a href="/bbs/admin/categories.php" class="keeper-nav__link keeper-nav__link--soon">
-          <span class="keeper-nav__label">Categories</span><span class="keeper-nav__soon">↗</span>
-        </a>
-        <a href="/bbs/admin/threads.php" class="keeper-nav__link keeper-nav__link--soon">
-          <span class="keeper-nav__label">Threads</span><span class="keeper-nav__soon">↗</span>
-        </a>
-        <a href="/bbs/admin/chat.php" class="keeper-nav__link keeper-nav__link--soon">
-          <span class="keeper-nav__label">Chat</span><span class="keeper-nav__soon">↗</span>
-        </a>
+        <p class="keeper-nav__heading">Forum</p>
+        <?= keeper_nav_link('/keeper/bbs/index.php', 'Forum Home', $keeperCurrent) ?>
+        <?= keeper_nav_link('/keeper/bbs/categories.php', 'Categories', $keeperCurrent) ?>
+        <?= keeper_nav_link('/keeper/bbs/threads.php', 'Threads', $keeperCurrent) ?>
+        <?= keeper_nav_link('/keeper/bbs/chat.php', 'Chat', $keeperCurrent) ?>
       </div>
 
       <div class="keeper-nav__group">
