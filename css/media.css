@@ -1,0 +1,616 @@
+/* THE DEAD LAST — public /media page: audio player + playlist. */
+
+/* Horror display fonts (Google Fonts). Loaded here so they're scoped to the
+   pages that use them without touching the shared header. */
+@import url('https://fonts.googleapis.com/css2?family=Creepster&family=Eater&family=Freckle+Face&family=Jolly+Lodger&family=Nosifer&display=swap');
+
+/* Fill the space between the (sticky) nav and footer and center the deck.
+   The compact player is short, so header + footer stay on screen with no
+   page scroll — the playlist lives in a side drawer, not stacked below. */
+.media-page {
+  --media-nav-h: 78px;
+  --media-footer-h: 92px;
+  /* Near-black edge for the player, drawer, and tab (inherited by descendants). */
+  --media-edge: #1a1a1a;
+  min-height: calc(100vh - var(--media-nav-h) - var(--media-footer-h));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5) 0;
+  box-sizing: border-box;
+  /* Big dark-gray → transparent glow, offset toward the bottom-right. */
+  background:
+    radial-gradient(120% 110% at 62% 65%,
+      rgba(120, 120, 120, 0.22) 0%,
+      rgba(90, 90, 90, 0.12) 28%,
+      rgba(60, 60, 60, 0.05) 48%,
+      transparent 70%);
+}
+
+.media-page > .container {
+  width: 100%;
+}
+
+/* ---- Deck: player + slide-out drawer, centered as one unit ---- */
+.media-deck {
+  position: relative;                /* anchor for the right-edge handle */
+  display: flex;
+  align-items: center;               /* children size to content, centered */
+  justify-content: center;
+  gap: 0;
+  width: fit-content;                /* wrap player+drawer tightly... */
+  max-width: 100%;
+  margin: 0 auto;                    /* ...and stay centered */
+}
+
+.media-empty {
+  padding: var(--space-6);
+  text-align: center;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   Player — one cohesive, centered container with dark ShadCN
+   polish: layered gradient, hairline highlight, top shine.
+   ============================================================ */
+/* Animatable angle for the traveling shine (falls back gracefully). */
+@property --mp-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.media-player {
+  position: relative;
+  flex: 0 0 auto;
+  width: 420px;
+  max-width: 100%;
+  border-radius: 16px;
+  isolation: isolate;
+  padding: 1px;                       /* room for the gradient-border layer */
+  /* The animated shine border: a rotating conic gradient painted only in the
+     1px padding ring (border-box) with a solid body on top (content-box). A
+     dim base ring keeps a full edge visible while the bright arc travels. */
+  background:
+    /* body */
+    linear-gradient(180deg, #131313 0%, #0b0b0b 42%, #060606 100%) content-box,
+    /* traveling bright arc */
+    conic-gradient(from var(--mp-angle),
+      transparent 0deg,
+      transparent 60deg,
+      rgba(255, 255, 255, 0.85) 90deg,
+      rgba(255, 255, 255, 0.15) 120deg,
+      transparent 160deg,
+      transparent 360deg) border-box,
+    /* dim base ring so the whole edge is always drawn */
+    linear-gradient(var(--media-edge), var(--media-edge)) border-box;
+  animation: mp-shine 5s linear infinite;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 30px 70px -30px rgba(0, 0, 0, 0.9);
+}
+
+@keyframes mp-shine {
+  to { --mp-angle: 360deg; }
+}
+
+/* Player interior is a row: volume rail (left) + now-panel. */
+.media-player {
+  display: flex;
+  align-items: stretch;
+}
+
+.media-player > .media-player__now {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* ---- Vertical volume rail (left side) ---- */
+.media-player__volume {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) 10px;
+  border-right: 1px solid var(--border-subtle);
+}
+
+.media-player__vol-icon {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  cursor: default;
+  user-select: none;
+}
+
+/* Vertical range input — a carved, inset dark rail. The filled portion is a
+   muted mid-gray (darker than white, lighter than the rail); the handle is a
+   round knob centered in the groove. */
+.media-player__vol {
+  -webkit-appearance: slider-vertical;
+  appearance: slider-vertical;
+  writing-mode: vertical-lr;
+  direction: rtl;                    /* low at bottom, high at top */
+  width: 8px;
+  flex: 1 1 auto;
+  min-height: 96px;
+  background: transparent;
+  cursor: pointer;
+  accent-color: #7d7d7d;             /* Firefox fill = muted gray */
+}
+
+/* Rail: dark groove, inset — highlight on the right edge, shadow on the left. */
+.media-player__vol::-webkit-slider-runnable-track {
+  width: 8px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #050505, #141414 55%, #0a0a0a);
+  box-shadow:
+    inset -1px 0 0 rgba(255, 255, 255, 0.10),   /* highlight, one side */
+    inset  1px 0 0 rgba(0, 0, 0, 0.9),          /* shadow, other side */
+    inset  0 1px 3px rgba(0, 0, 0, 0.8);        /* carved-in depth */
+}
+.media-player__vol::-moz-range-track {
+  width: 8px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #050505, #141414 55%, #0a0a0a);
+  box-shadow:
+    inset -1px 0 0 rgba(255, 255, 255, 0.10),
+    inset  1px 0 0 rgba(0, 0, 0, 0.9),
+    inset  0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* Filled portion (below the thumb) — muted gray, WebKit uses accent-color. */
+.media-player__vol { accent-color: #7d7d7d; }
+
+/* Handle: centered round knob with its own highlight/shadow. */
+.media-player__vol::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  margin-left: -4px;                 /* center the 15px knob over the 8px rail */
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e8e8e8, #9a9a9a 70%, #6c6c6c);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.media-player__vol::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border: none;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e8e8e8, #9a9a9a 70%, #6c6c6c);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* Soft top shine sweeping across the header (kept, layered above the body). */
+.media-player__now::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 220px;
+  background:
+    radial-gradient(120% 80% at 50% -20%, rgba(255, 255, 255, 0.10), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+}
+
+/* ---- Rotated DEADAMP brand on the left spine ---- */
+.media-player__brand {
+  position: absolute;
+  /* Anchor to just outside the player's left edge, vertically centered, then
+     rotate around that point so the text runs up the outside of the spine. */
+  right: 100%;
+  top: 50%;
+  z-index: 2;
+  margin-right: 14px;                 /* gap between text and the player edge */
+  /* rotate(-90) around right-center makes the word run downward from the
+     midline; translateX(50%) (pre-rotation) shifts it right by half its width,
+     which after the -90° rotation becomes UP by half its length — centering
+     it on the player's vertical midline. */
+  transform: rotate(-90deg) translateX(50%);
+  transform-origin: right center;
+  font-family: var(--font-condensed, sans-serif);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: #555;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* ---- Subtitle inside the player, top-center ---- */
+.media-player__subtitle {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+  text-shadow: 1px 1px rgba(0, 0, 0, 0.9);
+}
+
+.media-player__now {
+  position: relative;
+  z-index: 1;
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: center;
+  border-radius: 0 15px 15px 0;      /* square left (volume rail sits there) */
+}
+
+/* ---- Visualizer ---- */
+.media-player__viz-wrap {
+  width: 100%;
+  height: 80px;
+  border-radius: 12px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0) 60%),
+    var(--bg-0);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset, var(--shadow-md);
+}
+
+.media-player__viz {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- Now-playing meta (centered) ---- */
+.media-player__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  width: 100%;
+}
+
+.media-player__eyebrow {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--text-muted);
+}
+
+.media-player__track {
+  font-family: "Creepster", var(--font-display);
+  font-size: clamp(1.3rem, 4vw, 1.5rem);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  color: var(--text-0);
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.28);
+}
+
+/* ---- Scrubber ---- */
+.media-player__scrub {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.media-player__time {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 34px;
+  text-align: center;
+}
+
+.media-player__seek {
+  flex: 1 1 auto;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 5px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 1px 1px rgba(0,0,0,0.6) inset;
+  cursor: pointer;
+}
+
+.media-player__seek::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #fff, #cfcfcf);
+  box-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+.media-player__seek::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #fff, #cfcfcf);
+  box-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+/* ---- Transport ---- */
+.media-player__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
+.media-player__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  font-size: 1rem;
+  color: var(--text-1);
+  background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease;
+}
+
+.media-player__btn:hover {
+  color: var(--text-0);
+  border-color: rgba(255,255,255,0.4);
+  box-shadow: 0 0 16px rgba(255,255,255,0.12);
+}
+
+.media-player__btn:active { transform: scale(0.93); }
+
+.media-player__btn--play {
+  width: 54px;
+  height: 54px;
+  font-size: 1.3rem;
+  color: #000;
+  background: linear-gradient(180deg, #ffffff, #d0d0d0);
+  border-color: #ffffff;
+  box-shadow: 0 0 24px rgba(255,255,255,0.25), 0 1px 0 rgba(255,255,255,0.8) inset;
+}
+
+.media-player__btn--play:hover {
+  background: linear-gradient(180deg, #ffffff, #e6e6e6);
+  box-shadow: 0 0 34px rgba(255,255,255,0.45), 0 1px 0 rgba(255,255,255,0.9) inset;
+}
+
+/* ---- Playlist (inside the same container) ---- */
+/* ============================================================
+   Slide-out playlist drawer (right of the player).
+   ============================================================ */
+/* Outer drawer: animates its WIDTH open. Its HEIGHT is pinned to the player's
+   height (set by JS as --mp-h) so a long track list scrolls INSIDE it instead
+   of stretching the drawer/deck taller than the player. overflow:hidden clips
+   the fixed-width inner panel while width animates. */
+.media-drawer {
+  flex: 0 0 auto;
+  align-self: center;
+  height: var(--mp-h, 260px);
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin-left: 0;
+  transition: width 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.24s ease,
+              margin-left 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.media-deck.is-open .media-drawer {
+  width: 300px;
+  max-width: 60vw;
+  opacity: 1;
+  margin-left: var(--space-4);
+}
+
+/* Inner panel: fixed width (so contents don't squish during the width
+   animation), full height, a head + scrolling list + foot. */
+.media-drawer__panel {
+  width: 300px;
+  max-width: 60vw;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #101010, #070707);
+  border: 1px solid var(--media-edge);
+  overflow: hidden;
+}
+
+.media-drawer__head,
+.media-drawer__foot {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+}
+
+.media-drawer__head {
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.media-drawer__foot {
+  justify-content: center;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.media-drawer__title {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text-2);
+}
+
+.media-drawer__count {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.media-drawer__foot-text {
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: var(--text-muted);
+}
+
+.media-playlist {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  margin: 0;
+  padding: var(--space-2) 0;
+}
+
+.media-playlist::-webkit-scrollbar { width: 8px; }
+.media-playlist::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+}
+.media-playlist::-webkit-scrollbar-track { background: transparent; }
+
+/* ---- Tab handle on the RIGHT edge of the deck ----
+   Anchored just outside the deck's right side, vertically centered. When
+   closed the deck ≈ the player, so it rests on the player's right edge; when
+   open the deck widens to include the drawer, so it rides out to the drawer's
+   right edge — all automatic, no JS positioning. */
+.media-deck__handle {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 52px;
+  padding: 0;
+  background: linear-gradient(180deg, #161616, #0c0c0c);
+  color: var(--text-2);
+  border: 1px solid var(--media-edge);
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.media-deck__handle:hover {
+  color: var(--text-0);
+  background: linear-gradient(180deg, #1c1c1c, #101010);
+}
+
+/* Arrow: ▸ (points right = "open") when closed; flips to ◂ ("close") open. */
+.media-deck__handle-icon {
+  font-size: 0.9rem;
+  line-height: 1;
+  transition: transform 0.3s ease;
+}
+
+.media-deck.is-open .media-deck__handle-icon {
+  transform: rotate(180deg);
+}
+
+.media-playlist__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 11px var(--space-6);
+  cursor: pointer;
+  transition: background-color 0.14s ease, color 0.14s ease;
+}
+
+.media-playlist__item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.media-playlist__num {
+  width: 20px;
+  text-align: right;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+
+.media-playlist__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #b0b0b0;                     /* inactive: a touch darker than --text-1 */
+  font-size: 0.92rem;
+}
+
+.media-playlist__item.is-current {
+  background: linear-gradient(90deg, rgba(255,255,255,0.06), transparent 80%);
+  box-shadow: inset 2px 0 0 var(--text-0);
+}
+
+.media-playlist__item.is-current .media-playlist__title {
+  color: var(--text-0);
+  font-weight: 600;
+}
+
+.media-playlist__item.is-current .media-playlist__num { color: var(--text-0); }
+
+/* Little equalizer bars on the currently-playing track. */
+.media-playlist__eq {
+  display: none;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+  flex: 0 0 auto;
+}
+
+.media-playlist__item.is-current .media-playlist__eq { display: flex; }
+
+.media-playlist__eq i {
+  width: 3px;
+  height: 100%;
+  background: var(--text-0);
+  transform-origin: bottom;
+  animation: mp-eq 0.9s ease-in-out infinite;
+}
+
+.media-playlist__eq i:nth-child(2) { animation-delay: 0.25s; }
+.media-playlist__eq i:nth-child(3) { animation-delay: 0.5s; }
+
+.media-player:not(.is-playing) .media-playlist__eq i {
+  animation-play-state: paused;
+}
+
+@keyframes mp-eq {
+  0%, 100% { transform: scaleY(0.3); }
+  50%      { transform: scaleY(1); }
+}
+
+@media (max-width: 600px) {
+  .media-player__now { padding: var(--space-5) var(--space-4) var(--space-4); }
+  .media-playlist__item { padding-left: var(--space-4); padding-right: var(--space-4); }
+}

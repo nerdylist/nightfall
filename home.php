@@ -1,8 +1,38 @@
 <?php
 require_once __DIR__ . '/config.php';
 $pageTitle = 'The Dead Last — Survival is only half of the game.';
-$pageCss = ['/css/index.css'];
-$pageJs = ['/js/home-news.js'];
+$pageCss = ['/css/index.css', '/css/trailer-modal.css'];
+$pageJs = ['/js/home-news.js', '/js/trailer-modal.js'];
+
+/**
+ * Resolve the trailer the hero "Watch Trailer" button plays: the video marked
+ * active in Keeper > Media (settings.media_active), falling back to the first
+ * video in assets/video/ so the button is never dead. Null if none exists.
+ */
+$heroTrailer = null;
+try {
+    $stmt = grave_db()->prepare('SELECT value FROM settings WHERE key = ?');
+    $stmt->execute(['media_active']);
+    $raw = $stmt->fetchColumn();
+    $active = ($raw !== false) ? json_decode((string) $raw, true) : [];
+    $active = is_array($active) ? $active : [];
+
+    foreach ($active as $p) {
+        if (is_string($p) && preg_match('#^/assets/video/.+\.(mp4|webm|mov)$#i', $p) && is_file(__DIR__ . $p)) {
+            $heroTrailer = $p;
+            break;
+        }
+    }
+    if ($heroTrailer === null) {
+        foreach (glob(__DIR__ . '/assets/video/*.{mp4,webm,mov}', GLOB_BRACE) ?: [] as $f) {
+            $heroTrailer = '/assets/video/' . basename($f);
+            break;
+        }
+    }
+} catch (Throwable $e) {
+    $heroTrailer = null;
+}
+
 include __DIR__ . '/partials/header.php';
 ?>
 <link rel="stylesheet" href="<?= htmlspecialchars(asset_url('/css/model-embed.css')) ?>">
@@ -26,11 +56,25 @@ include __DIR__ . '/partials/header.php';
       <p class="hero__tagline">Game of the Living Dead</p>
       <div class="hero__actions">
         <a href="/register" class="btn btn-primary">Create Survivor</a>
-        <a href="#" class="btn btn-ghost btn-trailer"><span class="btn-trailer__glyph">&#9658;</span> Watch Trailer</a>
+        <?php if ($heroTrailer !== null): ?>
+        <button type="button" class="btn btn-ghost btn-trailer" data-open-trailer aria-haspopup="dialog"><span class="btn-trailer__glyph">&#9658;</span> Watch Trailer</button>
+        <?php endif; ?>
       </div>
     </div>
     <div class="hero__chevron" aria-hidden="true">&#8964;</div>
   </section>
+
+  <?php if ($heroTrailer !== null): ?>
+  <!-- Trailer modal: native <dialog> renders in the browser top layer, which
+       escapes the body's grayscale filter (a filtered ancestor otherwise
+       breaks position:fixed). Closes via X / backdrop / Esc. -->
+  <dialog class="trailer-modal" id="trailer-modal" aria-label="Trailer">
+    <button type="button" class="trailer-modal__close" data-close-trailer aria-label="Close">&times;</button>
+    <div class="trailer-modal__stage">
+      <video class="trailer-modal__video" id="trailer-video" controls playsinline preload="none" src="<?= htmlspecialchars($heroTrailer) ?>"></video>
+    </div>
+  </dialog>
+  <?php endif; ?>
 
   <section class="features">
     <div class="container features__grid">

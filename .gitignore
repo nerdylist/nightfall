@@ -16,6 +16,11 @@ data/*.bak-*
 # OS cruft
 .DS_Store
 
+# Large media assets (trailer + music) — kept OUT of git; uploaded to the
+# server separately. The Keeper > Media tab scans these folders live.
+assets/video/
+assets/music/
+
 # Local tooling (Claude Code session/config — not part of the project)
 .claude/
 

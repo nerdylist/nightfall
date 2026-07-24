@@ -32,6 +32,11 @@
       "description": "Shop (placeholder)"
     },
     {
+      "url": "/media",
+      "destination": "media.php",
+      "description": "Media — audio player + playlist of active music"
+    },
+    {
       "url": "/leaderboard",
       "destination": "leaderboard.php",
       "description": "Season survival-time leaderboard"

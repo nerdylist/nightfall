@@ -1,0 +1,143 @@
+/* THE DEAD LAST — Keeper > Media (trailer + music library, active flags) */
+
+.keeper-main .keeper-table-card {
+  margin-bottom: var(--space-5);
+}
+
+.keeper-media-count {
+  margin-left: var(--space-2);
+  font-size: 0.75rem;
+  color: var(--keeper-ink-3, rgba(255,255,255,0.45));
+  font-weight: 600;
+}
+
+/* ---- Video / trailer grid ---- */
+.keeper-media-grid--video {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-4);
+}
+
+.keeper-media-item {
+  border: 1px solid var(--keeper-line-soft, rgba(255,255,255,0.07));
+  border-radius: var(--radius-md, 10px);
+  padding: var(--space-3);
+  background: var(--keeper-panel-2, #131313);
+}
+
+.keeper-media-item.is-active {
+  border-color: var(--keeper-ink, #fff);
+}
+
+.keeper-media-video {
+  width: 100%;
+  display: block;
+  border-radius: var(--radius-sm, 6px);
+  background: #000;
+  aspect-ratio: 16 / 9;
+}
+
+.keeper-media-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+/* ---- Music table ---- */
+.keeper-media-table td {
+  padding: 10px 12px;
+  vertical-align: middle;
+}
+
+.keeper-media-name {
+  color: var(--keeper-ink, #fff);
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.keeper-media-size {
+  color: var(--keeper-ink-3, rgba(255,255,255,0.45));
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.keeper-media-audio-cell {
+  width: 340px;
+}
+
+.keeper-media-audio {
+  width: 100%;
+  height: 34px;
+  display: block;
+  /* Keep the native player readable on the dark UI. */
+  filter: invert(0.92) hue-rotate(180deg) brightness(1.05);
+}
+
+/* ---- Active toggle pill ---- */
+.keeper-media-toggle-form {
+  margin: 0;
+}
+
+.keeper-media-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  min-width: 84px;
+  justify-content: center;
+  font-family: var(--font-condensed, inherit);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  border-radius: 999px;
+  border: 1px solid var(--keeper-line, rgba(255,255,255,0.14));
+  background: transparent;
+  color: var(--keeper-ink-3, rgba(255,255,255,0.45));
+  transition: color 0.14s ease, background-color 0.14s ease, border-color 0.14s ease;
+}
+
+.keeper-media-toggle:hover {
+  color: var(--keeper-ink, #fff);
+  border-color: var(--keeper-ink-2, rgba(255,255,255,0.72));
+}
+
+.keeper-media-toggle.is-on {
+  background: var(--keeper-ink, #fff);
+  border-color: var(--keeper-ink, #fff);
+  color: #000;
+}
+
+/* ---- Editable title column ---- */
+.keeper-media-hint {
+  font-size: 0.85rem;
+  margin: calc(-1 * var(--space-2)) 0 var(--space-4);
+}
+
+.keeper-media-title-input {
+  min-width: 200px;
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 0.88rem;
+}
+
+.keeper-media-titles-actions {
+  margin-top: var(--space-4);
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 720px) {
+  .keeper-media-grid--video {
+    grid-template-columns: 1fr;
+  }
+  .keeper-media-audio-cell {
+    width: auto;
+  }
+  .keeper-media-title-input {
+    min-width: 140px;
+  }
+}

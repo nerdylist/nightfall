@@ -1,0 +1,75 @@
+/* THE DEAD LAST — hero "Watch Trailer" modal.
+   Uses a native <dialog> so it renders in the browser TOP LAYER, centered on
+   the viewport and immune to the body's grayscale filter (a filtered ancestor
+   otherwise breaks position:fixed / traps the modal in the long page). */
+
+.trailer-modal {
+  /* Top-layer dialog: center in the viewport. */
+  width: min(96vw, calc(96vh * 16 / 9));
+  max-width: 96vw;
+  max-height: 96vh;
+  margin: auto;                 /* centers within the top layer */
+  padding: 0;
+  border: none;
+  background: transparent;
+  overflow: visible;
+}
+
+/* The dark, blurred backdrop is the dialog's own ::backdrop pseudo-element. */
+.trailer-modal::backdrop {
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(4px);
+}
+
+/* Stage holds the 16:9 video. */
+.trailer-modal__stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 30px 120px rgba(0, 0, 0, 0.7);
+}
+
+.trailer-modal__video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: #000;
+}
+
+/* X close, pinned to the top-right of the viewport (fixed works inside the
+   top-layer dialog — the dialog itself is the top-layer root, unfiltered). */
+.trailer-modal__close {
+  position: fixed;
+  top: clamp(10px, 2vw, 24px);
+  right: clamp(10px, 2vw, 24px);
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  line-height: 1;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+}
+
+.trailer-modal__close:hover {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+}
+
+.trailer-modal__close:active {
+  transform: scale(0.94);
+}
+
+/* Lock page scroll while the dialog is open (JS adds this to <body>). */
+body.trailer-open {
+  overflow: hidden;
+}
