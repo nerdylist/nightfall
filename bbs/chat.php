@@ -77,8 +77,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($threadId <= 0) {
         chat_fail(400, 'Missing thread_id.');
     }
-    if (get_thread($threadId) === null) {
+    $chatThread = get_thread($threadId);
+    if ($chatThread === null) {
         chat_fail(404, 'Thread not found.');
+    }
+
+    // LOCKED THREAD (Boss 2026-07-25): only the ORIGINAL POSTER may post.
+    // The UI disables the composer for everyone else; this is the law that
+    // holds even against a hand-crafted request.
+    if ((int) ($chatThread['locked'] ?? 0) === 1) {
+        $poster = auth_current_user();
+        if ($poster === null || (int) $poster['id'] !== (int) $chatThread['author_id']) {
+            chat_fail(403, 'Chat is locked — only the original poster can post.');
+        }
     }
 
     $text = trim((string) ($_POST['text'] ?? ''));

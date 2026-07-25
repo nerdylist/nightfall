@@ -114,6 +114,21 @@ if (!function_exists('forum_install')) {
         $db->exec("CREATE INDEX IF NOT EXISTS idx_chat_thread ON chat_messages(thread_id)");
         $db->exec("CREATE INDEX IF NOT EXISTS idx_reactions_post ON reactions(post_id)");
 
+        // --- Migration: threads.locked (idempotent, 2026-07-25) -------------
+        // Thread lock: when 1, the thread's live chat only accepts messages
+        // from the ORIGINAL POSTER (Boss: Dev-Log-style broadcast threads).
+        // Lock/unlock is available to the OP and to admin/moderator roles.
+        $hasLocked = false;
+        foreach ($db->query('PRAGMA table_info(threads)') as $col) {
+            if ($col['name'] === 'locked') {
+                $hasLocked = true;
+                break;
+            }
+        }
+        if (!$hasLocked) {
+            $db->exec('ALTER TABLE threads ADD COLUMN locked INTEGER DEFAULT 0');
+        }
+
         // --- Migration: categories.color (idempotent) -----------------------
         // Safe to run on every page load and on an existing populated forum.db.
         $hasColor = false;

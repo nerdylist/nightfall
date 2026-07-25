@@ -604,3 +604,37 @@
 .thread-list-empty a:focus-visible {
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.35);
 }
+
+/* Post-action FA icons (icons.txt set): ship black, invert to nav ink. */
+.post-action-icon {
+  display: block;
+  filter: brightness(0) invert(1);
+  opacity: 0.75;
+  transition: opacity 0.15s ease;
+}
+
+.post-action:hover .post-action-icon,
+.post-action:focus-visible .post-action-icon { opacity: 1; }
+
+.post-lock-form,
+.post-delete-form { display: inline-flex; }
+
+/* Locked-chat state */
+.chat-locked-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint, #6f6f75);
+}
+
+.chat-locked-badge img { filter: brightness(0) invert(0.6); }
+
+.chat-composer--locked { opacity: 0.45; }
+.chat-composer--locked textarea,
+.chat-composer--locked .chat-send { cursor: not-allowed; }
+.chat-composer--locked .chat-send-icon { filter: brightness(0) invert(0.7); }

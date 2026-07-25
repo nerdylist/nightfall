@@ -126,7 +126,7 @@ if (!function_exists('get_users')) {
     function get_threads()
     {
         $rows = forum_db()->query(
-            'SELECT id, category_id, title, author_id, replies, views, last_activity, pinned, hot, excerpt
+            'SELECT id, category_id, title, author_id, replies, views, last_activity, pinned, hot, excerpt, locked
              FROM threads
              ORDER BY id'
         )->fetchAll();
@@ -143,7 +143,7 @@ if (!function_exists('get_users')) {
     function get_threads_by_category($id)
     {
         $stmt = forum_db()->prepare(
-            'SELECT id, category_id, title, author_id, replies, views, last_activity, pinned, hot, excerpt
+            'SELECT id, category_id, title, author_id, replies, views, last_activity, pinned, hot, excerpt, locked
              FROM threads
              WHERE category_id = :id
              ORDER BY id'
@@ -162,7 +162,7 @@ if (!function_exists('get_users')) {
     function get_thread($id)
     {
         $stmt = forum_db()->prepare(
-            'SELECT id, category_id, title, author_id, replies, views, last_activity, pinned, hot, excerpt
+            'SELECT id, category_id, title, author_id, replies, views, last_activity, pinned, hot, excerpt, locked
              FROM threads
              WHERE id = :id'
         );
@@ -181,7 +181,7 @@ if (!function_exists('get_users')) {
     function get_post_for_thread($threadId)
     {
         $stmt = forum_db()->prepare(
-            'SELECT thread_id, author_id, body, created
+            'SELECT id, thread_id, author_id, body, created
              FROM posts
              WHERE thread_id = :id
              ORDER BY id ASC
@@ -467,6 +467,7 @@ if (!function_exists('get_users')) {
             'pinned'        => $r['pinned'],
             'hot'           => $r['hot'],
             'excerpt'       => $r['excerpt'],
+            'locked'        => (int) ($r['locked'] ?? 0),
         ];
     }
 

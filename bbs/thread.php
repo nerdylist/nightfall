@@ -29,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
     require_once __DIR__ . '/db.php';
     $delId = (int) ($_POST['thread_id'] ?? 0);
     $fdb = forum_db();
+
     $catStmt = $fdb->prepare('SELECT category_id FROM threads WHERE id = ?');
     $catStmt->execute([$delId]);
     $delCat = (int) $catStmt->fetchColumn();
@@ -41,6 +42,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
     $fdb->prepare('DELETE FROM threads WHERE id = ?')->execute([$delId]);
 
     header('Location: ' . ($BASE ?? '/bbs/') . ($delCat > 0 ? 'category/' . $delCat : ''));
+    exit;
+}
+
+// ---- LOCK TOGGLE (Boss 2026-07-25): OP on their own thread, or staff on
+// any. Locked = the live chat only accepts the ORIGINAL POSTER's messages
+// (enforced server-side in chat.php; the UI also hides the composer).
+if ($_SERVER['REQUEST_METHOD'] === 'POST'
+    && (($_POST['action'] ?? '') === 'toggle_lock')) {
+    if (!csrf_check($_POST['csrf_token'] ?? '')) {
+        http_response_code(403);
+        exit('Forbidden');
+    }
+
+    require_once __DIR__ . '/db.php';
+    $lockId = (int) ($_POST['thread_id'] ?? 0);
+    $fdb = forum_db();
+    $row = $fdb->prepare('SELECT author_id, locked FROM threads WHERE id = ?');
+    $row->execute([$lockId]);
+    $lockThread = $row->fetch();
+
+    $isOwner = $lockThread && $me !== null
+        && (int) $me['id'] === (int) $lockThread['author_id'];
+    if (!$lockThread || (!$isOwner && !$canModerate)) {
+        http_response_code(403);
+        exit('Forbidden');
+    }
+
+    $fdb->prepare('UPDATE threads SET locked = ? WHERE id = ?')
+        ->execute([((int) $lockThread['locked']) === 1 ? 0 : 1, $lockId]);
+
+    header('Location: ' . ($BASE ?? '/bbs/') . 'thread/' . $lockId);
     exit;
 }
 
@@ -192,19 +224,29 @@ include __DIR__ . '/partials/header.php';     // <header class="site-header">
           <button class="reaction" type="button" role="menuitem" data-emoji="🔥">🔥</button>
         </div>
       </div>
+      <?php
+      // LOCK (Boss 2026-07-25): OP can lock/unlock their own thread; staff
+      // can lock/unlock any. Locked = chat accepts ONLY the OP's messages.
+      $isThreadOwner = $me !== null && (int) $me['id'] === (int) ($thread['author_id'] ?? 0);
+      $threadLocked = (int) ($thread['locked'] ?? 0) === 1;
+      ?>
+      <?php if ($isThreadOwner || $canModerate): ?>
+      <form class="post-lock-form" method="post" action="<?= htmlspecialchars(($BASE ?? '/bbs/') . 'thread/' . $threadId) ?>">
+        <?= csrf_field() ?>
+        <input type="hidden" name="action" value="toggle_lock">
+        <input type="hidden" name="thread_id" value="<?= (int) $threadId ?>">
+        <button class="post-action" type="submit" aria-label="<?= $threadLocked ? 'Unlock thread chat' : 'Lock thread chat' ?>" title="<?= $threadLocked ? 'Unlock chat (everyone can post)' : 'Lock chat (only you can post)' ?>">
+          <img class="post-action-icon" src="https://nerd.biz/assets/fa/svgs/solid/<?= $threadLocked ? 'lock' : 'lock-open' ?>.svg" width="17" height="17" alt="" aria-hidden="true">
+        </button>
+      </form>
+      <?php endif; ?>
       <?php if ($canModerate): ?>
       <form class="post-delete-form" method="post" action="<?= htmlspecialchars(($BASE ?? '/bbs/') . 'thread/' . $threadId) ?>">
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="delete_thread">
         <input type="hidden" name="thread_id" value="<?= (int) $threadId ?>">
         <button class="post-action post-action--danger" type="submit" data-action="delete-thread" aria-label="Delete thread" title="Delete thread (staff)">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M3 6h18"></path>
-            <path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"></path>
-            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-            <line x1="10" y1="11" x2="10" y2="17"></line>
-            <line x1="14" y1="11" x2="14" y2="17"></line>
-          </svg>
+          <img class="post-action-icon" src="https://nerd.biz/assets/fa/svgs/solid/trash-can.svg" width="17" height="17" alt="" aria-hidden="true">
         </button>
       </form>
       <?php endif; ?>
@@ -247,8 +289,15 @@ include __DIR__ . '/partials/header.php';     // <header class="site-header">
     </div>
   </article>
 
-  <section class="chat" data-user-name="<?= htmlspecialchars($currentUserName) ?>" data-user-initials="<?= htmlspecialchars($currentUserInitials) ?>" data-user-id="<?= (int)$data['current_user'] ?>" data-thread-id="<?= (int)$threadId ?>" data-csrf="<?= htmlspecialchars(csrf_token()) ?>" data-can-post="<?= auth_is_logged_in() ? '1' : '' ?>" data-last-id="<?= (int)$lastChatId ?>" data-endpoint="<?= htmlspecialchars(($BASE ?? '/bbs/') . 'chat.php') ?>">
-    <div class="chat-header"><span>Live Chat</span></div>
+  <?php
+  // LOCKED CHAT (Boss 2026-07-25): when the thread is locked, only the OP
+  // may post — everyone else (including staff) reads. chat.php enforces
+  // this server-side; here we gate the composer + the data-can-post flag.
+  $chatMayPost = auth_is_logged_in()
+      && (!$threadLocked || ($me !== null && (int) $me['id'] === (int) ($thread['author_id'] ?? 0)));
+  ?>
+  <section class="chat" data-user-name="<?= htmlspecialchars($currentUserName) ?>" data-user-initials="<?= htmlspecialchars($currentUserInitials) ?>" data-user-id="<?= (int)$data['current_user'] ?>" data-thread-id="<?= (int)$threadId ?>" data-csrf="<?= htmlspecialchars(csrf_token()) ?>" data-can-post="<?= $chatMayPost ? '1' : '' ?>" data-last-id="<?= (int)$lastChatId ?>" data-endpoint="<?= htmlspecialchars(($BASE ?? '/bbs/') . 'chat.php') ?>">
+    <div class="chat-header"><span>Live Chat</span><?php if ($threadLocked): ?><span class="chat-locked-badge"><img src="https://nerd.biz/assets/fa/svgs/solid/lock.svg" width="11" height="11" alt="" aria-hidden="true"> OP only</span><?php endif; ?></div>
     <div class="chat-messages" aria-live="polite">
       <?php if (empty($threadChat)): ?>
         <p class="chat-empty">No messages yet.</p>
@@ -271,11 +320,18 @@ include __DIR__ . '/partials/header.php';     // <header class="site-header">
         <?php endforeach; ?>
       <?php endif; ?>
     </div>
-    <?php if (auth_is_logged_in()): ?>
+    <?php if ($chatMayPost): ?>
     <div class="chat-composer">
       <textarea id="chat-input" placeholder="Write a message..." rows="1" aria-label="Write a message"></textarea>
       <button id="chat-send" class="chat-send" type="button" title="Send" aria-label="Send">
         <img class="chat-send-icon" src="https://nerd.biz/assets/fa/svgs/solid/paper-plane.svg" alt="">
+      </button>
+    </div>
+    <?php elseif ($threadLocked && auth_is_logged_in()): ?>
+    <div class="chat-composer chat-composer--locked">
+      <textarea id="chat-input" placeholder="Chat locked — only the original poster can post" rows="1" aria-label="Chat locked" disabled></textarea>
+      <button id="chat-send" class="chat-send" type="button" title="Chat locked" aria-label="Chat locked" disabled>
+        <img class="chat-send-icon" src="https://nerd.biz/assets/fa/svgs/solid/lock.svg" alt="">
       </button>
     </div>
     <?php else: ?>
