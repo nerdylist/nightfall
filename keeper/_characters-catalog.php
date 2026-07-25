@@ -78,19 +78,19 @@ foreach (($catalogByType ?? []) as $rows) { $total += count($rows); }
           <?php foreach ($rows as $c): ?>
           <?php $cid = (int) $c['id']; $msgCount = count($messagesByChar[$cid] ?? []); $isActive = (int) $c['active'] === 1; ?>
           <div class="keeper-chars-card<?= $isActive ? '' : ' is-inactive' ?>">
-            <form method="post" action="/keeper/characters.php" class="keeper-chars-toggle-form" title="<?= $isActive ? 'Active — in the runtime feed. Click to deactivate.' : 'Inactive — excluded from the runtime feed. Click to activate.' ?>">
-              <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
-              <input type="hidden" name="id" value="<?= $cid ?>">
-              <button type="submit" name="toggle_active" value="1" class="keeper-chars-toggle<?= $isActive ? ' is-on' : '' ?>" aria-label="<?= $isActive ? 'Deactivate' : 'Activate' ?>" role="switch" aria-checked="<?= $isActive ? 'true' : 'false' ?>">
-                <span class="keeper-chars-toggle__knob"></span>
-              </button>
-            </form>
             <div class="keeper-chars-card__media">
               <?php if (!empty($c['avatar_path'])): ?>
                 <img src="/<?= htmlspecialchars(ltrim((string) $c['avatar_path'], '/')) ?>" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
               <?php else: ?>
                 <span class="keeper-chars-card__noimg"><?= htmlspecialchars(strtoupper(substr((string) $c['name'], 0, 1))) ?></span>
               <?php endif; ?>
+              <form method="post" action="/keeper/characters.php" class="keeper-chars-toggle-form" title="<?= $isActive ? 'Active — in the runtime feed. Click to deactivate.' : 'Inactive — excluded from the runtime feed. Click to activate.' ?>">
+                <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
+                <input type="hidden" name="id" value="<?= $cid ?>">
+                <button type="submit" name="toggle_active" value="1" class="keeper-chars-toggle<?= $isActive ? ' is-on' : '' ?>" aria-label="<?= $isActive ? 'Deactivate' : 'Activate' ?>" role="switch" aria-checked="<?= $isActive ? 'true' : 'false' ?>">
+                  <span class="keeper-chars-toggle__knob"></span>
+                </button>
+              </form>
             </div>
             <div class="keeper-chars-card__body">
               <span class="keeper-chars-card__name"><?= htmlspecialchars((string) $c['name']) ?></span>

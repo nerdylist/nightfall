@@ -134,37 +134,61 @@
   color: var(--text-muted); margin: 0 0 var(--space-3);
 }
 
+/* Tall portrait cards, 4–5 across. Big avatar on top (in color), name/meta and
+   an actions row below. The Active toggle overlays the top-left of the image. */
 .keeper-chars-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-4);
 }
 
 .keeper-chars-card {
-  display: flex; align-items: center; gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
+  display: flex; flex-direction: column;
   background: var(--keeper-panel, #0a0a0a);
   border: 1px solid var(--keeper-line, rgba(255,255,255,0.12));
   border-radius: var(--radius-md, 8px);
+  overflow: hidden;
+  transition: border-color 0.16s ease, transform 0.16s ease;
 }
+.keeper-chars-card:hover { border-color: var(--keeper-ink-2, rgba(255,255,255,0.4)); }
+
 .keeper-chars-card__media {
-  flex: 0 0 auto; width: 44px; height: 44px;
-  border-radius: var(--radius-sm, 6px); overflow: hidden;
+  position: relative;
+  width: 100%; aspect-ratio: 3 / 4;
   display: flex; align-items: center; justify-content: center;
   background: var(--keeper-panel-2, #141414);
+  overflow: hidden;
 }
-.keeper-chars-card__media img { width: 100%; height: 100%; object-fit: cover; }
-.keeper-chars-card__noimg { font-family: var(--font-display); color: var(--text-muted); font-size: 1.1rem; }
+.keeper-chars-card__media img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+.keeper-chars-card__noimg {
+  font-family: var(--font-display);
+  color: var(--text-muted); font-size: 3rem;
+}
 
-.keeper-chars-card__body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.keeper-chars-card__body {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: var(--space-3) var(--space-3) 0;
+  min-width: 0;
+}
 .keeper-chars-card__name {
-  font-weight: 600; font-size: 0.9rem; color: var(--text-0, #fff);
+  font-weight: 600; font-size: 0.98rem; color: var(--text-0, #fff);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.keeper-chars-card__meta { font-size: 0.74rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.keeper-chars-card__meta {
+  font-size: 0.76rem; color: var(--text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
-.keeper-chars-card__actions { flex: 0 0 auto; display: flex; gap: 5px; }
+.keeper-chars-card__actions {
+  display: flex; gap: 6px; align-items: center;
+  padding: var(--space-3);
+  margin-top: auto;
+}
 .keeper-chars-card__actions form { margin: 0; display: inline-flex; }
+.keeper-chars-card__actions .keeper-icon-btn:last-child { margin-left: auto; } /* delete pushed right */
 
 @media (max-width: 720px) {
   .keeper-chars-grid { grid-template-columns: 1fr 1fr; }
@@ -218,8 +242,11 @@
 
 body.keeper-modal-open { overflow: hidden; }
 
-/* ---- Active toggle (per card) ---- */
-.keeper-chars-toggle-form { margin: 0; flex: 0 0 auto; display: inline-flex; }
+/* ---- Active toggle (overlaid top-left of the card image) ---- */
+.keeper-chars-toggle-form {
+  margin: 0; display: inline-flex;
+  position: absolute; top: 8px; left: 8px; z-index: 2;
+}
 .keeper-chars-toggle {
   position: relative; width: 34px; height: 19px; padding: 0; flex: 0 0 auto;
   border-radius: 999px; cursor: pointer;
@@ -236,5 +263,6 @@ body.keeper-modal-open { overflow: hidden; }
 .keeper-chars-toggle.is-on { background: #fff; border-color: #fff; }
 .keeper-chars-toggle.is-on .keeper-chars-toggle__knob { transform: translate(15px, -50%); background: #000; }
 
-.keeper-chars-card.is-inactive { opacity: 0.5; }
-.keeper-chars-card.is-inactive:hover { opacity: 0.8; }
+/* Active characters render in full color; inactive drain to monochrome. */
+.keeper-chars-card.is-inactive .keeper-chars-card__media img { filter: grayscale(1) brightness(0.82); }
+.keeper-chars-card.is-inactive .keeper-chars-card__name { color: var(--text-muted); }

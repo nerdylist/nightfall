@@ -19,6 +19,12 @@ body.keeper {
   background: var(--keeper-bg);
   color: var(--keeper-ink-2);
   margin: 0;
+  /* Keeper opts out of the site-wide body grayscale (base.css) so authored
+     character art renders in true color. Keeper's palette is already monochrome
+     (white ink on black); the only previously-grayed color is the red danger
+     hover on delete buttons, which now reads as its intended red — a fitting,
+     clearer signal for destructive actions. */
+  filter: none;
 }
 
 /* ---- Shell layout ---- */
