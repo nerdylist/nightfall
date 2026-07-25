@@ -111,45 +111,63 @@
     if (picker && picker.hidden) { openPicker(); } else { closePicker(); }
   }
 
-  function findChip(emoji) {
-    if (!reactionsArea) { return null; }
-    var chips = reactionsArea.querySelectorAll('.reaction-chip');
-    for (var i = 0; i < chips.length; i++) {
-      if (chips[i].getAttribute('data-emoji') === emoji) { return chips[i]; }
-    }
-    return null;
+  // PERSISTED REACTIONS (2026-07-25): the old version only painted chips in
+  // the DOM — nothing survived a refresh. Toggles now POST to react.php and
+  // the chip row is rebuilt from the server's JSON truth (counts + mine).
+  function rebuildChips(counts, mine) {
+    if (!reactionsArea) { return; }
+    reactionsArea.innerHTML = '';
+    Object.keys(counts).forEach(function (emoji) {
+      var chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'reaction-chip' + (mine.indexOf(emoji) !== -1 ? ' active' : '');
+      chip.setAttribute('data-emoji', emoji);
+      chip.setAttribute('aria-label', 'Toggle ' + emoji + ' reaction');
+
+      var emojiSpan = document.createElement('span');
+      emojiSpan.className = 'reaction-chip-emoji';
+      emojiSpan.textContent = emoji;
+
+      var countSpan = document.createElement('span');
+      countSpan.className = 'reaction-chip-count';
+      countSpan.textContent = String(counts[emoji]);
+
+      chip.appendChild(emojiSpan);
+      chip.appendChild(countSpan);
+      reactionsArea.appendChild(chip);
+    });
   }
 
+  var reactBusy = false;
   function toggleReaction(emoji) {
-    if (!reactionsArea) { return; }
-    var existing = findChip(emoji);
-    if (existing) {
-      existing.parentNode.removeChild(existing);
+    if (!reactionsArea || reactBusy) { return; }
+    if (!reactionsArea.getAttribute('data-can-react')) {
+      window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);
       return;
     }
-    var chip = document.createElement('button');
-    chip.type = 'button';
-    chip.className = 'reaction-chip active';
-    chip.setAttribute('data-emoji', emoji);
-    chip.setAttribute('aria-label', 'Remove ' + emoji + ' reaction');
+    reactBusy = true;
+    var body = new URLSearchParams();
+    body.set('csrf_token', reactionsArea.getAttribute('data-csrf') || '');
+    body.set('post_id', reactionsArea.getAttribute('data-post-id') || '0');
+    body.set('emoji', emoji);
+    fetch(reactionsArea.getAttribute('data-endpoint') || '/bbs/react.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString(),
+      credentials: 'same-origin'
+    }).then(function (r) { return r.json(); }).then(function (json) {
+      if (json && json.ok) { rebuildChips(json.counts || {}, json.mine || []); }
+    }).catch(function () { /* leave chips as-is on network error */ })
+      .finally(function () { reactBusy = false; });
+  }
 
-    var emojiSpan = document.createElement('span');
-    emojiSpan.className = 'reaction-chip-emoji';
-    emojiSpan.textContent = emoji;
-
-    var countSpan = document.createElement('span');
-    countSpan.className = 'reaction-chip-count';
-    countSpan.textContent = '1';
-
-    chip.appendChild(emojiSpan);
-    chip.appendChild(countSpan);
-
-    // Clicking a chip removes the reaction (toggle off).
-    chip.addEventListener('click', function () {
-      toggleReaction(emoji);
+  // Chip clicks toggle off/on — delegated so server-rendered AND rebuilt
+  // chips both work without per-chip listeners.
+  if (reactionsArea) {
+    reactionsArea.addEventListener('click', function (e) {
+      var chip = e.target.closest ? e.target.closest('.reaction-chip') : null;
+      if (chip) { toggleReaction(chip.getAttribute('data-emoji')); }
     });
-
-    reactionsArea.appendChild(chip);
   }
 
   if (reactBtn) {

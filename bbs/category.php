@@ -10,6 +10,22 @@ $data['current_user'] = $me ? (int)$me['id'] : 0;
 // friendly-URL: /bbs/category/:id exposes id via $_ROUTE_PARAMS; bridge to $_GET
 if (isset($GLOBALS['_ROUTE_PARAMS']['id']) && !isset($_GET['id'])) { $_GET['id'] = $GLOBALS['_ROUTE_PARAMS']['id']; }
 
+// Relative time for the sidebar's LAST ACTIVITY ("just now" / "5m ago" /
+// "3h ago" / "2d ago" / date). Single consumer; promote to a lib if reused.
+if (!function_exists('forum_time_ago')) {
+    function forum_time_ago(string $ts): string
+    {
+        $t = strtotime($ts);
+        if ($t === false) { return $ts; }
+        $d = time() - $t;
+        if ($d < 60) { return 'just now'; }
+        if ($d < 3600) { return floor($d / 60) . 'm ago'; }
+        if ($d < 86400) { return floor($d / 3600) . 'h ago'; }
+        if ($d < 604800) { return floor($d / 86400) . 'd ago'; }
+        return date('M j, Y', $t);
+    }
+}
+
 // Resolve requested category id (default to first category).
 $requestedId = isset($_GET['id']) ? (int) $_GET['id'] : (int) ($data['categories'][0]['id'] ?? 0);
 
@@ -69,18 +85,48 @@ include __DIR__ . '/partials/header.php';     // <header class="site-header">
           <h1 class="cat-info-name forum-title-layered" data-title="<?= $catInfoName ?>"><?= $catInfoName ?></h1>
         </div>
         <p class="cat-info-desc"><?= htmlspecialchars($category['description'] ?? '') ?></p>
+        <?php
+        // LIVE STATS (Boss 2026-07-25: sidebar showed THREADS 2 / POSTS 2 on
+        // an empty category). The categories table carries install-time
+        // counter columns that nothing maintains — deletes/creates drifted
+        // them immediately. Count the actual tables instead, every render:
+        // THREADS = threads in this category, COMMENTS = live-chat messages
+        // on those threads. Cheap at this scale; can denormalize later if
+        // the forum ever gets big enough to care.
+        require_once __DIR__ . '/db.php';
+        $sdb = forum_db();
+        $sq = $sdb->prepare('SELECT COUNT(*) FROM threads WHERE category_id = ?');
+        $sq->execute([$categoryId]);
+        $liveThreads = (int) $sq->fetchColumn();
+        $cq = $sdb->prepare(
+            'SELECT COUNT(*) FROM chat_messages WHERE thread_id IN
+             (SELECT id FROM threads WHERE category_id = ?)'
+        );
+        $cq->execute([$categoryId]);
+        $liveComments = (int) $cq->fetchColumn();
+        $aq = $sdb->prepare(
+            'SELECT MAX(t) FROM (
+                SELECT MAX(created_at) AS t FROM threads WHERE category_id = :c
+                UNION ALL
+                SELECT MAX(created_at) AS t FROM chat_messages WHERE thread_id IN
+                    (SELECT id FROM threads WHERE category_id = :c)
+             )'
+        );
+        $aq->execute(['c' => $categoryId]);
+        $liveActivity = (string) ($aq->fetchColumn() ?: '');
+        ?>
         <dl class="cat-info-stats">
           <div class="cat-info-stat">
             <dt>Threads</dt>
-            <dd><?= number_format((int)($category['thread_count'] ?? 0)) ?></dd>
+            <dd><?= number_format($liveThreads) ?></dd>
           </div>
           <div class="cat-info-stat">
-            <dt>Posts</dt>
-            <dd><?= number_format((int)($category['post_count'] ?? 0)) ?></dd>
+            <dt>Comments</dt>
+            <dd><?= number_format($liveComments) ?></dd>
           </div>
           <div class="cat-info-stat">
             <dt>Last activity</dt>
-            <dd><?= htmlspecialchars($category['last_activity'] ?? '') ?></dd>
+            <dd><?= htmlspecialchars($liveActivity !== '' ? forum_time_ago($liveActivity) : '—') ?></dd>
           </div>
         </dl>
       </div>

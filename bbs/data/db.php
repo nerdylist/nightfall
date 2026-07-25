@@ -193,7 +193,7 @@ if (!function_exists('get_users')) {
     function get_all_posts()
     {
         $rows = forum_db()->query(
-            'SELECT thread_id, author_id, body, created
+            'SELECT id, thread_id, author_id, body, created
              FROM posts
              ORDER BY id ASC'
         )->fetchAll();
@@ -447,6 +447,9 @@ if (!function_exists('get_users')) {
     function forum_shape_post($r)
     {
         return [
+            // id was silently dropped here — reactions target posts BY id,
+            // so every thread page rendered data-post-id="0" (2026-07-25).
+            'id'        => (int) ($r['id'] ?? 0),
             'thread_id' => (int) $r['thread_id'],
             'author_id' => (int) $r['author_id'],
             'body'      => $r['body'],

@@ -209,7 +209,42 @@ include __DIR__ . '/partials/header.php';     // <header class="site-header">
       </form>
       <?php endif; ?>
     </div>
-    <div class="post-reactions" aria-label="Reactions"></div>
+    <?php
+    // PERSISTED REACTIONS (2026-07-25): render stored chips on load; the
+    // picker/chips JS then toggles via react.php and rebuilds from JSON.
+    $reactionCounts = [];
+    $myReactions = [];
+    $mainPostId = (int) ($post['id'] ?? 0);
+    if ($mainPostId > 0) {
+        require_once __DIR__ . '/db.php';
+        $rdb = forum_db();
+        $rq = $rdb->prepare('SELECT emoji, COUNT(*) AS n FROM reactions WHERE post_id = ? GROUP BY emoji');
+        $rq->execute([$mainPostId]);
+        foreach ($rq->fetchAll(PDO::FETCH_ASSOC) as $rrow) {
+            $reactionCounts[$rrow['emoji']] = (int) $rrow['n'];
+        }
+        if ($me !== null) {
+            $mq = $rdb->prepare('SELECT emoji FROM reactions WHERE post_id = ? AND user_id = ?');
+            $mq->execute([$mainPostId, (int) $me['id']]);
+            $myReactions = $mq->fetchAll(PDO::FETCH_COLUMN);
+        }
+    }
+    ?>
+    <div class="post-reactions" aria-label="Reactions"
+         data-post-id="<?= $mainPostId ?>"
+         data-endpoint="<?= htmlspecialchars(($BASE ?? '/bbs/') . 'react.php') ?>"
+         data-csrf="<?= htmlspecialchars(csrf_token()) ?>"
+         data-can-react="<?= $me !== null ? '1' : '' ?>">
+      <?php foreach ($reactionCounts as $rEmoji => $rCount): ?>
+        <button type="button"
+                class="reaction-chip<?= in_array($rEmoji, $myReactions, true) ? ' active' : '' ?>"
+                data-emoji="<?= htmlspecialchars($rEmoji) ?>"
+                aria-label="Toggle <?= htmlspecialchars($rEmoji) ?> reaction">
+          <span class="reaction-chip-emoji"><?= htmlspecialchars($rEmoji) ?></span>
+          <span class="reaction-chip-count"><?= $rCount ?></span>
+        </button>
+      <?php endforeach; ?>
+    </div>
   </article>
 
   <section class="chat" data-user-name="<?= htmlspecialchars($currentUserName) ?>" data-user-initials="<?= htmlspecialchars($currentUserInitials) ?>" data-user-id="<?= (int)$data['current_user'] ?>" data-thread-id="<?= (int)$threadId ?>" data-csrf="<?= htmlspecialchars(csrf_token()) ?>" data-can-post="<?= auth_is_logged_in() ? '1' : '' ?>" data-last-id="<?= (int)$lastChatId ?>" data-endpoint="<?= htmlspecialchars(($BASE ?? '/bbs/') . 'chat.php') ?>">
