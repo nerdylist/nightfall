@@ -1,15 +1,15 @@
 <?php
 /**
- * THE DEAD LAST — API: player stats ingest + characters (game server only).
+ * THE DEAD LAST — API: player stats ingest + survivors (game server only).
  *
  * Auth: Authorization: Bearer <GAME_API_KEY>   (.env GAME_API_KEY)
  *
- * POST /api/stats  -> report stats and/or a character lifecycle event.
+ * POST /api/stats  -> report stats and/or a survivor lifecycle event.
  *      body { "username": "<users.username>",
  *             "stats":     { "<column>": <int >= 0>, ... },          // optional
- *             "character": { ... },                                   // optional
- *             "character_id": <int> | "character_ref": "<string>" }   // optional stat context
- *      At least one of "stats" / "character" is required.
+ *             "survivor": { ... },                                   // optional
+ *             "survivor_id": <int> | "survivor_ref": "<string>" }   // optional stat context
+ *      At least one of "stats" / "survivor" is required.
  *
  *      Stats semantics (docs/player-stats.md):
  *        counters  (humans_killed, zombies_killed, times_turned, deaths,
@@ -20,31 +20,31 @@
  *        set       (bank) -> replaced by the sent value (game owns balance)
  *      Row is upserted (first report creates it); updated_at refreshed.
  *
- *      Character create: "character": { "ref": "<any string>", "skin": "...",
+ *      Survivor create: "survivor": { "ref": "<any string>", "skin": "...",
  *      "name": "..."? } — ref is an OPAQUE game-side identifier stored
  *      verbatim (never parsed/validated structurally). Creates the row AND
- *      increments player_stats.lives (a new character IS a new life).
- *      Returns the numeric character id + the ref.
+ *      increments player_stats.lives (a new survivor IS a new life).
+ *      Returns the numeric survivor id + the ref.
  *
- *      Character end: "character": { "id": <int> | "ref": "<string>",
+ *      Survivor end: "survivor": { "id": <int> | "ref": "<string>",
  *      "ended": true, "outcome": "..."? } — stamps ended_at (+ outcome).
  *
- *      "character_id" / "character_ref" alongside "stats" is validated as
- *      belonging to the user and echoed back; per-character stat
+ *      "survivor_id" / "survivor_ref" alongside "stats" is validated as
+ *      belonging to the user and echoed back; per-survivor stat
  *      aggregation is not implemented yet.
  *
  *      "daily_playtime": [{ "date": "YYYY-MM-DD", "seconds": <int >= 0> }, ...]
- *      (optional, PER-CHARACTER) — absolute per-real-day active survival time.
- *      Max 40 buckets/post. UPSERTS each (character, date) with
+ *      (optional, PER-SURVIVOR) — absolute per-real-day active survival time.
+ *      Max 40 buckets/post. UPSERTS each (survivor, date) with
  *      seconds = max(stored, sent) so resends are idempotent/monotonic. Needs
- *      a character: a "character" create/end in this post OR character context
- *      (character_id/character_ref). Applied buckets are echoed as
+ *      a survivor: a "survivor" create/end in this post OR survivor context
+ *      (survivor_id/survivor_ref). Applied buckets are echoed as
  *      "applied_playtime". Feeds the season/daily leaderboard (api/leaderboard).
  *
  * GET  /api/stats?username=<name>  -> the player's current stats row
  *      (all zeros if the player has never reported).
  *
- * Errors (JSON): 401 bad/missing bearer, 404 unknown username / character,
+ * Errors (JSON): 401 bad/missing bearer, 404 unknown username / survivor,
  * 400 malformed payload / unknown stat key / non-integer or negative value,
  * 405 other methods. See docs/game-stats-api.md for the full contract.
  */
@@ -184,11 +184,11 @@ function stats_apply(PDO $pdo, int $userId, array $clean): void
 
 /**
  * SURVIVOR VIEW (012, Boss 2026-07-23 "SURVIVOR | USER | ALL"): mirror the
- * same validated stat values onto the character's own character_stats row —
- * identical semantics, keyed by character_id. Called only when the post
- * carries a character context; 'lives' is user-level and skipped.
+ * same validated stat values onto the survivor's own survivor_stats row —
+ * identical semantics, keyed by survivor_id. Called only when the post
+ * carries a survivor context; 'lives' is user-level and skipped.
  */
-function stats_apply_character(PDO $pdo, int $characterId, array $clean): void
+function stats_apply_survivor(PDO $pdo, int $survivorId, array $clean): void
 {
     unset($clean['lives']);
     if ($clean === []) {
@@ -202,25 +202,25 @@ function stats_apply_character(PDO $pdo, int $characterId, array $clean): void
     $updates = [];
     foreach ($columns as $column) {
         $updates[] = match (STATS_COLUMNS[$column]) {
-            'counter' => "{$column} = character_stats.{$column} + excluded.{$column}",
-            'max'     => "{$column} = CASE WHEN excluded.{$column} > character_stats.{$column}"
-                       . " THEN excluded.{$column} ELSE character_stats.{$column} END",
+            'counter' => "{$column} = survivor_stats.{$column} + excluded.{$column}",
+            'max'     => "{$column} = CASE WHEN excluded.{$column} > survivor_stats.{$column}"
+                       . " THEN excluded.{$column} ELSE survivor_stats.{$column} END",
             'min'     => "{$column} = CASE WHEN excluded.{$column} > 0 AND"
-                       . " (character_stats.{$column} = 0 OR excluded.{$column} < character_stats.{$column})"
-                       . " THEN excluded.{$column} ELSE character_stats.{$column} END",
+                       . " (survivor_stats.{$column} = 0 OR excluded.{$column} < survivor_stats.{$column})"
+                       . " THEN excluded.{$column} ELSE survivor_stats.{$column} END",
             'set'     => "{$column} = excluded.{$column}",
         };
     }
 
-    $sql = "INSERT INTO character_stats (character_id, {$insertCols}) VALUES (:character_id, {$placeholders})
-            ON CONFLICT(character_id) DO UPDATE SET " . implode(', ', $updates);
+    $sql = "INSERT INTO survivor_stats (survivor_id, {$insertCols}) VALUES (:survivor_id, {$placeholders})
+            ON CONFLICT(survivor_id) DO UPDATE SET " . implode(', ', $updates);
 
     $stmt = $pdo->prepare($sql);
-    $stmt->execute(array_merge(['character_id' => $characterId], $clean));
+    $stmt->execute(array_merge(['survivor_id' => $survivorId], $clean));
 }
 
-/** Public shape of a character row for API responses. */
-function stats_character_public(array $row): array
+/** Public shape of a survivor row for API responses. */
+function stats_survivor_public(array $row): array
 {
     return [
         'id'         => (int) $row['id'],
@@ -234,18 +234,18 @@ function stats_character_public(array $row): array
 }
 
 /**
- * Find a user's character by numeric id or by exact-string ref (opaque —
+ * Find a user's survivor by numeric id or by exact-string ref (opaque —
  * matched verbatim, newest row wins if the game reused a ref). Null if the
- * user has no matching character.
+ * user has no matching survivor.
  */
-function stats_find_character(PDO $pdo, int $userId, ?int $id, ?string $ref): ?array
+function stats_find_survivor(PDO $pdo, int $userId, ?int $id, ?string $ref): ?array
 {
     if ($id !== null) {
-        $stmt = $pdo->prepare('SELECT * FROM characters WHERE id = :id AND user_id = :user_id');
+        $stmt = $pdo->prepare('SELECT * FROM survivors WHERE id = :id AND user_id = :user_id');
         $stmt->execute(['id' => $id, 'user_id' => $userId]);
     } else {
         $stmt = $pdo->prepare(
-            'SELECT * FROM characters WHERE user_id = :user_id AND ref = :ref
+            'SELECT * FROM survivors WHERE user_id = :user_id AND ref = :ref
              ORDER BY id DESC LIMIT 1'
         );
         $stmt->execute(['user_id' => $userId, 'ref' => (string) $ref]);
@@ -268,24 +268,24 @@ function stats_valid_date(string $value): bool
 }
 
 /**
- * Upsert per-character daily playtime buckets. The game sends ABSOLUTE
- * per-day totals, so each (character, date) is max-merged — resends are
+ * Upsert per-survivor daily playtime buckets. The game sends ABSOLUTE
+ * per-day totals, so each (survivor, date) is max-merged — resends are
  * idempotent and can only move a bucket up (never down). $buckets is the
  * pre-validated list of ['date' => 'YYYY-MM-DD', 'seconds' => <int >= 0>].
  */
-function stats_apply_playtime(PDO $pdo, int $characterId, array $buckets): void
+function stats_apply_playtime(PDO $pdo, int $survivorId, array $buckets): void
 {
     $stmt = $pdo->prepare(
-        'INSERT INTO character_playtime (character_id, date, seconds)
-         VALUES (:character_id, :date, :seconds)
-         ON CONFLICT(character_id, date) DO UPDATE SET
-           seconds = CASE WHEN excluded.seconds > character_playtime.seconds
-                          THEN excluded.seconds ELSE character_playtime.seconds END'
+        'INSERT INTO survivor_playtime (survivor_id, date, seconds)
+         VALUES (:survivor_id, :date, :seconds)
+         ON CONFLICT(survivor_id, date) DO UPDATE SET
+           seconds = CASE WHEN excluded.seconds > survivor_playtime.seconds
+                          THEN excluded.seconds ELSE survivor_playtime.seconds END'
     );
 
     foreach ($buckets as $bucket) {
         $stmt->execute([
-            'character_id' => $characterId,
+            'survivor_id' => $survivorId,
             'date'         => $bucket['date'],
             'seconds'      => $bucket['seconds'],
         ]);
@@ -329,11 +329,11 @@ if ($username === '') {
 }
 
 $stats = $input['stats'] ?? null;
-$character = $input['character'] ?? null;
+$survivor = $input["survivor"] ?? null;
 $hasPlaytime = array_key_exists('daily_playtime', $input);
 
-if (($stats === null || $stats === []) && !is_array($character) && !$hasPlaytime) {
-    grave_json_response(400, ['success' => false, 'error' => 'Request must include "stats", "character", and/or "daily_playtime".']);
+if (($stats === null || $stats === []) && !is_array($survivor) && !$hasPlaytime) {
+    grave_json_response(400, ['success' => false, 'error' => 'Request must include "stats", "survivor", and/or "daily_playtime".']);
 }
 
 // ---- Validate the stats object (before touching the database). ----
@@ -366,78 +366,78 @@ if ($stats !== null) {
     }
 }
 
-// ---- Validate the character action. ----
+// ---- Validate the survivor action. ----
 // Create: { ref, skin, name? }   End: { id|ref, ended: true, outcome? }
-$characterAction = null; // null | 'create' | 'end'
-$charRef = null;
-$charId = null;
-$charSkin = null;
-$charName = null;
-$charOutcome = null;
+$survivorAction = null; // null | 'create' | 'end'
+$survRef = null;
+$survId = null;
+$survSkin = null;
+$survName = null;
+$survOutcome = null;
 
-if ($character !== null) {
-    if (!is_array($character)) {
-        grave_json_response(400, ['success' => false, 'error' => '"character" must be an object.']);
+if ($survivor !== null) {
+    if (!is_array($survivor)) {
+        grave_json_response(400, ['success' => false, 'error' => '"survivor" must be an object.']);
     }
 
-    if (!empty($character['ended'])) {
-        $characterAction = 'end';
+    if (!empty($survivor['ended'])) {
+        $survivorAction = 'end';
 
-        if (isset($character['id'])) {
-            if (!is_numeric($character['id']) || (int) $character['id'] <= 0) {
-                grave_json_response(400, ['success' => false, 'error' => 'Character "id" must be a positive integer.']);
+        if (isset($survivor['id'])) {
+            if (!is_numeric($survivor['id']) || (int) $survivor['id'] <= 0) {
+                grave_json_response(400, ['success' => false, 'error' => 'Survivor "id" must be a positive integer.']);
             }
-            $charId = (int) $character['id'];
-        } elseif (isset($character['ref']) && trim((string) $character['ref']) !== '') {
-            $charRef = (string) $character['ref'];
+            $survId = (int) $survivor['id'];
+        } elseif (isset($survivor['ref']) && trim((string) $survivor['ref']) !== '') {
+            $survRef = (string) $survivor['ref'];
         } else {
-            grave_json_response(400, ['success' => false, 'error' => 'Ending a character requires "id" or "ref".']);
+            grave_json_response(400, ['success' => false, 'error' => 'Ending a survivor requires "id" or "ref".']);
         }
 
-        if (isset($character['outcome']) && trim((string) $character['outcome']) !== '') {
-            $charOutcome = trim((string) $character['outcome']);
+        if (isset($survivor['outcome']) && trim((string) $survivor['outcome']) !== '') {
+            $survOutcome = trim((string) $survivor['outcome']);
         }
-    } elseif (isset($character['skin']) || isset($character['ref'])) {
-        $characterAction = 'create';
+    } elseif (isset($survivor['skin']) || isset($survivor['ref'])) {
+        $survivorAction = 'create';
 
-        $charRef = isset($character['ref']) ? (string) $character['ref'] : '';
-        $charSkin = isset($character['skin']) ? trim((string) $character['skin']) : '';
-        if ($charRef === '') {
-            grave_json_response(400, ['success' => false, 'error' => 'Character create requires a non-empty "ref" string.']);
+        $survRef = isset($survivor['ref']) ? (string) $survivor['ref'] : '';
+        $survSkin = isset($survivor['skin']) ? trim((string) $survivor['skin']) : '';
+        if ($survRef === '') {
+            grave_json_response(400, ['success' => false, 'error' => 'Survivor create requires a non-empty "ref" string.']);
         }
-        if ($charSkin === '') {
-            grave_json_response(400, ['success' => false, 'error' => 'Character create requires a non-empty "skin".']);
+        if ($survSkin === '') {
+            grave_json_response(400, ['success' => false, 'error' => 'Survivor create requires a non-empty "skin".']);
         }
-        if (isset($character['name']) && trim((string) $character['name']) !== '') {
-            $charName = trim((string) $character['name']);
+        if (isset($survivor['name']) && trim((string) $survivor['name']) !== '') {
+            $survName = trim((string) $survivor['name']);
         }
     } else {
         grave_json_response(400, [
             'success' => false,
-            'error'   => 'Unrecognized "character" action: send {ref, skin} to create or {id|ref, ended: true} to end.',
+            'error'   => 'Unrecognized "survivor" action: send {ref, skin} to create or {id|ref, ended: true} to end.',
         ]);
     }
 }
 
-// ---- Optional character context on a stats report (no aggregation yet). ----
+// ---- Optional survivor context on a stats report (no aggregation yet). ----
 $contextId = null;
 $contextRef = null;
-if (isset($input['character_id'])) {
-    if (!is_numeric($input['character_id']) || (int) $input['character_id'] <= 0) {
-        grave_json_response(400, ['success' => false, 'error' => '"character_id" must be a positive integer.']);
+if (isset($input['survivor_id'])) {
+    if (!is_numeric($input['survivor_id']) || (int) $input['survivor_id'] <= 0) {
+        grave_json_response(400, ['success' => false, 'error' => '"survivor_id" must be a positive integer.']);
     }
-    $contextId = (int) $input['character_id'];
-} elseif (isset($input['character_ref'])) {
-    if (trim((string) $input['character_ref']) === '') {
-        grave_json_response(400, ['success' => false, 'error' => '"character_ref" must be a non-empty string.']);
+    $contextId = (int) $input['survivor_id'];
+} elseif (isset($input['survivor_ref'])) {
+    if (trim((string) $input['survivor_ref']) === '') {
+        grave_json_response(400, ['success' => false, 'error' => '"survivor_ref" must be a non-empty string.']);
     }
-    $contextRef = (string) $input['character_ref'];
+    $contextRef = (string) $input['survivor_ref'];
 }
 
-// ---- Validate daily playtime buckets (optional, per-character). ----
+// ---- Validate daily playtime buckets (optional, per-survivor). ----
 // [{ "date": "YYYY-MM-DD", "seconds": <int >= 0> }, ...]. The game sends
-// absolute per-day totals; ingest max-merges each (character, date). Requires
-// a character to attach to: a create/end in this post, or character context.
+// absolute per-day totals; ingest max-merges each (survivor, date). Requires
+// a survivor to attach to: a create/end in this post, or survivor context.
 $cleanPlaytime = [];
 if (array_key_exists('daily_playtime', $input)) {
     $daily = $input['daily_playtime'];
@@ -482,88 +482,88 @@ if ($userId === null) {
     grave_json_response(404, ['success' => false, 'error' => 'Unknown username.']);
 }
 
-$contextCharacter = null;
+$contextSurvivor = null;
 if ($contextId !== null || $contextRef !== null) {
-    $row = stats_find_character($pdo, $userId, $contextId, $contextRef);
+    $row = stats_find_survivor($pdo, $userId, $contextId, $contextRef);
     if ($row === null) {
-        grave_json_response(404, ['success' => false, 'error' => 'Unknown character for this user.']);
+        grave_json_response(404, ['success' => false, 'error' => 'Unknown survivor for this user.']);
     }
-    $contextCharacter = stats_character_public($row);
+    $contextSurvivor = stats_survivor_public($row);
 }
 
-// daily_playtime is per-character — it needs a character to attach to: either
-// the character context on this post, or a character create/end in this post.
+// daily_playtime is per-survivor — it needs a survivor to attach to: either
+// the survivor context on this post, or a survivor create/end in this post.
 // (A create resolves its id inside the transaction below.)
-if ($cleanPlaytime !== [] && $contextCharacter === null && $characterAction === null) {
+if ($cleanPlaytime !== [] && $contextSurvivor === null && $survivorAction === null) {
     grave_json_response(400, [
         'success' => false,
-        'error'   => '"daily_playtime" requires a character: send "character_id"/"character_ref", or a "character" create/end in the same post.',
+        'error'   => '"daily_playtime" requires a survivor: send "survivor_id"/"survivor_ref", or a "survivor" create/end in the same post.',
     ]);
 }
 
-$characterOut = null;
+$survivorOut = null;
 
 $pdo->beginTransaction();
 try {
-    if ($characterAction === 'create') {
+    if ($survivorAction === 'create') {
         $stmt = $pdo->prepare(
-            'INSERT INTO characters (user_id, ref, name, skin) VALUES (:user_id, :ref, :name, :skin)'
+            'INSERT INTO survivors (user_id, ref, name, skin) VALUES (:user_id, :ref, :name, :skin)'
         );
-        $stmt->execute(['user_id' => $userId, 'ref' => $charRef, 'name' => $charName, 'skin' => $charSkin]);
+        $stmt->execute(['user_id' => $userId, 'ref' => $survRef, 'name' => $survName, 'skin' => $survSkin]);
         $newId = (int) $pdo->lastInsertId();
 
-        // A new character is a new life.
+        // A new survivor is a new life.
         stats_apply($pdo, $userId, ['lives' => 1]);
 
-        $characterOut = stats_find_character($pdo, $userId, $newId, null);
-    } elseif ($characterAction === 'end') {
-        $row = stats_find_character($pdo, $userId, $charId, $charRef);
+        $survivorOut = stats_find_survivor($pdo, $userId, $newId, null);
+    } elseif ($survivorAction === 'end') {
+        $row = stats_find_survivor($pdo, $userId, $survId, $survRef);
         if ($row === null) {
             $pdo->rollBack();
-            grave_json_response(404, ['success' => false, 'error' => 'Unknown character for this user.']);
+            grave_json_response(404, ['success' => false, 'error' => 'Unknown survivor for this user.']);
         }
 
         $stmt = $pdo->prepare(
-            'UPDATE characters
+            'UPDATE survivors
              SET ended_at = COALESCE(ended_at, CURRENT_TIMESTAMP),
                  outcome  = COALESCE(:outcome, outcome)
              WHERE id = :id'
         );
-        $stmt->execute(['outcome' => $charOutcome, 'id' => (int) $row['id']]);
+        $stmt->execute(['outcome' => $survOutcome, 'id' => (int) $row['id']]);
 
-        $characterOut = stats_find_character($pdo, $userId, (int) $row['id'], null);
+        $survivorOut = stats_find_survivor($pdo, $userId, (int) $row['id'], null);
     }
 
     if ($clean !== []) {
         stats_apply($pdo, $userId, $clean);
 
-        // SURVIVOR VIEW (012): same values onto the character's own row when
-        // this post has a character context (or created/ended one).
-        $statsCharId = null;
-        if ($contextCharacter !== null) {
-            $statsCharId = (int) $contextCharacter['id'];
-        } elseif ($characterOut !== null && isset($characterOut['id'])) {
-            $statsCharId = (int) $characterOut['id'];
+        // SURVIVOR VIEW (012): same values onto the survivor's own row when
+        // this post has a survivor context (or created/ended one).
+        $statsSurvId = null;
+        if ($contextSurvivor !== null) {
+            $statsSurvId = (int) $contextSurvivor['id'];
+        } elseif ($survivorOut !== null && isset($survivorOut['id'])) {
+            $statsSurvId = (int) $survivorOut['id'];
         }
 
-        if ($statsCharId !== null && $statsCharId > 0) {
-            stats_apply_character($pdo, $statsCharId, $clean);
+        if ($statsSurvId !== null && $statsSurvId > 0) {
+            stats_apply_survivor($pdo, $statsSurvId, $clean);
         }
     }
 
     if ($cleanPlaytime !== []) {
-        // Attach to the context character if given, else the character
+        // Attach to the context survivor if given, else the survivor
         // created/ended in this same post. The pre-transaction guard
         // guarantees one of these exists.
-        $playtimeCharId = ($contextCharacter !== null)
-            ? (int) $contextCharacter['id']
-            : (int) $characterOut['id'];
+        $playtimeSurvId = ($contextSurvivor !== null)
+            ? (int) $contextSurvivor['id']
+            : (int) $survivorOut['id'];
 
         $buckets = [];
         foreach ($cleanPlaytime as $date => $seconds) {
             $buckets[] = ['date' => $date, 'seconds' => $seconds];
         }
-        stats_apply_playtime($pdo, $playtimeCharId, $buckets);
+        stats_apply_playtime($pdo, $playtimeSurvId, $buckets);
     }
 
     $pdo->commit();
@@ -578,14 +578,14 @@ $response = [
     'success'  => true,
     'username' => $username,
 ];
-if ($characterOut !== null) {
-    $response['character'] = stats_character_public($characterOut);
-    if ($characterAction === 'create') {
-        $response['character_id'] = $response['character']['id'];
+if ($survivorOut !== null) {
+    $response['survivor'] = stats_survivor_public($survivorOut);
+    if ($survivorAction === 'create') {
+        $response['survivor_id'] = $response['survivor']['id'];
     }
 }
-if ($contextCharacter !== null) {
-    $response['character_context'] = $contextCharacter;
+if ($contextSurvivor !== null) {
+    $response['survivor_context'] = $contextSurvivor;
 }
 if ($clean !== []) {
     $response['applied'] = $clean;

@@ -2,7 +2,7 @@
 /**
  * THE DEAD LAST — Leaderboard page.
  *
- * Survival-time leaderboard: the season TOP list (SUM of per-character
+ * Survival-time leaderboard: the season TOP list (SUM of per-survivor
  * per-day active survival time over the season window) and a TODAY panel
  * (today's buckets), plus the live season countdown.
  *
@@ -52,7 +52,7 @@ function lb_format_duration(int $seconds): string
     return $seconds . 's';
 }
 
-/** A player-facing display name for a character (name, else its skin). */
+/** A player-facing display name for a survivor (name, else its skin). */
 function lb_character_name(array $row): string
 {
     $name = trim((string) ($row['name'] ?? ''));
@@ -79,18 +79,18 @@ if (lb_valid_date($seasonEnd)) {
     }
 }
 
-// ---- TOP: SUM(seconds) per character over the season window (or all-time). ----
+// ---- TOP: SUM(seconds) per survivor over the season window (or all-time). ----
 if ($hasWindow) {
     $topStmt = $db->prepare(
         'SELECT c.id, c.name, c.skin, c.outcome, c.started_at, u.username,
                 agg.seconds AS seconds
          FROM (
-             SELECT character_id, SUM(seconds) AS seconds
-             FROM character_playtime
+             SELECT survivor_id, SUM(seconds) AS seconds
+             FROM survivor_playtime
              WHERE date BETWEEN :start AND :end
-             GROUP BY character_id
+             GROUP BY survivor_id
          ) agg
-         JOIN characters c ON c.id = agg.character_id
+         JOIN survivors c ON c.id = agg.survivor_id
          JOIN users u      ON u.id = c.user_id
          WHERE agg.seconds > 0
          ORDER BY agg.seconds DESC, c.id ASC
@@ -102,11 +102,11 @@ if ($hasWindow) {
         'SELECT c.id, c.name, c.skin, c.outcome, c.started_at, u.username,
                 agg.seconds AS seconds
          FROM (
-             SELECT character_id, SUM(seconds) AS seconds
-             FROM character_playtime
-             GROUP BY character_id
+             SELECT survivor_id, SUM(seconds) AS seconds
+             FROM survivor_playtime
+             GROUP BY survivor_id
          ) agg
-         JOIN characters c ON c.id = agg.character_id
+         JOIN survivors c ON c.id = agg.survivor_id
          JOIN users u      ON u.id = c.user_id
          WHERE agg.seconds > 0
          ORDER BY agg.seconds DESC, c.id ASC
@@ -115,12 +115,12 @@ if ($hasWindow) {
 }
 $topRows = $topStmt->fetchAll();
 
-// ---- TODAY: each character's bucket for the current server date. ----
+// ---- TODAY: each survivor's bucket for the current server date. ----
 $todayStmt = $db->prepare(
     'SELECT c.id, c.name, c.skin, c.outcome, c.started_at, u.username,
             p.seconds AS seconds
-     FROM character_playtime p
-     JOIN characters c ON c.id = p.character_id
+     FROM survivor_playtime p
+     JOIN survivors c ON c.id = p.survivor_id
      JOIN users u      ON u.id = c.user_id
      WHERE p.date = :today AND p.seconds > 0
      ORDER BY p.seconds DESC, c.id ASC
@@ -153,7 +153,7 @@ include __DIR__ . '/partials/header.php';
   <header class="lb-head">
     <div class="lb-head__titles">
       <h1 class="lb-title">Leaderboard</h1>
-      <p class="text-muted lb-subtitle">Most active survival time this season. Every character races the season clock &mdash; and permadeath makes the climb count.</p>
+      <p class="text-muted lb-subtitle">Most active survival time this season. Every survivor races the season clock &mdash; and permadeath makes the climb count.</p>
     </div>
 
     <div class="lb-clock" id="lb-clock"
@@ -194,7 +194,7 @@ include __DIR__ . '/partials/header.php';
                   <span class="lb-row__skin"><?= htmlspecialchars((string) $row['skin']) ?></span>
                   <span class="lb-row__user">@<?= htmlspecialchars((string) $row['username']) ?></span>
                   <?php if (!empty($row['outcome'])): ?>
-                    <span class="lb-row__outcome" title="Character ended: <?= htmlspecialchars((string) $row['outcome']) ?>">&dagger; <?= htmlspecialchars((string) $row['outcome']) ?></span>
+                    <span class="lb-row__outcome" title="Survivor ended: <?= htmlspecialchars((string) $row['outcome']) ?>">&dagger; <?= htmlspecialchars((string) $row['outcome']) ?></span>
                   <?php endif; ?>
                 </span>
               </span>

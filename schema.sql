@@ -96,43 +96,44 @@ CREATE INDEX IF NOT EXISTS idx_player_stats_longest_life   ON player_stats(longe
 CREATE INDEX IF NOT EXISTS idx_player_stats_playtime       ON player_stats(playtime_seconds);
 CREATE INDEX IF NOT EXISTS idx_player_stats_bank           ON player_stats(bank);
 
--- Characters (mirrors migrations/006_characters.sql).
--- One row per character an account starts (permadeath: True Death ends one,
+-- Survivors (mirrors migrations/006_characters.sql, renamed by 013).
+-- One row per survivor life an account starts (permadeath: True Death ends one,
 -- the player rolls a new survivor). Created via the stats ingest API
 -- (api/stats/), which also increments player_stats.lives. `ref` is an
 -- OPAQUE identifier minted by the game (its own convention, likely
 -- username_id_name) — stored verbatim, never parsed; lookups are by numeric
--- id or exact-string ref scoped to the user.
-CREATE TABLE IF NOT EXISTS characters (
+-- id or exact-string ref scoped to the user. `skin` names the game
+-- CHARACTER (mesh/skin) this survivor plays as — a distinct concept.
+CREATE TABLE IF NOT EXISTS survivors (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id    INTEGER NOT NULL,                   -- owning account
     ref        TEXT NOT NULL,                      -- opaque game-side identifier, stored verbatim
-    name       TEXT,                               -- optional character name, if sent separately
-    skin       TEXT NOT NULL,                      -- skin identifier the character was created with
+    name       TEXT,                               -- optional survivor name, if sent separately
+    skin       TEXT NOT NULL,                      -- character/skin identifier the survivor was created with
     started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    ended_at   DATETIME,                           -- set when the character's run ends
+    ended_at   DATETIME,                           -- set when the survivor's run ends
     outcome    TEXT,                               -- free text for now, e.g. died | turned | true_death
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS idx_characters_user_id ON characters(user_id);
-CREATE INDEX IF NOT EXISTS idx_characters_ref     ON characters(ref);
+CREATE INDEX IF NOT EXISTS idx_survivors_user_id ON survivors(user_id);
+CREATE INDEX IF NOT EXISTS idx_survivors_ref     ON survivors(ref);
 
--- Per-character daily playtime buckets (mirrors migrations/010_character_playtime.sql).
--- The season leaderboard metric: per-character, per-real-day active survival
--- time. One row per (character, date); the game sends absolute per-day totals
+-- Per-survivor daily playtime buckets (mirrors migrations/010_character_playtime.sql, renamed by 013).
+-- The season leaderboard metric: per-survivor, per-real-day active survival
+-- time. One row per (survivor, date); the game sends absolute per-day totals
 -- reported via daily_playtime on stat posts and ingest max-merges seconds so
 -- resends are idempotent/monotonic. Season TOP = SUM over the season window;
 -- TODAY = one day's bucket. See docs/game-stats-api.md.
-CREATE TABLE IF NOT EXISTS character_playtime (
-    character_id INTEGER NOT NULL,                   -- FK -> characters.id
-    date         TEXT NOT NULL,                      -- real calendar day, YYYY-MM-DD
-    seconds      INTEGER NOT NULL DEFAULT 0,         -- absolute active seconds that day (max-merged on ingest)
-    PRIMARY KEY (character_id, date),
-    FOREIGN KEY (character_id) REFERENCES characters(id) ON DELETE CASCADE
+CREATE TABLE IF NOT EXISTS survivor_playtime (
+    survivor_id INTEGER NOT NULL,                    -- FK -> survivors.id
+    date        TEXT NOT NULL,                       -- real calendar day, YYYY-MM-DD
+    seconds     INTEGER NOT NULL DEFAULT 0,          -- absolute active seconds that day (max-merged on ingest)
+    PRIMARY KEY (survivor_id, date),
+    FOREIGN KEY (survivor_id) REFERENCES survivors(id) ON DELETE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS idx_character_playtime_date ON character_playtime(date);
+CREATE INDEX IF NOT EXISTS idx_survivor_playtime_date ON survivor_playtime(date);
 
 -- Settings (mirrors migrations/007_settings.sql).
 -- Generic key/value store for site/game-level configuration on the HOST

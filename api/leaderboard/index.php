@@ -6,25 +6,25 @@
  *   -> { "success": true,
  *        "season": { season_start, season_end, ends_at, ends_at_unix,
  *                    server_time, server_unix, server_date },
- *        "top":   [ { rank, character: {id, name, skin, outcome, started_at},
+ *        "top":   [ { rank, survivor: {id, name, skin, outcome, started_at},
  *                     username, seconds } ... ],   // LIMIT 25
  *        "today": [ same shape ] }                 // LIMIT 25
  *
- * The leaderboard metric (Boss, 2026-07-22) is PER-CHARACTER, PER-REAL-DAY
+ * The leaderboard metric (Boss, 2026-07-22) is PER-SURVIVOR, PER-REAL-DAY
  * ACTIVE SURVIVAL TIME, reported by the game as daily_playtime buckets on stat
- * posts (see docs/game-stats-api.md) and stored in character_playtime.
+ * posts (see docs/game-stats-api.md) and stored in survivor_playtime.
  *
- *   "top"   = SUM(seconds) over each character's buckets whose date falls
+ *   "top"   = SUM(seconds) over each survivor's buckets whose date falls
  *             INSIDE the season window (settings season_start..season_end,
  *             inclusive). If no season is configured, falls back to ALL-TIME.
- *             Alive AND dead characters both rank (a dead legend keeps their
+ *             Alive AND dead survivors both rank (a dead legend keeps their
  *             place). LIMIT 25, highest total first.
- *   "today" = each character's bucket for the current SERVER date only.
+ *   "today" = each survivor's bucket for the current SERVER date only.
  *             LIMIT 25, highest first.
  *
- * Both queries are covered by character_playtime's PK (character_id, date) plus
+ * Both queries are covered by survivor_playtime's PK (survivor_id, date) plus
  * the date index — a range/equality scan and a grouped SUM, no N+1: the join to
- * characters/users happens once per already-aggregated row.
+ * survivors/users happens once per already-aggregated row.
  *
  * PUBLIC: no auth. Mirrors the api/season public-read pattern — leaderboard
  * standings are shown on the title screen and the site /leaderboard page,
@@ -113,7 +113,7 @@ function leaderboard_row(array $row, int $rank): array
 {
     return [
         'rank'      => $rank,
-        'character' => [
+        'survivor' => [
             'id'         => (int) $row['id'],
             'name'       => $row['name'],
             'skin'       => (string) $row['skin'],
@@ -148,8 +148,8 @@ try {
 
     $hasWindow = leaderboard_valid_date($seasonStart) && leaderboard_valid_date($seasonEnd);
 
-    // ---- TOP: SUM(seconds) per character over the season window (or all-time). ----
-    // Group the buckets first (index-covered), then join out to the character
+    // ---- TOP: SUM(seconds) per survivor over the season window (or all-time). ----
+    // Group the buckets first (index-covered), then join out to the survivor
     // + owning account once per aggregated row. String date comparison is
     // valid because dates are zero-padded YYYY-MM-DD.
     if ($hasWindow) {
@@ -157,12 +157,12 @@ try {
             'SELECT c.id, c.name, c.skin, c.outcome, c.started_at, u.username,
                     agg.seconds AS seconds
              FROM (
-                 SELECT character_id, SUM(seconds) AS seconds
-                 FROM character_playtime
+                 SELECT survivor_id, SUM(seconds) AS seconds
+                 FROM survivor_playtime
                  WHERE date BETWEEN :start AND :end
-                 GROUP BY character_id
+                 GROUP BY survivor_id
              ) agg
-             JOIN characters c ON c.id = agg.character_id
+             JOIN survivors c ON c.id = agg.survivor_id
              JOIN users u      ON u.id = c.user_id
              WHERE agg.seconds > 0
              ORDER BY agg.seconds DESC, c.id ASC
@@ -174,11 +174,11 @@ try {
             'SELECT c.id, c.name, c.skin, c.outcome, c.started_at, u.username,
                     agg.seconds AS seconds
              FROM (
-                 SELECT character_id, SUM(seconds) AS seconds
-                 FROM character_playtime
-                 GROUP BY character_id
+                 SELECT survivor_id, SUM(seconds) AS seconds
+                 FROM survivor_playtime
+                 GROUP BY survivor_id
              ) agg
-             JOIN characters c ON c.id = agg.character_id
+             JOIN survivors c ON c.id = agg.survivor_id
              JOIN users u      ON u.id = c.user_id
              WHERE agg.seconds > 0
              ORDER BY agg.seconds DESC, c.id ASC
@@ -192,12 +192,12 @@ try {
         $top[] = leaderboard_row($row, ++$rank);
     }
 
-    // ---- TODAY: each character's bucket for the current server date. ----
+    // ---- TODAY: each survivor's bucket for the current server date. ----
     $todayStmt = $db->prepare(
         'SELECT c.id, c.name, c.skin, c.outcome, c.started_at, u.username,
                 p.seconds AS seconds
-         FROM character_playtime p
-         JOIN characters c ON c.id = p.character_id
+         FROM survivor_playtime p
+         JOIN survivors c ON c.id = p.survivor_id
          JOIN users u      ON u.id = c.user_id
          WHERE p.date = :today AND p.seconds > 0
          ORDER BY p.seconds DESC, c.id ASC

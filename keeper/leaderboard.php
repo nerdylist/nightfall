@@ -12,13 +12,13 @@ if (!grave_is_admin()) {
 
 /**
  * Keeper > Leaderboard — season data control (Boss 2026-07-23: "let me
- * control whatever data is on there... delete survivors/characters if need
+ * control whatever data is on there... delete survivors/survivors if need
  * be. Some of these are just for testing.").
  *
  * Two tables:
- *   SURVIVORS — every characters row with its playtime + key board stats.
- *     DELETE removes the character AND its leaderboard footprint
- *     (character_playtime buckets + character_stats row). The per-USER
+ *   SURVIVORS — every survivors row with its playtime + key board stats.
+ *     DELETE removes the survivor AND its leaderboard footprint
+ *     (survivor_playtime buckets + survivor_stats row). The per-USER
  *     aggregates in player_stats are untouched by design — use the user
  *     table's ZERO BOARD STATS for those.
  *   USER BOARD STATS — per-user player_stats rows. ZERO wipes every board
@@ -55,17 +55,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $id = (int) ($_POST['id'] ?? 0);
 
-    if ($action === 'delete_character' && $id > 0) {
+    if ($action === 'delete_survivor' && $id > 0) {
         $stmt = $db->prepare('SELECT c.name, c.skin, u.username
-                              FROM characters c JOIN users u ON u.id = c.user_id
+                              FROM survivors c JOIN users u ON u.id = c.user_id
                               WHERE c.id = ?');
         $stmt->execute([$id]);
         $row = $stmt->fetch();
 
         if ($row) {
-            $db->prepare('DELETE FROM character_playtime WHERE character_id = ?')->execute([$id]);
-            $db->prepare('DELETE FROM character_stats WHERE character_id = ?')->execute([$id]);
-            $db->prepare('DELETE FROM characters WHERE id = ?')->execute([$id]);
+            $db->prepare('DELETE FROM survivor_playtime WHERE survivor_id = ?')->execute([$id]);
+            $db->prepare('DELETE FROM survivor_stats WHERE survivor_id = ?')->execute([$id]);
+            $db->prepare('DELETE FROM survivors WHERE id = ?')->execute([$id]);
             $label = trim((string) ($row['name'] ?: $row['skin']));
             $_SESSION['keeper_flash'] = 'Survivor "' . $label . '" (@' . $row['username']
                 . ') removed from the season books.';
@@ -100,8 +100,8 @@ include __DIR__ . '/../partials/keeper-header.php';
 
 $db = grave_db();
 
-$totalChars = (int) $db->query('SELECT COUNT(*) FROM characters')->fetchColumn();
-$endedChars = (int) $db->query('SELECT COUNT(*) FROM characters WHERE ended_at IS NOT NULL')->fetchColumn();
+$totalChars = (int) $db->query('SELECT COUNT(*) FROM survivors')->fetchColumn();
+$endedChars = (int) $db->query('SELECT COUNT(*) FROM survivors WHERE ended_at IS NOT NULL')->fetchColumn();
 
 // SURVIVORS with their leaderboard footprint.
 $chars = $db->query(
@@ -110,12 +110,12 @@ $chars = $db->query(
             COALESCE(cs.chests_looted, 0) AS chests,
             COALESCE(cs.kills_hvz + cs.kills_hvh + cs.kills_zvz + cs.kills_zvh, 0) AS kills,
             COALESCE(cs.distance_m, 0) AS distance
-     FROM characters c
+     FROM survivors c
      JOIN users u ON u.id = c.user_id
-     LEFT JOIN (SELECT character_id, SUM(seconds) AS seconds
-                FROM character_playtime GROUP BY character_id) pt
-            ON pt.character_id = c.id
-     LEFT JOIN character_stats cs ON cs.character_id = c.id
+     LEFT JOIN (SELECT survivor_id, SUM(seconds) AS seconds
+                FROM survivor_playtime GROUP BY survivor_id) pt
+            ON pt.survivor_id = c.id
+     LEFT JOIN survivor_stats cs ON cs.survivor_id = c.id
      ORDER BY playtime DESC, c.id ASC"
 )->fetchAll();
 
@@ -189,7 +189,7 @@ function keeper_lb_duration(int $seconds): string
                 <div class="keeper-row-actions">
                   <form method="post" onsubmit="return confirm('Remove this survivor and all their leaderboard data? This cannot be undone.');">
                     <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
-                    <input type="hidden" name="action" value="delete_character">
+                    <input type="hidden" name="action" value="delete_survivor">
                     <input type="hidden" name="id" value="<?= (int) $c['id'] ?>">
                     <button type="submit" class="keeper-icon-btn keeper-icon-btn--danger" title="Delete survivor" aria-label="Delete">
                       <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/trash.svg" alt="">

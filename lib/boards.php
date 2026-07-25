@@ -4,8 +4,8 @@
  *
  * One shared definition of every leaderboard BOARD backed by a player_stats
  * column, used by both GET /api/leaderboard?board=... and the /leaderboard
- * page tabs. The main survival-time board (character_playtime) is separate —
- * it ranks characters; these rank USERS.
+ * page tabs. The main survival-time board (survivor_playtime) is separate —
+ * it ranks survivors; these rank USERS.
  *
  *   column — player_stats column (whitelisted here, never from input)
  *   label  — display name (1950s-horror voice, per the spec doc)
@@ -23,7 +23,7 @@ const TDL_BOARDS = [
     'horde'       => ['column' => 'biggest_horde_size',     'label' => 'Biggest Horde',    'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Largest horde led.', 'icon' => '/assets/images/leaderboards/icon-_0003_biggest_horde.png', 'who' => 'survivor'],
     'turned'      => ['column' => 'times_turned',           'label' => 'Times Turned',     'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Times gone over to the dead.', 'icon' => '/assets/images/leaderboards/icon-_0002_times_turned.png', 'who' => 'both'],
     'redemptions' => ['column' => 'redemptions',            'label' => 'Redemptions',      'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Times clawed back to the living.', 'icon' => '/assets/images/leaderboards/icon-_0001_redemptions.png', 'who' => 'both'],
-    'truedeath'   => ['column' => 'true_deaths',            'label' => 'True Deaths',      'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Characters lost forever.', 'icon' => '/assets/images/leaderboards/icon-_0000_true_deaths.png', 'who' => 'user'],
+    'truedeath'   => ['column' => 'true_deaths',            'label' => 'True Deaths',      'dir' => 'DESC', 'fmt' => 'count',    'blurb' => 'Survivors lost forever.', 'icon' => '/assets/images/leaderboards/icon-_0000_true_deaths.png', 'who' => 'user'],
     'wealthy'     => ['column' => 'bank',                   'label' => 'Most Wealthy',     'dir' => 'DESC', 'fmt' => 'money',    'blurb' => 'Fattest bank account right now.', 'icon' => '/assets/images/leaderboards/icon-_0019_most_wealthy.png', 'who' => 'user'],
     'banker'      => ['column' => 'banked_total',           'label' => 'The Banker',       'dir' => 'DESC', 'fmt' => 'money',    'blurb' => 'Total cash extracted to the bank.', 'icon' => '/assets/images/leaderboards/icon-_0018_the_banker.png', 'who' => 'both'],
     'diedrich'    => ['column' => 'died_rich',              'label' => 'Died Rich',        'dir' => 'DESC', 'fmt' => 'money',    'blurb' => 'Most cash dropped in a single death.', 'icon' => '/assets/images/leaderboards/icon-_0017_died_rich.png', 'who' => 'survivor'],
@@ -59,7 +59,7 @@ function tdl_board_rows(PDO $db, string $key, int $limit = 10): array
 
 /**
  * SURVIVOR rows for one board: [ [name, skin, outcome, username, value] ].
- * Ranks individual characters from character_stats (012).
+ * Ranks individual survivors from survivor_stats (012).
  */
 function tdl_board_rows_survivor(PDO $db, string $key, int $limit = 10): array
 {
@@ -72,8 +72,8 @@ function tdl_board_rows_survivor(PDO $db, string $key, int $limit = 10): array
     $dir = $def['dir'] === 'ASC' ? 'ASC' : 'DESC';
 
     $sql = "SELECT c.name, c.skin, c.outcome, u.username, s.{$col} AS value
-            FROM character_stats s
-            JOIN characters c ON c.id = s.character_id
+            FROM survivor_stats s
+            JOIN survivors c ON c.id = s.survivor_id
             JOIN users u      ON u.id = c.user_id
             WHERE s.{$col} > 0
             ORDER BY s.{$col} {$dir}, c.id ASC
