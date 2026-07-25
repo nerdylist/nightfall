@@ -15,8 +15,11 @@
    full glyph set; the ::before overlay layer is retired (content none). */
 .forum-title-layered.forum-title-layered {
   position: relative;
-  font-family: "Creepy Crawlers Bold", var(--font-forum-title);
+  font-family: "Young Frankenstein Expanded", var(--font-forum-title);
   color: #ffffff;
+  /* The face carries tall internal line metrics — at title sizes the default
+     line box opened a visible gap above descriptions (Boss 2026-07-25). */
+  line-height: 1;
 }
 .forum-title-layered.forum-title-layered::before {
   content: none; /* layered overlay retired with the two-variant font */
@@ -462,9 +465,13 @@
    scanability. The actual thread-page heading (.op-title, thread.css) is
    the one that gets var(--font-display). */
 .thread-row .title {
-  font-family: var(--font-sans);
-  font-size: var(--fs-lg);
-  font-weight: var(--fw-semibold);
+  /* Same face as category/forum titles (Boss 2026-07-25): the category
+     page's thread rows now match the marquee look. */
+  font-family: "Young Frankenstein Expanded", var(--font-forum-title);
+  text-transform: uppercase;
+  font-size: var(--fs-2xl);
+  font-weight: 400;
+  line-height: 1;
   letter-spacing: -0.01em;
   color: var(--text);
   white-space: nowrap;

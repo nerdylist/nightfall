@@ -28,12 +28,13 @@
   font-display: swap;
 }
 
-/* Thread + category titles (Boss 2026-07-25): Creepy Crawlers Bold — full
-   punctuation set. Replaces the Shadow of the Deads Over/Under pair, whose
-   missing glyphs (e.g. "&") rendered as blank gaps in titles. */
+/* Thread + category titles (Boss 2026-07-25): Young Frankenstein Expanded —
+   full punctuation set, wider set-width than Creepy Crawlers (which read too
+   narrow). Replaces the Shadow of the Deads Over/Under pair, whose missing
+   glyphs (e.g. "&") rendered as blank gaps in titles. */
 @font-face {
-  font-family: "Creepy Crawlers Bold";
-  src: url("/fonts/creepycrawlersbold.ttf") format("truetype");
+  font-family: "Young Frankenstein Expanded";
+  src: url("/fonts/youngfrankexpand.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
