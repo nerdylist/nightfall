@@ -10,7 +10,7 @@
  *   running in the world. Inactive characters are excluded. Ordered by
  *   type, then the admin's sort order, then name.
  *
- *   Optional: ?type=Human|NPC|Zombie filters to one type.
+ *   Optional: ?type=Human|NPC|Zombie|Enemy filters to one type.
  *   Optional: ?all=1 includes inactive rows too (for authoring/preview).
  *
  * Image fields are absolute web paths under /assets/characters/ (or null).
@@ -48,7 +48,7 @@ if (empty($_GET['all'])) {
 
 // Optional type filter.
 $type = isset($_GET['type']) ? trim((string) $_GET['type']) : '';
-if ($type !== '' && in_array($type, ['Human', 'NPC', 'Zombie'], true)) {
+if ($type !== '' && in_array($type, ['Human', 'NPC', 'Zombie', 'Enemy'], true)) {
     $where[] = 'type = :type';
     $params[':type'] = $type;
 }

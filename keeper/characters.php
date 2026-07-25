@@ -49,7 +49,7 @@ function keeper_ensure_characters_table(PDO $db): void
 }
 
 /** Allowed character types (extensible later). */
-const KEEPER_CHAR_TYPES = ['Human', 'NPC', 'Zombie'];
+const KEEPER_CHAR_TYPES = ['Human', 'NPC', 'Zombie', 'Enemy'];
 /** Allowed gender codes. */
 const KEEPER_CHAR_GENDERS = ['m', 'f', 'unknown'];
 

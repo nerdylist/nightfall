@@ -17,7 +17,7 @@ foreach (($catalogByType ?? []) as $rows) { $total += count($rows); }
 <div class="card keeper-table-card" id="character-form">
   <h2 class="keeper-table-card__heading"><?= $isEdit ? 'Edit Character' : 'Add Character' ?></h2>
   <p class="text-muted keeper-chars-hint">
-    The game's characters — Humans, NPCs, and Zombies. This roster will feed the game's runtime startup as the list of characters running in the world.
+    The game's characters — Humans, NPCs, Zombies, and Enemies. This roster will feed the game's runtime startup as the list of characters running in the world.
   </p>
 
   <form method="post" action="/keeper/characters.php" enctype="multipart/form-data" class="keeper-chars-form">
@@ -33,7 +33,7 @@ foreach (($catalogByType ?? []) as $rows) { $total += count($rows); }
         <?php endforeach; ?>
       </select>
       <select class="field" name="type" aria-label="Type">
-        <?php foreach (['Human', 'NPC', 'Zombie'] as $t): ?>
+        <?php foreach (['Human', 'NPC', 'Zombie', 'Enemy'] as $t): ?>
         <option value="<?= $t ?>" <?= ($cv('type', 'Human') === $t) ? 'selected' : '' ?>><?= $t ?></option>
         <?php endforeach; ?>
       </select>
@@ -70,7 +70,7 @@ foreach (($catalogByType ?? []) as $rows) { $total += count($rows); }
   <?php if ($total === 0): ?>
     <p class="text-muted">No characters yet. Add one above.</p>
   <?php else: ?>
-    <?php foreach (['Human', 'NPC', 'Zombie'] as $type): ?>
+    <?php foreach (['Human', 'NPC', 'Zombie', 'Enemy'] as $type): ?>
       <?php $rows = $catalogByType[$type] ?? []; if (!$rows) { continue; } ?>
       <div class="keeper-chars-group">
         <h3 class="keeper-chars-group__title"><?= htmlspecialchars($type) ?> <span class="keeper-chars-count"><?= count($rows) ?></span></h3>
