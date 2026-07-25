@@ -1,0 +1,120 @@
+/* THE DEAD LAST — site search results page. */
+
+.search-page {
+  padding-block: var(--space-8, 64px) var(--space-8, 64px);
+  max-width: 780px;
+}
+
+.search-head {
+  margin-bottom: var(--space-7, 48px);
+}
+
+.search-title {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-size: 2rem;
+  margin: 0 0 var(--space-5, 24px);
+}
+
+.search-form {
+  display: flex;
+  gap: var(--space-3, 12px);
+  align-items: stretch;
+}
+
+.search-form__input {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-form__submit {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.search-summary {
+  margin: var(--space-4, 16px) 0 0;
+  color: var(--text-2, #9a9a9a);
+  font-size: 0.9rem;
+}
+.search-summary strong { color: var(--text-0, #fff); font-weight: 600; }
+
+.search-empty {
+  color: var(--text-2, #9a9a9a);
+  padding: var(--space-6, 32px) 0;
+}
+
+/* ---- Result groups ---- */
+.search-group {
+  margin-bottom: var(--space-7, 48px);
+}
+
+.search-group__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 12px);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-2, #9a9a9a);
+  font-weight: 700;
+  margin: 0 0 var(--space-3, 12px);
+  padding-bottom: var(--space-2, 8px);
+  border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.07));
+}
+
+.search-group__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  font-size: 0.68rem;
+  color: var(--text-1, #d6d6d6);
+  background: var(--surface, #101010);
+  border: 1px solid var(--border-subtle, rgba(255,255,255,0.07));
+  border-radius: 999px;
+}
+
+.search-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.search-result + .search-result {
+  border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.06));
+}
+
+.search-result__link {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: var(--space-3, 12px) var(--space-3, 12px);
+  border-radius: var(--radius-md, 6px);
+  text-decoration: none;
+  transition: background-color 0.14s ease;
+}
+.search-result__link:hover {
+  background: var(--bg-elevated, #0f0f15);
+}
+
+.search-result__name {
+  color: var(--text-0, #fff);
+  font-weight: 600;
+  font-size: 0.98rem;
+}
+
+.search-result__meta {
+  color: var(--text-2, #9a9a9a);
+  font-size: 0.82rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .search-form { flex-direction: column; }
+}

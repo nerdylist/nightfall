@@ -42,6 +42,11 @@
       "description": "Season survival-time leaderboard"
     },
     {
+      "url": "/search",
+      "destination": "search.php",
+      "description": "Site search — pages, threads, categories, users (query via ?q=)"
+    },
+    {
       "url": "/bbs",
       "destination": "bbs/index.php",
       "description": "Forum: home (forums listing) - normally served directly as bbs/index.php; router fallback"

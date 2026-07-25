@@ -99,8 +99,8 @@ if (!empty($_SESSION['user_id'])) {
             </a>
           <?php endif; ?>
         </div>
-        <form class="site-nav__search-form" id="nav-search-form">
-          <input class="site-nav__search-input" id="nav-search-input" type="search" aria-label="Search" placeholder="<?= htmlspecialchars($NAV_SEARCH_PLACEHOLDER) ?>">
+        <form class="site-nav__search-form" id="nav-search-form" method="get" action="/search" role="search">
+          <input class="site-nav__search-input" id="nav-search-input" type="search" name="q" aria-label="Search" placeholder="<?= htmlspecialchars($NAV_SEARCH_PLACEHOLDER) ?>">
         </form>
       </div>
       <div class="site-nav__search">
