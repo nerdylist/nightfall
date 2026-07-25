@@ -25,15 +25,15 @@ if ($category === null) {
 }
 $categoryId = $category !== null ? (int) $category['id'] : 0;
 
-// Gather threads for this category; fall back to all threads if none match.
+// Gather threads for this category — ONLY this category. (The old "fall back
+// to all threads if none match" scaffold made every EMPTY category list the
+// entire forum — Boss 2026-07-25: "my post shows up in every category".
+// An empty category now renders an honest empty state instead.)
 $categoryThreads = [];
 foreach ($data['threads'] as $t) {
     if ((int) $t['category_id'] === $categoryId) {
         $categoryThreads[] = $t;
     }
-}
-if (empty($categoryThreads)) {
-    $categoryThreads = $data['threads'];
 }
 
 include __DIR__ . '/partials/head.php';       // DOCTYPE..head..</head><body>
@@ -42,9 +42,13 @@ include __DIR__ . '/partials/header.php';     // <header class="site-header">
 <main class="container">
   <div class="category-layout">
     <section class="thread-list" aria-label="Threads">
-      <?php foreach ($categoryThreads as $thread): ?>
-        <?php include __DIR__ . '/partials/thread-row.php'; ?>
-      <?php endforeach; ?>
+      <?php if (empty($categoryThreads)): ?>
+        <p class="thread-list-empty">There are no current threads in this category. <a href="<?= htmlspecialchars(($BASE ?? '/bbs/') . 'write.php?category=' . (int) $categoryId) ?>">Click here</a> to create one!</p>
+      <?php else: ?>
+        <?php foreach ($categoryThreads as $thread): ?>
+          <?php include __DIR__ . '/partials/thread-row.php'; ?>
+        <?php endforeach; ?>
+      <?php endif; ?>
     </section>
 
     <aside class="category-aside">

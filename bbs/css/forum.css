@@ -583,3 +583,13 @@
 .post-delete-form { display: inline-flex; margin-left: 2px; }
 .post-action--danger:hover,
 .post-action--danger:focus-visible { color: #f26d6d; }
+
+/* Honest empty category (fallback-to-all-threads scaffold removed 2026-07-25) */
+.thread-list-empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--text-2, #8b8b90);
+  font-size: 0.9rem;
+  border: 1px dashed var(--border-subtle, rgba(255,255,255,0.1));
+  border-radius: 8px;
+}
