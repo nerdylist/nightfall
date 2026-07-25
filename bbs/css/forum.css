@@ -9,24 +9,17 @@
    data-title="Same Text">Same Text</h_>. */
 /* Doubled class raises specificity so this beats .forum-row-name / .op-title
    (single-class rules that also set font-family + color, and load later). */
+/* SINGLE-FACE TITLES (Boss 2026-07-25): Creepy Crawlers Bold replaces the
+   Shadow of the Deads Under/Over chromatic pair — that face lacked most
+   punctuation ("&" rendered as blank space in titles/categories). One font,
+   full glyph set; the ::before overlay layer is retired (content none). */
 .forum-title-layered.forum-title-layered {
   position: relative;
-  font-family: "Shadow of the Deads Under", var(--font-forum-title);
-  color: #ffffff; /* under / backing layer — white */
+  font-family: "Creepy Crawlers Bold", var(--font-forum-title);
+  color: #ffffff;
 }
 .forum-title-layered.forum-title-layered::before {
-  content: attr(data-title);
-  position: absolute;
-  inset: 0;
-  font-family: "Shadow of the Deads Over", var(--font-forum-title);
-  color: #000000; /* over / face layer — black */
-  /* inherit the base layer's box exactly so the two variants register */
-  text-transform: inherit;
-  letter-spacing: inherit;
-  font-weight: inherit;
-  font-size: inherit;
-  line-height: inherit;
-  pointer-events: none;
+  content: none; /* layered overlay retired with the two-variant font */
 }
 
 /* ---- Hero ---- */

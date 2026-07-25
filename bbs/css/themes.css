@@ -28,6 +28,17 @@
   font-display: swap;
 }
 
+/* Thread + category titles (Boss 2026-07-25): Creepy Crawlers Bold — full
+   punctuation set. Replaces the Shadow of the Deads Over/Under pair, whose
+   missing glyphs (e.g. "&") rendered as blank gaps in titles. */
+@font-face {
+  font-family: "Creepy Crawlers Bold";
+  src: url("/fonts/creepycrawlersbold.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* ---- Spacing scale (theme-independent) ---- */
   --space-1: 4px;
