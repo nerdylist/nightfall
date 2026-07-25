@@ -101,6 +101,9 @@
   color: var(--text);
   word-wrap: break-word;
   overflow-wrap: anywhere;
+  /* Preserve authored line breaks (Boss 2026-07-25: multi-line dev-log
+     entries rendered as one run-on blob — HTML collapses \n by default). */
+  white-space: pre-wrap;
   padding: var(--space-2) var(--space-3);
   background: var(--surface);
   /* Rounded everywhere except the bottom-left (avatar side) */
