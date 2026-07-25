@@ -1,33 +1,27 @@
 # TODO — current work
 
-The site is mostly stable. Remaining work is largely **adding content**; the
-open engineering items below are game-side animation issues captured here as the
-working list.
+The site is mostly stable. Remaining site work is largely **adding content**.
 
 _Last updated: 2026-07-25._
 
-## Animation fixes (game-side — Unity)
-
-These live in the game (`/Volumes/Crucial/GAMES/livingdead`); tracked here as
-the current punch list.
-
-- [ ] **3P jump overshoot.** In third-person, the character jump lands **too far
-  ahead** of where it should, then **snaps back** to the correct position.
-  Reads as a visual rubber-band — likely a root-motion vs. controller-position
-  mismatch (animation drives forward displacement that the controller then
-  corrects). Reconcile root motion / in-air horizontal handling so the landing
-  spot matches the jump arc, no snap-back.
-- [ ] **Zombie walk.** Zombie walk animation looks wrong / off — needs
-  adjusting.
-- [ ] **Die animations.** The "die" animations need adjusting.
-
-## Content (ongoing)
+## Site / content (ongoing)
 
 - [ ] Populate the **Characters** roster (Keeper → Characters): Humans, NPCs,
   Zombies, Enemies — with avatar/pose art and per-character talk-bubble lines.
 - [ ] General content passes as the game and site fill out.
 
+## Game-side (tracked in the game repo)
+
+Open engineering items are **animation fixes** and live where the work happens —
+the game repo, not here:
+
+- `GAMES/livingdead/docs/BUG_FIXES/animation-fixes.md`
+  - 3P jump overshoot / snap-back
+  - Zombie walk looks wrong
+  - Die animations need adjusting
+
 ## Notes
 
-- Reference docs moved to `docs/archive/`. Live API contracts kept at `docs/`
-  root: `game-stats-api.md`, `player-stats.md`.
+- Reference docs archived under `docs/archive/` (backlog,
+  npc-talk-bubbles-research). Live API contracts kept at `docs/` root:
+  `game-stats-api.md`, `player-stats.md`.
