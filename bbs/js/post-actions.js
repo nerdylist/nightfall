@@ -183,3 +183,15 @@
     }
   });
 })();
+
+// STAFF THREAD DELETE (2026-07-25): confirm before the form fires. The
+// button only renders for admin/moderator; the server re-checks the role.
+(function () {
+  var delForm = document.querySelector('.post-delete-form');
+  if (!delForm) { return; }
+  delForm.addEventListener('submit', function (e) {
+    if (!window.confirm('Delete this thread and all of its replies? This cannot be undone.')) {
+      e.preventDefault();
+    }
+  });
+})();

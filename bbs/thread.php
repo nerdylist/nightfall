@@ -12,6 +12,38 @@ require_once __DIR__ . '/partials/category-badge.php';
 // friendly-URL: /bbs/thread/:id exposes id via $_ROUTE_PARAMS; bridge to $_GET
 if (isset($GLOBALS['_ROUTE_PARAMS']['id']) && !isset($_GET['id'])) { $_GET['id'] = $GLOBALS['_ROUTE_PARAMS']['id']; }
 
+// ---- STAFF DELETE (Boss 2026-07-25): admins/moderators can delete a whole
+// thread from the main-post footer. Role-gated HARD server-side — the button
+// is also hidden in markup for everyone else, but this check is the law.
+$canModerate = $me !== null
+    && in_array(($me['role'] ?? ''), ['admin', 'moderator'], true)
+    && (($me['status'] ?? '') === 'active');
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST'
+    && (($_POST['action'] ?? '') === 'delete_thread')) {
+    if (!$canModerate || !csrf_check($_POST['csrf_token'] ?? '')) {
+        http_response_code(403);
+        exit('Forbidden');
+    }
+
+    require_once __DIR__ . '/db.php';
+    $delId = (int) ($_POST['thread_id'] ?? 0);
+    $fdb = forum_db();
+    $catStmt = $fdb->prepare('SELECT category_id FROM threads WHERE id = ?');
+    $catStmt->execute([$delId]);
+    $delCat = (int) $catStmt->fetchColumn();
+
+    // Full footprint, children first: reactions -> posts -> chat -> thread.
+    $fdb->prepare('DELETE FROM reactions WHERE post_id IN (SELECT id FROM posts WHERE thread_id = ?)')
+        ->execute([$delId]);
+    $fdb->prepare('DELETE FROM posts WHERE thread_id = ?')->execute([$delId]);
+    $fdb->prepare('DELETE FROM chat_messages WHERE thread_id = ?')->execute([$delId]);
+    $fdb->prepare('DELETE FROM threads WHERE id = ?')->execute([$delId]);
+
+    header('Location: ' . ($BASE ?? '/bbs/') . ($delCat > 0 ? 'category/' . $delCat : ''));
+    exit;
+}
+
 // Resolve requested thread id (default to first thread).
 $requestedId = isset($_GET['id']) ? (int) $_GET['id'] : (int) ($data['threads'][0]['id'] ?? 0);
 
@@ -160,6 +192,22 @@ include __DIR__ . '/partials/header.php';     // <header class="site-header">
           <button class="reaction" type="button" role="menuitem" data-emoji="🔥">🔥</button>
         </div>
       </div>
+      <?php if ($canModerate): ?>
+      <form class="post-delete-form" method="post" action="<?= htmlspecialchars(($BASE ?? '/bbs/') . 'thread/' . $threadId) ?>">
+        <?= csrf_field() ?>
+        <input type="hidden" name="action" value="delete_thread">
+        <input type="hidden" name="thread_id" value="<?= (int) $threadId ?>">
+        <button class="post-action post-action--danger" type="submit" data-action="delete-thread" aria-label="Delete thread" title="Delete thread (staff)">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 6h18"></path>
+            <path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"></path>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+          </svg>
+        </button>
+      </form>
+      <?php endif; ?>
     </div>
     <div class="post-reactions" aria-label="Reactions"></div>
   </article>
