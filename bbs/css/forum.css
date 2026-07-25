@@ -593,3 +593,14 @@
   border: 1px dashed var(--border-subtle, rgba(255,255,255,0.1));
   border-radius: 8px;
 }
+
+.thread-list-empty a {
+  color: var(--text-0, #ffffff);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.thread-list-empty a:hover,
+.thread-list-empty a:focus-visible {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.35);
+}
