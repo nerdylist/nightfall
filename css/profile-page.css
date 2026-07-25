@@ -1,0 +1,189 @@
+/* profile-page.css — /u/{username} public profile.
+   Ultra-dark, compact; matches the site's hairline-border card language. */
+
+.uprof {
+  padding-top: var(--space-7, 40px);
+  padding-bottom: var(--space-7, 40px);
+  max-width: 860px;
+}
+
+/* ---- Identity card ---- */
+.uprof-head {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 22px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+
+.uprof-avatar { flex: 0 0 auto; }
+
+.uprof-id { flex: 1 1 auto; min-width: 0; }
+
+.uprof-name {
+  margin: 0 0 6px;
+  font-family: "Young Frankenstein Expanded", var(--font-display, sans-serif);
+  font-weight: 400;
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: #fff;
+}
+
+.uprof-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: var(--text-muted, #9a9aa0);
+}
+
+.uprof-role {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #e8e8ea;
+}
+
+.uprof-role--admin { border-color: rgba(242, 109, 109, 0.5); color: #f2a0a0; }
+.uprof-role--moderator { border-color: rgba(125, 200, 255, 0.45); color: #a8d8ff; }
+
+.uprof-stats {
+  display: flex;
+  gap: 22px;
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.uprof-stat { text-align: right; }
+
+.uprof-stat dt {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint, #6f6f75);
+}
+
+.uprof-stat dd {
+  margin: 2px 0 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+
+/* ---- Activity feed ---- */
+.uprof-activity { margin-top: 26px; }
+
+.uprof-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.uprof-section-head h2 {
+  margin: 0;
+  font-family: "Young Frankenstein Expanded", var(--font-display, sans-serif);
+  font-weight: 400;
+  font-size: 1.15rem;
+  line-height: 1;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.uprof-bbs-link {
+  font-size: 0.8rem;
+  color: var(--text-muted, #9a9aa0);
+  text-decoration: none;
+}
+
+.uprof-bbs-link:hover { color: #fff; }
+
+.uprof-feed {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.uprof-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.uprof-kind {
+  flex: 0 0 auto;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint, #6f6f75);
+}
+
+.uprof-item--thread .uprof-kind { color: #b9e8c9; }
+
+.uprof-item-title {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #e8e8ea;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.uprof-item-title:hover { color: #fff; text-decoration: underline; }
+
+.uprof-excerpt {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.82rem;
+  color: var(--text-muted, #9a9aa0);
+}
+
+.uprof-when {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--text-faint, #6f6f75);
+}
+
+.uprof-empty {
+  padding: 26px 16px;
+  text-align: center;
+  color: var(--text-muted, #9a9aa0);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+/* Mobile: identity card stacks */
+@media (max-width: 640px) {
+  .uprof-head { flex-wrap: wrap; }
+  .uprof-stats { width: 100%; justify-content: flex-start; }
+  .uprof-stat { text-align: left; }
+  .uprof-item { flex-wrap: wrap; }
+  .uprof-when { margin-left: 0; }
+}

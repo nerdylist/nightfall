@@ -80,6 +80,11 @@
       "url": "/bbs/profile/:user",
       "destination": "bbs/profile.php",
       "description": "Forum: user profile - :user becomes $_ROUTE_PARAMS['user']"
+    },
+    {
+      "url": "/u/:user",
+      "destination": "u.php",
+      "description": "Public user profile - identity + live forum stats + recent activity"
     }
   ]
 }
