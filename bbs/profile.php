@@ -1,104 +1,27 @@
 <?php
-require __DIR__ . '/config.php';
-require_once __DIR__ . '/lib/auth.php';
-auth_start_session();
-$data = require __DIR__ . '/data/live.php';
-$me = auth_current_user();
-$data['current_user'] = $me ? (int)$me['id'] : 0;
-require_once __DIR__ . '/partials/avatar.php';
-
-// friendly-URL: /bbs/profile/:user exposes user via $_ROUTE_PARAMS; bridge to $_GET
-if (isset($GLOBALS['_ROUTE_PARAMS']['user']) && !isset($_GET['user'])) { $_GET['user'] = $GLOBALS['_ROUTE_PARAMS']['user']; }
-
-// Resolve requested user (default to current user). Accepts either a
-// numeric id or a username in ?user=.
-$requestedParam = isset($_GET['user']) ? (string) $_GET['user'] : (string) $data['current_user'];
-$requestedIsId = (bool) preg_match('/^\d+$/', $requestedParam);
-$requestedId = $requestedIsId ? (int) $requestedParam : 0;
-
-$profileUser = null;
-foreach ($data['users'] as $u) {
-    if ($requestedIsId) {
-        if ((int) $u['id'] === $requestedId) {
-            $profileUser = $u;
-            break;
-        }
-    } else {
-        if (strcasecmp((string) $u['username'], $requestedParam) === 0) {
-            $profileUser = $u;
-            break;
-        }
-    }
-}
-if ($profileUser === null) {
-    // Fall back to the current user, then the first user.
-    foreach ($data['users'] as $u) {
-        if ((int) $u['id'] === (int) $data['current_user']) {
-            $profileUser = $u;
-            break;
-        }
-    }
-    if ($profileUser === null && !empty($data['users'])) {
-        $profileUser = $data['users'][0];
-    }
+/**
+ * RETIRED (Boss 2026-07-25): the forum profile page is superseded by the
+ * public profile at /u/{username}. This stub 301s old links/bookmarks there
+ * permanently. The route stays in routes.json so /bbs/profile/:user keeps
+ * resolving; delete both together if ever fully removed.
+ */
+if (isset($GLOBALS['_ROUTE_PARAMS']['user']) && !isset($_GET['user'])) {
+    $_GET['user'] = $GLOBALS['_ROUTE_PARAMS']['user'];
 }
 
-// Collect this user's threads; fall back to a few recent threads if none.
-$userThreads = [];
-foreach ($data['threads'] as $t) {
-    if ((int) $t['author_id'] === (int) $profileUser['id']) {
-        $userThreads[] = $t;
-    }
-}
-if (empty($userThreads)) {
-    $userThreads = array_slice($data['threads'], 0, 3);
-}
+$user = trim((string) ($_GET['user'] ?? ''));
 
-// Format join date for display.
-$joinDisplay = $profileUser['join_date'];
-$ts = strtotime((string) $profileUser['join_date']);
-if ($ts !== false) {
-    $joinDisplay = date('F j, Y', $ts);
+// Numeric ids (old-style ?user=7 links) resolve to the username first.
+if ($user !== '' && preg_match('/^\d+$/', $user)) {
+    require __DIR__ . '/config.php';
+    require_once __DIR__ . '/db.php';
+    $pdo = new PDO('sqlite:' . forum_host_db_path());
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $stmt = $pdo->prepare('SELECT username FROM users WHERE id = ?');
+    $stmt->execute([(int) $user]);
+    $name = $stmt->fetchColumn();
+    $user = $name !== false ? (string) $name : '';
 }
 
-include __DIR__ . '/partials/head.php';
-include __DIR__ . '/partials/header.php';
-?>
-<main class="container py-7">
-  <div class="profile-banner"></div>
-
-  <div class="profile-head">
-    <div class="profile-avatar"><?php render_avatar($profileUser['display_name'], 120); ?></div>
-    <div class="profile-head-info">
-      <div class="profile-name"><?= htmlspecialchars($profileUser['display_name']) ?></div>
-      <div class="profile-meta">@<?= htmlspecialchars($profileUser['username']) ?> &middot; Joined <?= htmlspecialchars($joinDisplay) ?></div>
-    </div>
-  </div>
-
-  <?php if (!empty($profileUser['bio'])): ?>
-    <p class="profile-bio"><?= htmlspecialchars($profileUser['bio']) ?></p>
-  <?php endif; ?>
-
-  <div class="profile-stats">
-    <div class="stat">
-      <span class="num"><?= (int) ($profileUser['threads_started'] ?? 0) ?></span>
-      <span class="label">Threads Started</span>
-    </div>
-    <div class="stat">
-      <span class="num"><?= (int) ($profileUser['chat_messages'] ?? 0) ?></span>
-      <span class="label">Chat Messages</span>
-    </div>
-    <div class="stat">
-      <span class="num"><?= (int) ($profileUser['reputation'] ?? 0) ?></span>
-      <span class="label">Reputation</span>
-    </div>
-  </div>
-
-  <h3 class="mt-6 mb-4">Recent activity</h3>
-  <div class="activity-list">
-    <?php foreach ($userThreads as $thread): ?>
-      <?php include __DIR__ . '/partials/thread-row.php'; ?>
-    <?php endforeach; ?>
-  </div>
-</main>
-<?php include __DIR__ . '/partials/footer.php'; ?>
+header('Location: /u/' . rawurlencode($user), true, 301);
+exit;

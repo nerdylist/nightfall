@@ -110,7 +110,7 @@ if (!empty($_SESSION['user_id'])) {
       </div>
       <div class="site-nav__auth">
         <?php if ($navUser): ?>
-          <a href="/bbs/profile/<?= urlencode($navUser['username']) ?>" class="site-nav__link site-nav__username"><?= htmlspecialchars(strtoupper($navUser['username'])) ?></a>
+          <a href="/u/<?= urlencode($navUser['username']) ?>" class="site-nav__link site-nav__username"><?= htmlspecialchars(strtoupper($navUser['username'])) ?></a>
           <a href="/logout" class="btn btn-ghost site-nav__cta">Logout</a>
         <?php else: ?>
           <a href="<?= htmlspecialchars($NAV_LOGIN_URL) ?>" class="btn btn-ghost site-nav__cta">Login</a>

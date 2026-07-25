@@ -104,7 +104,6 @@ include __DIR__ . '/partials/header.php';
   <section class="uprof-activity" aria-label="Recent activity">
     <div class="uprof-section-head">
       <h2>Recent Activity</h2>
-      <a class="uprof-bbs-link" href="/bbs/profile/<?= urlencode($profile['username']) ?>">Full forum profile &rarr;</a>
     </div>
 
     <?php if (empty($activity)): ?>
