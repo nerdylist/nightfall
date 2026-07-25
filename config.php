@@ -39,6 +39,21 @@ const GRAVE_SESSION_LIFETIME = 31536000;
 // httponly, samesite Lax, secure) so both apps stay cookie-compatible — the
 // only addition is the long lifetime.
 if (session_status() === PHP_SESSION_NONE) {
+    // Server-side session data must live as long as the cookie, or PHP's GC
+    // deletes the session file after session.gc_maxlifetime (default 1440s =
+    // 24 min idle) and the user is logged out despite holding a valid cookie.
+    // Raise it to match the ~1-year cookie so logins actually persist.
+    @ini_set('session.gc_maxlifetime', (string) GRAVE_SESSION_LIFETIME);
+
+    // Use a dedicated session directory so shared-host GC (which sweeps the
+    // common /tmp on the OTHER sites' shorter gc_maxlifetime) can't delete our
+    // long-lived sessions early. Created once; ignored if it can't be made
+    // (falls back to the PHP default).
+    $grave_sess_dir = __DIR__ . '/data/sessions';
+    if (is_dir($grave_sess_dir) || @mkdir($grave_sess_dir, 0700, true)) {
+        @ini_set('session.save_path', $grave_sess_dir);
+    }
+
     session_set_cookie_params([
         'lifetime' => GRAVE_SESSION_LIFETIME,
         'path' => '/',

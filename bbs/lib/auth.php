@@ -13,8 +13,23 @@ if (!function_exists('auth_start_session')) {
         if (session_status() === PHP_SESSION_ACTIVE) {
             return;
         }
+        // Keep persistence identical to the host (config.php): a ~1-year cookie
+        // AND a matching server-side lifetime + shared save_path, so a session
+        // started forum-first survives just as long and both apps read/write
+        // the SAME session store (SSO). ~1 year in seconds.
+        $lifetime = 31536000;
+        @ini_set('session.gc_maxlifetime', (string) $lifetime);
+
+        // Host session dir is <project root>/data/sessions; the forum lives at
+        // <root>/bbs, so it's one level up. Share it so SSO sessions land in the
+        // same place regardless of which app starts first.
+        $sessDir = dirname(__DIR__, 2) . '/data/sessions';
+        if (is_dir($sessDir) || @mkdir($sessDir, 0700, true)) {
+            @ini_set('session.save_path', $sessDir);
+        }
+
         session_set_cookie_params([
-            'lifetime' => 0,
+            'lifetime' => $lifetime,
             'path' => '/',
             'httponly' => true,
             'samesite' => 'Lax',

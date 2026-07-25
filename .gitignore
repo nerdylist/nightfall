@@ -40,3 +40,6 @@ bbs/up/*
 # Character avatar/pose uploads (user content; dir kept via .gitkeep)
 assets/characters/*
 !assets/characters/.gitkeep
+
+# PHP session files (server-side, sensitive)
+data/sessions/
