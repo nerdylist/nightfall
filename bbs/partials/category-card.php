@@ -15,7 +15,7 @@ require_once __DIR__ . '/category-badge.php';
   <span class="desc"><?= htmlspecialchars($category['description'] ?? '') ?></span>
   <span class="meta">
     <span class="meta-stat"><span class="meta-num"><?= number_format((int)($category['thread_count'] ?? 0)) ?></span> threads</span>
-    <span class="meta-stat"><span class="meta-num"><?= number_format((int)($category['post_count'] ?? 0)) ?></span> posts</span>
+    <span class="meta-stat"><span class="meta-num"><?= number_format((int)($category['post_count'] ?? 0)) ?></span> comments</span>
     <span class="meta-time"><?= htmlspecialchars($category['last_activity'] ?? '') ?></span>
   </span>
 </a>

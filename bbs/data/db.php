@@ -63,10 +63,27 @@ if (!function_exists('get_users')) {
      */
     function get_categories()
     {
+        // LIVE COUNTS (Boss 2026-07-25): the categories table's
+        // thread_count/post_count columns are install-time fossils nothing
+        // maintains (deletes/creates drift instantly). Every consumer (index
+        // rows, category cards, sidebars) reads these keys, so compute them
+        // from the real tables here, once, per request:
+        //   thread_count = threads in the category
+        //   post_count   = live-chat COMMENTS on those threads
+        //   last_activity = newest thread/comment timestamp
         $rows = forum_db()->query(
-            'SELECT id, name, description, icon, color, thread_count, post_count, last_activity, featured
-             FROM categories
-             ORDER BY sort_order, id'
+            'SELECT c.id, c.name, c.description, c.icon, c.color, c.featured,
+                    (SELECT COUNT(*) FROM threads t WHERE t.category_id = c.id) AS thread_count,
+                    (SELECT COUNT(*) FROM chat_messages m WHERE m.thread_id IN
+                        (SELECT id FROM threads t2 WHERE t2.category_id = c.id)) AS post_count,
+                    (SELECT MAX(x) FROM (
+                        SELECT MAX(t3.created_at) AS x FROM threads t3 WHERE t3.category_id = c.id
+                        UNION ALL
+                        SELECT MAX(m2.created_at) AS x FROM chat_messages m2 WHERE m2.thread_id IN
+                            (SELECT id FROM threads t4 WHERE t4.category_id = c.id)
+                    )) AS last_activity
+             FROM categories c
+             ORDER BY c.sort_order, c.id'
         )->fetchAll();
 
         return array_map('forum_shape_category', $rows);
@@ -80,10 +97,20 @@ if (!function_exists('get_users')) {
      */
     function get_category($id)
     {
+        // Same live-count treatment as get_categories() (see note there).
         $stmt = forum_db()->prepare(
-            'SELECT id, name, description, icon, color, thread_count, post_count, last_activity, featured
-             FROM categories
-             WHERE id = :id'
+            'SELECT c.id, c.name, c.description, c.icon, c.color, c.featured,
+                    (SELECT COUNT(*) FROM threads t WHERE t.category_id = c.id) AS thread_count,
+                    (SELECT COUNT(*) FROM chat_messages m WHERE m.thread_id IN
+                        (SELECT id FROM threads t2 WHERE t2.category_id = c.id)) AS post_count,
+                    (SELECT MAX(x) FROM (
+                        SELECT MAX(t3.created_at) AS x FROM threads t3 WHERE t3.category_id = c.id
+                        UNION ALL
+                        SELECT MAX(m2.created_at) AS x FROM chat_messages m2 WHERE m2.thread_id IN
+                            (SELECT id FROM threads t4 WHERE t4.category_id = c.id)
+                    )) AS last_activity
+             FROM categories c
+             WHERE c.id = :id'
         );
         $stmt->execute([':id' => (int) $id]);
         $row = $stmt->fetch();

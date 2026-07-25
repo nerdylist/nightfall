@@ -26,7 +26,7 @@ include __DIR__ . '/partials/header.php';     // <header class="site-header">
         </span>
         <span class="forum-row-stats">
           <span class="forum-row-stat"><span class="forum-row-num"><?= number_format((int)($category['thread_count'] ?? 0)) ?></span> threads</span>
-          <span class="forum-row-stat"><span class="forum-row-num"><?= number_format((int)($category['post_count'] ?? 0)) ?></span> posts</span>
+          <span class="forum-row-stat"><span class="forum-row-num"><?= number_format((int)($category['post_count'] ?? 0)) ?></span> comments</span>
           <span class="forum-row-time"><?= htmlspecialchars($category['last_activity'] ?? '') ?></span>
         </span>
       </a>
