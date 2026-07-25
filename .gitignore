@@ -36,3 +36,7 @@ bbs/forum.db.bak-*
 bbs/up/*
 !bbs/up/index.html
 !bbs/up/.htaccess
+
+# Character avatar/pose uploads (user content; dir kept via .gitkeep)
+assets/characters/*
+!assets/characters/.gitkeep

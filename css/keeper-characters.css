@@ -1,0 +1,240 @@
+/* THE DEAD LAST — Keeper > Messages (NPC talk-bubble line editor) */
+
+.keeper-messages-hint {
+  font-size: 0.85rem;
+  margin: calc(-1 * var(--space-3)) 0 var(--space-4);
+}
+
+.keeper-messages-hint code {
+  padding: 1px 6px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+}
+
+/* Stacked NPC cards need breathing room between them. */
+.keeper-table-card + .keeper-table-card {
+  margin-top: var(--space-5);
+}
+
+/* Role chip next to an NPC's name. */
+.keeper-messages-role {
+  margin-left: var(--space-2);
+  padding: 2px 8px;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  background: var(--bg-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
+/* Compact rows; the line input takes the remaining width. */
+.keeper-messages-table td {
+  padding: 8px 10px;
+  vertical-align: middle;
+}
+
+.keeper-messages-table .field {
+  padding: 7px 10px;
+  font-size: 0.88rem;
+  width: 100%;
+}
+
+/* Narrow, centered On / Delete columns. */
+.keeper-messages-col-on,
+.keeper-messages-col-del {
+  width: 64px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.keeper-messages-table input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+/* Highlighted "add a new line" row. */
+.keeper-messages-new td {
+  background: var(--bg-2);
+}
+
+.keeper-messages-actions {
+  margin-top: var(--space-4);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ============================================================
+   Characters catalog (Boss 2026-07-25) — authored roster above
+   the NPC Messages section. Icon-button + clamp utilities are
+   shared from css/keeper.css.
+   ============================================================ */
+
+.keeper-chars-hint { font-size: 0.85rem; margin: 0 0 var(--space-4); }
+
+/* Section divider between the catalog and the NPC Messages block. */
+.keeper-section-divider {
+  margin: var(--space-7, 48px) 0 var(--space-4);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--keeper-line, rgba(255,255,255,0.12));
+}
+.keeper-section-divider__title {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 1.05rem;
+  margin: 0 0 4px;
+}
+.keeper-section-divider__hint { font-size: 0.82rem; margin: 0; }
+
+/* ---- Add / edit form ---- */
+.keeper-chars-grid {
+  display: grid;
+  grid-template-columns: 2fr 0.8fr 1fr 1fr;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.keeper-chars-desc { width: 100%; margin-bottom: var(--space-3); resize: vertical; }
+
+.keeper-chars-uploads {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+.keeper-chars-upload { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.keeper-chars-upload__label { font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.02em; }
+.keeper-chars-upload__thumb {
+  width: 72px; height: 72px; object-fit: cover;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--keeper-line, rgba(255,255,255,0.12));
+}
+
+.keeper-chars-actions { display: flex; gap: var(--space-3); align-items: center; }
+
+/* ---- Roster cards ---- */
+.keeper-chars-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 20px; height: 18px; padding: 0 6px;
+  font-size: 0.68rem; color: var(--text-1, #d6d6d6);
+  background: var(--keeper-panel-2, #1a1a1a);
+  border: 1px solid var(--keeper-line, rgba(255,255,255,0.12));
+  border-radius: 999px; vertical-align: middle;
+}
+
+.keeper-chars-group { margin-top: var(--space-4); }
+.keeper-chars-group__title {
+  font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--text-muted); margin: 0 0 var(--space-3);
+}
+
+.keeper-chars-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-3);
+}
+
+.keeper-chars-card {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--keeper-panel, #0a0a0a);
+  border: 1px solid var(--keeper-line, rgba(255,255,255,0.12));
+  border-radius: var(--radius-md, 8px);
+}
+.keeper-chars-card__media {
+  flex: 0 0 auto; width: 44px; height: 44px;
+  border-radius: var(--radius-sm, 6px); overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--keeper-panel-2, #141414);
+}
+.keeper-chars-card__media img { width: 100%; height: 100%; object-fit: cover; }
+.keeper-chars-card__noimg { font-family: var(--font-display); color: var(--text-muted); font-size: 1.1rem; }
+
+.keeper-chars-card__body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.keeper-chars-card__name {
+  font-weight: 600; font-size: 0.9rem; color: var(--text-0, #fff);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.keeper-chars-card__meta { font-size: 0.74rem; color: var(--text-muted); }
+
+.keeper-chars-card__actions { flex: 0 0 auto; display: flex; gap: 5px; }
+.keeper-chars-card__actions form { margin: 0; display: inline-flex; }
+
+@media (max-width: 720px) {
+  .keeper-chars-grid { grid-template-columns: 1fr 1fr; }
+  .keeper-chars-uploads { grid-template-columns: 1fr; }
+}
+
+/* ---- Messages button (on each roster card) ---- */
+.keeper-chars-msg-btn { position: relative; }
+.keeper-chars-msg-count {
+  position: absolute; top: -5px; right: -5px;
+  min-width: 15px; height: 15px; padding: 0 3px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; font-weight: 700; line-height: 1;
+  color: #000; background: #fff; border-radius: 999px;
+}
+
+/* ---- Messages modal ---- */
+.keeper-modal {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: var(--space-6) var(--space-4); overflow-y: auto;
+}
+.keeper-modal[hidden] { display: none; }
+.keeper-modal__backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(3px);
+}
+.keeper-modal__panel {
+  position: relative; z-index: 1; width: 100%; max-width: 620px; margin: auto;
+  background: var(--keeper-panel, #0a0a0a);
+  border: 1px solid var(--keeper-line, rgba(255,255,255,0.14));
+  border-radius: var(--radius-md, 10px);
+  padding: var(--space-5) var(--space-6) var(--space-6);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+}
+.keeper-modal__panel--wide { max-width: 760px; }
+.keeper-modal__head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: var(--space-4); margin-bottom: var(--space-3);
+}
+.keeper-modal__title {
+  font-family: var(--font-display); text-transform: uppercase;
+  letter-spacing: 0.03em; font-size: 1.15rem; color: var(--keeper-ink, #fff); margin: 0;
+}
+.keeper-modal__close {
+  font-size: 1.6rem; line-height: 1; color: var(--keeper-ink-3, rgba(255,255,255,0.45));
+  background: none; border: none; cursor: pointer; padding: 2px 6px; border-radius: var(--radius-sm, 6px);
+}
+.keeper-modal__close:hover { color: var(--keeper-ink, #fff); background: var(--keeper-panel-2, #131313); }
+.keeper-modal__actions { margin-top: var(--space-4); justify-content: flex-end; }
+
+body.keeper-modal-open { overflow: hidden; }
+
+/* ---- Active toggle (per card) ---- */
+.keeper-chars-toggle-form { margin: 0; flex: 0 0 auto; display: inline-flex; }
+.keeper-chars-toggle {
+  position: relative; width: 34px; height: 19px; padding: 0; flex: 0 0 auto;
+  border-radius: 999px; cursor: pointer;
+  background: var(--keeper-panel-2, #1a1a1a);
+  border: 1px solid var(--keeper-line, rgba(255,255,255,0.18));
+  transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+.keeper-chars-toggle__knob {
+  position: absolute; top: 50%; left: 2px; transform: translateY(-50%);
+  width: 13px; height: 13px; border-radius: 50%;
+  background: var(--text-muted, #888);
+  transition: transform 0.16s ease, background-color 0.16s ease;
+}
+.keeper-chars-toggle.is-on { background: #fff; border-color: #fff; }
+.keeper-chars-toggle.is-on .keeper-chars-toggle__knob { transform: translate(15px, -50%); background: #000; }
+
+.keeper-chars-card.is-inactive { opacity: 0.5; }
+.keeper-chars-card.is-inactive:hover { opacity: 0.8; }
