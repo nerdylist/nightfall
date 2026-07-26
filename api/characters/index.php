@@ -69,6 +69,29 @@ $imgUrl = static function ($p): ?string {
     return $p === '' ? null : '/' . ltrim($p, '/');
 };
 
+// Talk-bubble lines (migration 015), inline per character so the game's one
+// startup fetch carries them: ENABLED lines only, keyed by character_id.
+// Bodies may contain {tokens} (e.g. {password}) that the GAME resolves at
+// display time — served verbatim here.
+$messagesByChar = [];
+try {
+    $hasMsgs = $db->query("SELECT name FROM sqlite_master WHERE type='table' AND name='character_messages'")->fetchColumn();
+    if ($hasMsgs !== false) {
+        $msgStmt = $db->query(
+            'SELECT id, character_id, body, weight FROM character_messages
+             WHERE enabled = 1 ORDER BY character_id, id');
+        foreach ($msgStmt->fetchAll() as $m) {
+            $messagesByChar[(int) $m['character_id']][] = [
+                'id'     => (int) $m['id'],
+                'body'   => (string) $m['body'],
+                'weight' => max(1, (int) $m['weight']),
+            ];
+        }
+    }
+} catch (Throwable $e) {
+    // No messages table / read error -> every character just gets [].
+}
+
 $out = [];
 foreach ($stmt->fetchAll() as $c) {
     $out[] = [
@@ -80,6 +103,7 @@ foreach ($stmt->fetchAll() as $c) {
         'description' => $c['description'],
         'avatar'      => $imgUrl($c['avatar_path']),
         'pose'        => $imgUrl($c['pose_path']),
+        'messages'    => $messagesByChar[(int) $c['id']] ?? [],
     ];
 }
 
