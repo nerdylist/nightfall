@@ -483,7 +483,8 @@ unset($_SESSION['keeper_flash']);
 
 $items = $db->query(
     'SELECT item_id, display_name, category, rarity, stackable, max_stack,
-            power, weight_kg, value, durability, description, used_to, thumbnail, model
+            power, weight_kg, value, durability, description, used_to, thumbnail, model,
+            icon_path
      FROM items ORDER BY category, display_name, item_id'
 )->fetchAll();
 
@@ -538,6 +539,14 @@ function keeper_rarity_class(?string $rarity): string
     <div class="keeper-items-toolbar">
       <p class="text-muted keeper-items-toolbar__count"><strong><?= count($items) ?></strong> item<?= count($items) === 1 ? '' : 's' ?> in the catalog</p>
       <div class="keeper-items-toolbar__actions">
+        <div class="keeper-items-viewtoggle" role="group" aria-label="View">
+          <button type="button" class="keeper-items-viewbtn is-on" data-view="grid" title="Grid view" aria-label="Grid view">
+            <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/grip.svg" alt="">
+          </button>
+          <button type="button" class="keeper-items-viewbtn" data-view="list" title="List view" aria-label="List view">
+            <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/list.svg" alt="">
+          </button>
+        </div>
         <button type="button" class="btn btn-primary" data-open-item-modal>Add Item</button>
         <form method="post" action="/keeper/items.php" class="keeper-items-form">
           <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
@@ -735,9 +744,33 @@ function keeper_rarity_class(?string $rarity): string
       <p class="text-muted">No items yet. Press <strong>Update</strong> to pull the catalog, or run the game's item export to POST it to <code>/api/items</code>.</p>
     </div>
     <?php else: ?>
+      <!-- View mode (grid default) is applied to this wrapper by keeper-items.js
+           from localStorage; each category renders both a grid and a list, CSS
+           shows one. -->
+      <div class="keeper-items-catalog" data-items-catalog data-view="grid">
       <?php foreach ($byCategory as $cat => $rows): ?>
       <div class="card keeper-table-card">
         <h2 class="keeper-table-card__heading"><?= htmlspecialchars($cat) ?> <span class="keeper-items-count"><?= count($rows) ?></span></h2>
+
+        <!-- Grid view: icon + name cards; the whole card links to the edit
+             modal (?edit=…). No delete here — deletion lives in list view to
+             prevent accidental removals. -->
+        <div class="keeper-items-cardgrid">
+          <?php foreach ($rows as $it): ?>
+          <?php $icon = $it['icon_path'] ?? ($it['thumbnail'] ?? ''); ?>
+          <a class="keeper-items-tile" href="/keeper/items.php?edit=<?= urlencode((string) $it['item_id']) ?>#add" title="<?= htmlspecialchars((string) $it['item_id']) ?>">
+            <span class="keeper-items-tile__art">
+              <?php if ($icon !== ''): ?>
+                <img src="/<?= htmlspecialchars(ltrim((string) $icon, '/')) ?>" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+              <?php else: ?>
+                <span class="keeper-items-tile__noart"><?= htmlspecialchars(strtoupper(substr((string) $it['display_name'], 0, 1))) ?></span>
+              <?php endif; ?>
+            </span>
+            <span class="keeper-items-tile__name"><?= htmlspecialchars((string) $it['display_name']) ?></span>
+          </a>
+          <?php endforeach; ?>
+        </div>
+
         <div class="keeper-table-scroll">
           <table class="keeper-table keeper-items-table">
             <thead>
@@ -794,6 +827,7 @@ function keeper_rarity_class(?string $rarity): string
         </div>
       </div>
       <?php endforeach; ?>
+      </div><!-- /.keeper-items-catalog -->
     <?php endif; ?>
   </div>
 </main>

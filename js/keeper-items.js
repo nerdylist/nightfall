@@ -65,6 +65,40 @@
   }
 })();
 
+/* ---- Grid / list view toggle (persisted in localStorage) ---- */
+(function () {
+  'use strict';
+  var KEY = 'keeper-items-view';
+
+  function apply(view) {
+    var cat = document.querySelector('[data-items-catalog]');
+    if (cat) { cat.setAttribute('data-view', view); }
+    document.querySelectorAll('.keeper-items-viewbtn').forEach(function (b) {
+      b.classList.toggle('is-on', b.getAttribute('data-view') === view);
+    });
+  }
+
+  function init() {
+    var saved = null;
+    try { saved = localStorage.getItem(KEY); } catch (e) {}
+    apply(saved === 'list' ? 'list' : 'grid'); // default grid
+
+    document.querySelectorAll('.keeper-items-viewbtn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var view = btn.getAttribute('data-view') === 'list' ? 'list' : 'grid';
+        apply(view);
+        try { localStorage.setItem(KEY, view); } catch (e) {}
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+
 /* ---- Damage-bands repeater (add/remove {from,to,mode,value} rows) ----
    Generic: clones the <template data-band-template> into [data-bands-rows]. */
 (function () {

@@ -388,3 +388,69 @@
   border: 1px solid var(--keeper-line, rgba(255,255,255,0.12));
   margin-bottom: 6px;
 }
+
+/* ============================================================
+   Grid / list view toggle (Boss 2026-07-28). The catalog wrapper
+   carries data-view; CSS shows the matching view per category.
+   ============================================================ */
+
+/* View toggle buttons in the toolbar. */
+.keeper-items-viewtoggle {
+  display: inline-flex;
+  border: 1px solid var(--keeper-line, rgba(255,255,255,0.12));
+  border-radius: var(--radius-sm, 6px);
+  overflow: hidden;
+}
+.keeper-items-viewbtn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 32px; padding: 0;
+  background: transparent; border: none; cursor: pointer;
+  transition: background-color 0.14s ease;
+}
+.keeper-items-viewbtn + .keeper-items-viewbtn { border-left: 1px solid var(--keeper-line, rgba(255,255,255,0.12)); }
+.keeper-items-viewbtn .keeper-icon { width: 15px; height: 15px; opacity: 0.55; transition: opacity 0.14s ease; }
+.keeper-items-viewbtn:hover .keeper-icon { opacity: 0.85; }
+.keeper-items-viewbtn.is-on { background: var(--keeper-panel-2, #1a1a1a); }
+.keeper-items-viewbtn.is-on .keeper-icon { opacity: 1; }
+
+/* Show one view per mode. Default (no attr / grid) = grid. */
+.keeper-items-catalog[data-view="grid"] .keeper-table-scroll { display: none; }
+.keeper-items-catalog[data-view="list"] .keeper-items-cardgrid { display: none; }
+
+/* ---- Grid tiles: icon + name, whole tile links to edit ---- */
+.keeper-items-cardgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: var(--space-3);
+}
+.keeper-items-tile {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: var(--space-3);
+  text-decoration: none;
+  background: var(--keeper-panel, #0a0a0a);
+  border: 1px solid var(--keeper-line, rgba(255,255,255,0.12));
+  border-radius: var(--radius-md, 8px);
+  transition: border-color 0.14s ease, transform 0.14s ease, background-color 0.14s ease;
+}
+.keeper-items-tile:hover {
+  border-color: var(--keeper-ink-2, rgba(255,255,255,0.45));
+  background: var(--keeper-panel-2, #141414);
+  transform: translateY(-1px);
+}
+.keeper-items-tile__art {
+  width: 100%; aspect-ratio: 1 / 1;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-sm, 6px);
+  background: rgba(255,255,255,0.02);
+  overflow: hidden;
+}
+.keeper-items-tile__art img { width: 100%; height: 100%; object-fit: contain; }
+.keeper-items-tile__noart {
+  font-family: var(--font-display, sans-serif);
+  font-size: 2rem; color: var(--text-faint, #6f6f75);
+}
+.keeper-items-tile__name {
+  font-size: 0.82rem; font-weight: 600; color: var(--text-0, #fff);
+  text-align: center; line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
