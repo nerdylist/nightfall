@@ -58,6 +58,67 @@ foreach (($catalogByType ?? []) as $rows) { $total += count($rows); }
       </label>
     </div>
 
+    <?php
+      // Decode stored hp_bands JSON for pre-fill (edit). Malformed -> empty.
+      $bands = [];
+      if ($isEdit && !empty($editChar['hp_bands'])) {
+          $decoded = json_decode((string) $editChar['hp_bands'], true);
+          if (is_array($decoded)) { $bands = $decoded; }
+      }
+    ?>
+    <fieldset class="keeper-chars-wave">
+      <legend>Wave scaling <span class="keeper-chars-wave__opt">optional — spawner dials, read by the game at boot</span></legend>
+
+      <div class="keeper-chars-wavegrid">
+        <label class="keeper-chars-wavefield"><span>Base HP</span>
+          <input class="field" type="number" name="hp_base" value="<?= $cv('hp_base') ?>" placeholder="game default" min="0"></label>
+        <label class="keeper-chars-wavefield"><span>Wave min</span>
+          <input class="field" type="number" name="wave_min" value="<?= $cv('wave_min') ?>" placeholder="1" min="1"></label>
+        <label class="keeper-chars-wavefield"><span>Wave max</span>
+          <input class="field" type="number" name="wave_max" value="<?= $cv('wave_max') ?>" placeholder="∞" min="1"></label>
+        <label class="keeper-chars-wavefield"><span>HP cap</span>
+          <input class="field" type="number" name="hp_cap" value="<?= $cv('hp_cap') ?>" placeholder="none" min="0"></label>
+      </div>
+
+      <div class="keeper-chars-bands" data-bands>
+        <div class="keeper-chars-bands__head">
+          <span>HP bands</span>
+          <span class="keeper-chars-wave__opt">per-wave growth; tile without gaps, first “From” = Wave min</span>
+        </div>
+        <div class="keeper-chars-bands__rows" data-bands-rows>
+          <?php
+            // Render existing bands, plus always keep the markup for JS cloning
+            // in a <template>. Each row: from / to / mode / value.
+            $renderBand = function ($i, $b) {
+                $from = htmlspecialchars((string) ($b['from'] ?? ''));
+                $to   = ($b['to'] ?? null) === null ? '' : htmlspecialchars((string) $b['to']);
+                $mode = ($b['mode'] ?? 'pct') === 'flat' ? 'flat' : 'pct';
+                $val  = htmlspecialchars((string) ($b['value'] ?? ''));
+                ?>
+                <div class="keeper-chars-band" data-band-row>
+                  <input class="field" type="number" name="band_from[]" value="<?= $from ?>" placeholder="From" min="1">
+                  <input class="field" type="number" name="band_to[]" value="<?= $to ?>" placeholder="To (∞)" min="1">
+                  <select class="field" name="band_mode[]" aria-label="Mode">
+                    <option value="pct"  <?= $mode === 'pct'  ? 'selected' : '' ?>>% / wave</option>
+                    <option value="flat" <?= $mode === 'flat' ? 'selected' : '' ?>>flat / wave</option>
+                  </select>
+                  <input class="field" type="number" name="band_value[]" value="<?= $val ?>" placeholder="Value" step="any">
+                  <button type="button" class="keeper-icon-btn keeper-icon-btn--danger" data-band-remove title="Remove band" aria-label="Remove band">
+                    <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/xmark.svg" alt="">
+                  </button>
+                </div>
+                <?php
+            };
+            foreach ($bands as $i => $b) { $renderBand($i, $b); }
+          ?>
+        </div>
+        <template data-band-template>
+          <?php $renderBand('__i__', []); ?>
+        </template>
+        <button type="button" class="btn btn-ghost keeper-chars-band-add" data-band-add>+ Add band</button>
+      </div>
+    </fieldset>
+
     <div class="keeper-chars-actions">
       <button type="submit" name="save_character" value="1" class="btn btn-primary"><?= $isEdit ? 'Update Character' : 'Add Character' ?></button>
       <?php if ($isEdit): ?><a href="/keeper/characters.php" class="btn btn-ghost">Cancel</a><?php endif; ?>

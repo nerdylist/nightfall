@@ -39,4 +39,29 @@
       if (openModal) { close(openModal); }
     }
   });
+
+  // ---- HP bands repeater (add/remove {from,to,mode,value} rows) ----
+  document.addEventListener('click', function (e) {
+    var addBtn = e.target.closest('[data-band-add]');
+    if (addBtn) {
+      e.preventDefault();
+      var wrap = addBtn.closest('[data-bands]');
+      var tpl = wrap && wrap.querySelector('[data-band-template]');
+      var rows = wrap && wrap.querySelector('[data-bands-rows]');
+      if (tpl && rows) {
+        var frag = tpl.content.cloneNode(true);
+        rows.appendChild(frag);
+        var added = rows.lastElementChild;
+        var first = added && added.querySelector('input');
+        if (first) { first.focus(); }
+      }
+      return;
+    }
+    var rm = e.target.closest('[data-band-remove]');
+    if (rm) {
+      e.preventDefault();
+      var row = rm.closest('[data-band-row]');
+      if (row) { row.remove(); }
+    }
+  });
 })();

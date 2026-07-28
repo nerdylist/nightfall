@@ -37,6 +37,14 @@ function keeper_ensure_characters_table(PDO $db): void
     );
     $db->exec('CREATE INDEX IF NOT EXISTS idx_characters_type   ON characters(type)');
     $db->exec('CREATE INDEX IF NOT EXISTS idx_characters_active ON characters(active)');
+    // Wave-scaling dials (016) — added idempotently for DBs that predate it.
+    foreach ([
+        'hp_base' => 'INTEGER', 'wave_min' => 'INTEGER', 'wave_max' => 'INTEGER',
+        'hp_cap' => 'INTEGER', 'hp_bands' => 'TEXT',
+    ] as $col => $decl) {
+        try { $db->exec("ALTER TABLE characters ADD COLUMN {$col} {$decl}"); }
+        catch (Throwable $e) { /* already exists */ }
+    }
     $db->exec(
         'CREATE TABLE IF NOT EXISTS character_messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT, character_id INTEGER NOT NULL,
@@ -107,6 +115,52 @@ function keeper_char_slug(string $name): string
     return $slug !== '' ? substr($slug, 0, 40) : 'character';
 }
 
+/** Optional non-negative int from a POST field: '' -> null, else max(0,int). */
+function keeper_opt_int($v): ?int
+{
+    $v = trim((string) $v);
+    return $v === '' ? null : max(0, (int) $v);
+}
+
+/**
+ * Assemble the hp_bands JSON from the parallel POST arrays (band_from[],
+ * band_to[], band_mode[], band_value[]). Rows with an empty "from" or "value"
+ * are dropped (blank template rows). Returns a JSON string, or null when there
+ * are no valid bands (so absent = no growth, matching the game's fallback).
+ */
+function keeper_bands_json(array $post): ?string
+{
+    $from  = (array) ($post['band_from'] ?? []);
+    $to    = (array) ($post['band_to'] ?? []);
+    $mode  = (array) ($post['band_mode'] ?? []);
+    $value = (array) ($post['band_value'] ?? []);
+
+    $bands = [];
+    foreach ($from as $i => $f) {
+        $f = trim((string) $f);
+        $v = trim((string) ($value[$i] ?? ''));
+        if ($f === '' || $v === '') {
+            continue; // incomplete/blank row
+        }
+        $t = trim((string) ($to[$i] ?? ''));
+        $m = ($mode[$i] ?? 'pct') === 'flat' ? 'flat' : 'pct';
+        $bands[] = [
+            'from'  => max(1, (int) $f),
+            'to'    => $t === '' ? null : max(1, (int) $t),
+            'mode'  => $m,
+            'value' => 0 + $v, // numeric (int or float)
+        ];
+    }
+
+    if (!$bands) {
+        return null;
+    }
+    // Order by 'from' so the tiling reads correctly regardless of input order.
+    usort($bands, fn ($a, $b) => $a['from'] <=> $b['from']);
+
+    return json_encode($bands, JSON_UNESCAPED_SLASHES);
+}
+
 // Keeper-scoped CSRF token.
 if (empty($_SESSION['keeper_csrf'])) {
     $_SESSION['keeper_csrf'] = bin2hex(random_bytes(32));
@@ -146,6 +200,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $type = 'Human';
         }
 
+        // Wave-scaling dials (all optional; absent = today's behavior).
+        $hpBase  = keeper_opt_int($_POST['hp_base'] ?? '');
+        $waveMin = keeper_opt_int($_POST['wave_min'] ?? '');
+        $waveMax = keeper_opt_int($_POST['wave_max'] ?? '');
+        $hpCap   = keeper_opt_int($_POST['hp_cap'] ?? '');
+        $hpBands = keeper_bands_json($_POST);
+
         try {
             $slug      = keeper_char_slug($name);
             $avatarNew = keeper_store_character_image($_FILES['avatar'] ?? [], $slug . '-avatar');
@@ -166,25 +227,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $db->prepare(
                 'UPDATE characters SET name=:name, age=:age, gender=:gender, type=:type,
                         description=:description, avatar_path=:avatar, pose_path=:pose,
+                        hp_base=:hp_base, wave_min=:wave_min, wave_max=:wave_max,
+                        hp_cap=:hp_cap, hp_bands=:hp_bands,
                         updated_at=CURRENT_TIMESTAMP
                  WHERE id=:id'
             );
             $stmt->execute([
                 ':name' => $name, ':age' => $age, ':gender' => $gender, ':type' => $type,
                 ':description' => ($desc === '' ? null : $desc),
-                ':avatar' => $avatar, ':pose' => $pose, ':id' => $id,
+                ':avatar' => $avatar, ':pose' => $pose,
+                ':hp_base' => $hpBase, ':wave_min' => $waveMin, ':wave_max' => $waveMax,
+                ':hp_cap' => $hpCap, ':hp_bands' => $hpBands,
+                ':id' => $id,
             ]);
             $_SESSION['keeper_flash'] = "Updated \"{$name}\".";
         } else {
             $stmt = $db->prepare(
-                'INSERT INTO characters (name, age, gender, type, description, avatar_path, pose_path)
-                 VALUES (:name, :age, :gender, :type, :description, :avatar, :pose)'
+                'INSERT INTO characters (name, age, gender, type, description, avatar_path, pose_path,
+                        hp_base, wave_min, wave_max, hp_cap, hp_bands)
+                 VALUES (:name, :age, :gender, :type, :description, :avatar, :pose,
+                        :hp_base, :wave_min, :wave_max, :hp_cap, :hp_bands)'
             );
             $stmt->execute([
                 ':name' => $name, ':age' => $age, ':gender' => $gender, ':type' => $type,
                 ':description' => ($desc === '' ? null : $desc),
                 ':avatar' => ($avatarNew === '' ? null : $avatarNew),
                 ':pose'   => ($poseNew === '' ? null : $poseNew),
+                ':hp_base' => $hpBase, ':wave_min' => $waveMin, ':wave_max' => $waveMax,
+                ':hp_cap' => $hpCap, ':hp_bands' => $hpBands,
             ]);
             $_SESSION['keeper_flash'] = "Added \"{$name}\".";
         }

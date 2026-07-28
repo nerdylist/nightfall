@@ -4,7 +4,8 @@
  *
  * GET /api/characters                      (public, read-only)
  *   -> { "success": true, "count": N, "characters": [ { id, name, age, gender,
- *        type, description, avatar, pose }, ... ] }
+ *        type, description, avatar, pose, messages,
+ *        <wave dials if set> }, ... ] }
  *   The ACTIVE characters authored in Keeper (Characters tab). This is the
  *   canonical list piped into the game's runtime startup — the characters
  *   running in the world. Inactive characters are excluded. Ordered by
@@ -12,6 +13,17 @@
  *
  *   Optional: ?type=Human|NPC|Zombie|Enemy filters to one type.
  *   Optional: ?all=1 includes inactive rows too (for authoring/preview).
+ *
+ * WAVE-SCALING DIALS (site-authored balance, migration 016; see the game repo
+ * docs/ROADMAP/wave-scaling-handoff.md). Emitted flat and ONLY when set, so a
+ * character with no dials is byte-identical to before and the game applies its
+ * own fallbacks:
+ *   hp_base  (int)  starting HP at the first eligible wave
+ *   wave_min (int)  never spawns before this wave
+ *   wave_max (int)  never spawns after this wave (absent = forever)
+ *   hp_cap   (int)  hard HP ceiling regardless of band math
+ *   hp_bands (array) [ { from, to|null, mode:"pct"|"flat", value }, ... ]
+ *                    per-wave growth; pct compounds, flat adds, per wave.
  *
  * Image fields are absolute web paths under /assets/characters/ (or null).
  * Read-only; authoring happens in Keeper, so there is no POST here.
@@ -53,8 +65,19 @@ if ($type !== '' && in_array($type, ['Human', 'NPC', 'Zombie', 'Enemy'], true)) 
     $params[':type'] = $type;
 }
 
-$sql = 'SELECT id, name, age, gender, type, description, avatar_path, pose_path
-        FROM characters';
+// Wave-scaling dials (migration 016) are optional columns — only select them if
+// the DB has them, so an un-migrated DB still serves the base roster.
+$cols = [];
+foreach ($db->query('PRAGMA table_info(characters)') as $ci) {
+    $cols[$ci['name']] = true;
+}
+$hasWaveDials = isset($cols['hp_base'], $cols['wave_min'], $cols['wave_max'], $cols['hp_cap'], $cols['hp_bands']);
+
+$select = 'id, name, age, gender, type, description, avatar_path, pose_path';
+if ($hasWaveDials) {
+    $select .= ', hp_base, wave_min, wave_max, hp_cap, hp_bands';
+}
+$sql = "SELECT {$select} FROM characters";
 if ($where) {
     $sql .= ' WHERE ' . implode(' AND ', $where);
 }
@@ -94,7 +117,7 @@ try {
 
 $out = [];
 foreach ($stmt->fetchAll() as $c) {
-    $out[] = [
+    $row = [
         'id'          => (int) $c['id'],
         'name'        => (string) $c['name'],
         'age'         => ($c['age'] === null) ? null : (int) $c['age'],
@@ -105,6 +128,25 @@ foreach ($stmt->fetchAll() as $c) {
         'pose'        => $imgUrl($c['pose_path']),
         'messages'    => $messagesByChar[(int) $c['id']] ?? [],
     ];
+
+    // Wave-scaling dials — emitted flat, ONLY the keys that are set, so a
+    // character with no dials is byte-identical to before (game applies its own
+    // fallbacks). hp_bands is served as a parsed array. See the game repo:
+    // docs/ROADMAP/wave-scaling-handoff.md.
+    if ($hasWaveDials) {
+        if ($c['hp_base']  !== null) { $row['hp_base']  = (int) $c['hp_base']; }
+        if ($c['wave_min'] !== null) { $row['wave_min'] = (int) $c['wave_min']; }
+        if ($c['wave_max'] !== null) { $row['wave_max'] = (int) $c['wave_max']; }
+        if ($c['hp_cap']   !== null) { $row['hp_cap']   = (int) $c['hp_cap']; }
+        if (!empty($c['hp_bands'])) {
+            $decoded = json_decode((string) $c['hp_bands'], true);
+            if (is_array($decoded) && $decoded) {
+                $row['hp_bands'] = $decoded;
+            }
+        }
+    }
+
+    $out[] = $row;
 }
 
 grave_json_response(200, ['success' => true, 'count' => count($out), 'characters' => $out]);
