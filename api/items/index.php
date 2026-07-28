@@ -10,6 +10,7 @@
  *   -> { "success": true, "count": N, "items": [ item, ... ] }
  *   Each item (offload shape; legacy metadata kept alongside for compatibility):
  *     id, name, category, stackable, max_stack        (always)
+ *     icon                                             (uploaded item art; absent if none)
  *     visual_key, active                               (offload; active bool)
  *     weapon: { ammo_id, capacity, damage, pellets, spread_deg, range,
  *               reload_seconds, cooldown, noise_radius, recoil_deg,
@@ -95,6 +96,7 @@ if ($method === 'GET') {
     }
     $hasOffload = isset($cols['visual_key'], $cols['active'], $cols['weapon_json'],
         $cols['wave_min'], $cols['wave_max'], $cols['rarity_weight'], $cols['damage_bands']);
+    $hasIcon = isset($cols['icon_path']);
 
     $base = 'item_id, display_name, category, rarity, stackable, max_stack,
              power, weight_kg, value, durability, description, used_to,
@@ -102,6 +104,9 @@ if ($method === 'GET') {
     if ($hasOffload) {
         $base .= ', visual_key, active, weapon_json, wave_min, wave_max,
                    rarity_weight, damage_bands';
+    }
+    if ($hasIcon) {
+        $base .= ', icon_path';
     }
 
     // Active-only by default (the live runtime feed); ?all=1 for authoring.
@@ -140,6 +145,10 @@ if ($method === 'GET') {
             'model'        => $r['model'],
             'extra'        => $r['extra'] ? json_decode($r['extra'], true) : null,
         ];
+
+        if ($hasIcon && !empty($r['icon_path'])) {
+            $it['icon'] = '/' . ltrim((string) $r['icon_path'], '/');
+        }
 
         if ($hasOffload) {
             $it['active'] = (int) $r['active'] === 1;

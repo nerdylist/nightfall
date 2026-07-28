@@ -43,6 +43,49 @@ function keeper_item_slug(string $id): string
 }
 
 /**
+ * Validate + store an uploaded item icon under assets/items/. Returns the
+ * stored web path on success, '' if no file was uploaded, or throws
+ * RuntimeException on a bad upload. MIME sniffed server-side (mirrors the
+ * character avatar upload).
+ */
+function keeper_store_item_icon(array $file, string $slug): string
+{
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        return '';
+    }
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        throw new RuntimeException('Icon upload failed (code ' . (int) $file['error'] . ').');
+    }
+    if (($file['size'] ?? 0) > 5 * 1024 * 1024) {
+        throw new RuntimeException('Icon too large (max 5 MB).');
+    }
+    $tmp = $file['tmp_name'] ?? '';
+    if ($tmp === '' || !is_uploaded_file($tmp)) {
+        throw new RuntimeException('Invalid upload.');
+    }
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime = (string) $finfo->file($tmp);
+    $allowed = ['image/png' => 'png', 'image/jpeg' => 'jpg', 'image/webp' => 'webp', 'image/gif' => 'gif'];
+    if (!isset($allowed[$mime])) {
+        throw new RuntimeException('Unsupported image type (use PNG, JPG, WebP, or GIF).');
+    }
+    if (getimagesize($tmp) === false) {
+        throw new RuntimeException('That file is not a valid image.');
+    }
+    $ext = $allowed[$mime];
+    $dir = __DIR__ . '/../assets/items';
+    if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
+        throw new RuntimeException('Could not create the icon directory.');
+    }
+    $slug = $slug !== '' ? $slug : 'item';
+    $name = $slug . '-' . bin2hex(random_bytes(4)) . '.' . $ext;
+    if (!move_uploaded_file($tmp, $dir . '/' . $name)) {
+        throw new RuntimeException('Could not save the uploaded icon.');
+    }
+    return 'assets/items/' . $name;
+}
+
+/**
  * Weapon-stats fields (offload FirearmSpec). Each: [post-name, type]. `ammo_id`
  * is a string ref; the rest are numeric. Stored together as weapon_json and
  * emitted as the nested "weapon" object (present only when at least one is set).
@@ -241,7 +284,7 @@ $db->exec(
 foreach ([
     'visual_key' => 'TEXT', 'active' => 'INTEGER NOT NULL DEFAULT 1',
     'weapon_json' => 'TEXT', 'wave_min' => 'INTEGER', 'wave_max' => 'INTEGER',
-    'rarity_weight' => 'INTEGER', 'damage_bands' => 'TEXT',
+    'rarity_weight' => 'INTEGER', 'damage_bands' => 'TEXT', 'icon_path' => 'TEXT',
 ] as $col => $decl) {
     try { $db->exec("ALTER TABLE items ADD COLUMN {$col} {$decl}"); }
     catch (Throwable $e) { /* already exists */ }
@@ -278,6 +321,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['delete_item'])) {
         $id = keeper_item_slug((string) ($_POST['item_id'] ?? ''));
         if ($id !== '') {
+            // Remove the uploaded icon file, if any, before deleting the row.
+            $cur = $db->prepare('SELECT icon_path FROM items WHERE item_id = ?');
+            $cur->execute([$id]);
+            $icon = $cur->fetchColumn();
+            if ($icon) {
+                $abs = __DIR__ . '/../' . ltrim((string) $icon, '/');
+                if (is_file($abs)) { @unlink($abs); }
+            }
             $stmt = $db->prepare('DELETE FROM items WHERE item_id = ?');
             $stmt->execute([$id]);
             $_SESSION['keeper_flash'] = "Deleted item \"{$id}\".";
@@ -334,6 +385,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Wave dials (all optional; absent = game default).
         $damageBands = keeper_item_bands_json($_POST);
 
+        // Item icon upload (optional). On edit, a new file replaces the stored
+        // path; no file keeps the existing one.
+        try {
+            $iconNew = keeper_store_item_icon($_FILES['icon'] ?? [], $id);
+        } catch (Throwable $e) {
+            $_SESSION['keeper_flash'] = 'Icon error: ' . $e->getMessage();
+            header('Location: /keeper/items.php?edit=' . urlencode($original !== '' ? $original : $id));
+            exit;
+        }
+        $iconPath = $iconNew;
+        if ($iconNew === '') {
+            // Keep whatever's stored for this item (edit with no new upload).
+            $cur = $db->prepare('SELECT icon_path FROM items WHERE item_id = ?');
+            $cur->execute([$original !== '' ? $original : $id]);
+            $iconPath = $cur->fetchColumn() ?: null;
+        }
+
         $fields = [
             'item_id'      => $id,
             'display_name' => $name,
@@ -358,6 +426,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'wave_max'      => ($_POST['wave_max'] ?? '') === '' ? null : max(1, (int) $_POST['wave_max']),
             'rarity_weight' => ($_POST['rarity_weight'] ?? '') === '' ? null : max(0, (int) $_POST['rarity_weight']),
             'damage_bands'  => $damageBands,
+            'icon_path'     => $iconPath ?: null,
         ];
 
         if ($original !== '' && $original === $id) {
@@ -369,7 +438,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     thumbnail=:thumbnail, model=:model, extra=:extra,
                     visual_key=:visual_key, active=:active, weapon_json=:weapon_json,
                     wave_min=:wave_min, wave_max=:wave_max, rarity_weight=:rarity_weight,
-                    damage_bands=:damage_bands, updated_at=CURRENT_TIMESTAMP
+                    damage_bands=:damage_bands, icon_path=:icon_path, updated_at=CURRENT_TIMESTAMP
                  WHERE item_id=:item_id'
             );
             $stmt->execute($fields);
@@ -380,11 +449,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'INSERT INTO items
                     (item_id, display_name, category, rarity, stackable, max_stack, power,
                      weight_kg, value, durability, description, used_to, thumbnail, model, extra,
-                     visual_key, active, weapon_json, wave_min, wave_max, rarity_weight, damage_bands, updated_at)
+                     visual_key, active, weapon_json, wave_min, wave_max, rarity_weight, damage_bands, icon_path, updated_at)
                  VALUES
                     (:item_id, :display_name, :category, :rarity, :stackable, :max_stack, :power,
                      :weight_kg, :value, :durability, :description, :used_to, :thumbnail, :model, :extra,
-                     :visual_key, :active, :weapon_json, :wave_min, :wave_max, :rarity_weight, :damage_bands, CURRENT_TIMESTAMP)'
+                     :visual_key, :active, :weapon_json, :wave_min, :wave_max, :rarity_weight, :damage_bands, :icon_path, CURRENT_TIMESTAMP)'
             );
             $stmt->execute($fields);
             if ($original !== '' && $original !== $id) {
@@ -487,7 +556,7 @@ function keeper_rarity_class(?string $rarity): string
         </div>
         <p class="text-muted keeper-modal__desc"><?= $editItem ? 'Update this item. Item ID is lowercase letters, numbers and underscores.' : 'Add a new item to the system. Item ID is lowercase letters, numbers and underscores; the game ingests this catalog at build time.' ?></p>
 
-      <form method="post" action="/keeper/items.php" class="keeper-items-editor">
+      <form method="post" action="/keeper/items.php" class="keeper-items-editor" enctype="multipart/form-data">
         <input type="hidden" name="keeper_csrf" value="<?= htmlspecialchars($keeperCsrf) ?>">
         <?php if ($editItem): ?>
         <input type="hidden" name="original_item_id" value="<?= htmlspecialchars((string) $editItem['item_id']) ?>">
@@ -557,6 +626,13 @@ function keeper_rarity_class(?string $rarity): string
         <label class="keeper-items-field">
           <span class="keeper-items-label">Visual key</span>
           <input class="field" type="text" name="visual_key" value="<?= htmlspecialchars(keeper_item_val($editItem, 'visual_key')) ?>" placeholder="revolver (baked prefab)">
+        </label>
+        <label class="keeper-items-field keeper-items-icon">
+          <span class="keeper-items-label">Icon image</span>
+          <?php if ($editItem && !empty($editItem['icon_path'])): ?>
+            <img class="keeper-items-icon__thumb" src="/<?= htmlspecialchars(ltrim((string) $editItem['icon_path'], '/')) ?>" alt="">
+          <?php endif; ?>
+          <input class="field" type="file" name="icon" accept="image/png,image/jpeg,image/webp,image/gif">
         </label>
         <label class="keeper-items-field keeper-items-field--check">
           <input type="checkbox" name="active" value="1" <?= ($editItem === null || (int) keeper_item_val($editItem, 'active') === 1) ? 'checked' : '' ?>>

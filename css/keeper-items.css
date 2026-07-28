@@ -380,3 +380,11 @@
   .keeper-items-wavegrid { grid-template-columns: 1fr 1fr; }
   .keeper-items-band { grid-template-columns: 1fr 1fr; }
 }
+
+/* Item icon upload preview thumb (mirrors character avatar). */
+.keeper-items-icon__thumb {
+  width: 56px; height: 56px; object-fit: cover;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--keeper-line, rgba(255,255,255,0.12));
+  margin-bottom: 6px;
+}

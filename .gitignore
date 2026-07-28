@@ -43,3 +43,7 @@ assets/characters/*
 
 # PHP session files (server-side, sensitive)
 data/sessions/
+
+# Item icon uploads (user content; dir kept via .gitkeep)
+assets/items/*
+!assets/items/.gitkeep
