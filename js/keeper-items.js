@@ -64,3 +64,30 @@
     init();
   }
 })();
+
+/* ---- Damage-bands repeater (add/remove {from,to,mode,value} rows) ----
+   Generic: clones the <template data-band-template> into [data-bands-rows]. */
+(function () {
+  'use strict';
+  document.addEventListener('click', function (e) {
+    var addBtn = e.target.closest('[data-band-add]');
+    if (addBtn) {
+      e.preventDefault();
+      var wrap = addBtn.closest('[data-bands]');
+      var tpl = wrap && wrap.querySelector('[data-band-template]');
+      var rows = wrap && wrap.querySelector('[data-bands-rows]');
+      if (tpl && rows) {
+        rows.appendChild(tpl.content.cloneNode(true));
+        var first = rows.lastElementChild && rows.lastElementChild.querySelector('input');
+        if (first) { first.focus(); }
+      }
+      return;
+    }
+    var rm = e.target.closest('[data-band-remove]');
+    if (rm) {
+      e.preventDefault();
+      var row = rm.closest('[data-band-row]');
+      if (row) { row.remove(); }
+    }
+  });
+})();

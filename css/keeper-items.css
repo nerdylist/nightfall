@@ -330,3 +330,53 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ---- Weapon stats + wave scaling (runtime offload, Boss 2026-07-28) ---- */
+.keeper-items-wave {
+  grid-column: 1 / -1;
+  margin: var(--space-2) 0;
+  padding: var(--space-4);
+  border: 1px solid var(--keeper-line, rgba(255,255,255,0.12));
+  border-radius: var(--radius-md, 8px);
+}
+.keeper-items-wave legend {
+  padding: 0 8px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--keeper-ink-2, rgba(255,255,255,0.72));
+}
+.keeper-items-opt {
+  margin-left: 8px; font-weight: 400; letter-spacing: 0.02em; text-transform: none;
+  color: var(--text-muted, #888); font-size: 0.72rem;
+}
+
+.keeper-items-weapongrid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3);
+}
+.keeper-items-weapongrid label { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.keeper-items-weapongrid label > span,
+.keeper-items-wavegrid label > span {
+  font-size: 0.68rem; color: var(--text-muted, #888); letter-spacing: 0.02em;
+}
+
+.keeper-items-wavegrid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.keeper-items-wavegrid label { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+
+.keeper-items-bands__head {
+  display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--keeper-ink-2, rgba(255,255,255,0.72));
+}
+.keeper-items-bands__rows { display: flex; flex-direction: column; gap: 8px; }
+.keeper-items-band {
+  display: grid; grid-template-columns: 1fr 1fr 1.3fr 1fr auto; gap: 8px; align-items: center;
+}
+.keeper-items-band-add { margin-top: 10px; }
+
+@media (max-width: 720px) {
+  .keeper-items-weapongrid { grid-template-columns: 1fr 1fr; }
+  .keeper-items-wavegrid { grid-template-columns: 1fr 1fr; }
+  .keeper-items-band { grid-template-columns: 1fr 1fr; }
+}

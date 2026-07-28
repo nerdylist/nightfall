@@ -2,25 +2,39 @@
 /**
  * THE DEAD LAST — API: in-game item catalog.
  *
+ * The SITE owns the item catalog (full runtime offload — see the game repo:
+ * docs/ROADMAP/loot-runtime-handoff.md). The game hydrates this at boot, falls
+ * back to its cache, then to baked registrations. Authoring is in Keeper.
+ *
  * GET  /api/items                      (public, read-only)
- *   -> { "success": true, "count": N, "items": [ { item_id, display_name,
- *        category, rarity, stackable, max_stack, power, weight_kg, value,
- *        durability, description, used_to, thumbnail, model, extra }, ... ] }
- *   Lists every item in the game (mirror of the C# ItemDatabase). Used while
- *   authoring item thumbnails / to see what's registered. DYNAMIC — it reflects
- *   whatever the game last exported, and grows as items are added.
+ *   -> { "success": true, "count": N, "items": [ item, ... ] }
+ *   Each item (offload shape; legacy metadata kept alongside for compatibility):
+ *     id, name, category, stackable, max_stack        (always)
+ *     visual_key, active                               (offload; active bool)
+ *     weapon: { ammo_id, capacity, damage, pellets, spread_deg, range,
+ *               reload_seconds, cooldown, noise_radius, recoil_deg,
+ *               flash_intensity, flash_seconds, crit_chance, crit_damage }
+ *                                                      (present only for weapons)
+ *     wave_min, wave_max, rarity_weight                (wave dials; absent when unset)
+ *     damage_bands: [ { from, to|null, mode:"pct"|"flat", value }, ... ]
+ *                                                      (absent when no growth)
+ *     + legacy: item_id, display_name, rarity, power, weight_kg, value,
+ *               durability, description, used_to, thumbnail, model, extra
+ *   Active-only by default; ?all=1 includes inactive (authoring/preview).
+ *   Keys are ABSENT when unset (never null-as-signal), except `to` inside a
+ *   band which is null for an open-ended tail. Same conventions as the
+ *   character feed, so the read side is symmetrical.
  *
- * POST /api/items                      (Bearer GAME_API_KEY)
- *   body { "items": [ { "item_id": "...", "display_name": "...", ...any of the
- *          columns... }, ... ] }
- *   REPLACES the whole catalog (delete-all + insert) so the table always matches
- *   the game's current registry. Run the game's editor export after adding
- *   items. Unknown keys per item are folded into the `extra` JSON blob, so the
- *   game can add fields without changing this endpoint.
- *   -> { "success": true, "replaced": N }
+ * POST /api/items                      (Bearer GAME_API_KEY)  — SEED IMPORT
+ *   body { "items": [ { "item_id"|"id": "...", ...metadata..., "weapon": {…}? } ] }
+ *   NON-DESTRUCTIVE upsert by item_id (no catalog wipe). Seeds/updates the
+ *   game-metadata columns; NEVER overwrites site-authored columns (visual_key,
+ *   active, weapon_json, wave_min/max, rarity_weight, damage_bands) on rows
+ *   that already exist. Nancy runs this once to seed the site from ItemDatabase
+ *   + the firearm table; after that, authoring is in Keeper.
+ *   -> { "success": true, "imported": N }
  *
- * Server-to-server key; keep GAME_API_KEY out of the shipped client (the export
- * is an editor/build-time push, not a runtime call).
+ * Server-to-server key; keep GAME_API_KEY out of the shipped client.
  */
 
 require_once __DIR__ . '/../../config.php';
@@ -68,28 +82,54 @@ try {
 // GET — public read
 // -------------------------------------------------------------------------
 if ($method === 'GET') {
+    // Offload columns (migration 017) are optional — select them only if
+    // present so an un-migrated DB still serves the base catalog.
+    $cols = [];
+    try {
+        foreach ($db->query('PRAGMA table_info(items)') as $ci) {
+            $cols[$ci['name']] = true;
+        }
+    } catch (PDOException $e) {
+        grave_json_response(500, ['success' => false,
+            'error' => 'Items table unavailable (run migrations).']);
+    }
+    $hasOffload = isset($cols['visual_key'], $cols['active'], $cols['weapon_json'],
+        $cols['wave_min'], $cols['wave_max'], $cols['rarity_weight'], $cols['damage_bands']);
+
+    $base = 'item_id, display_name, category, rarity, stackable, max_stack,
+             power, weight_kg, value, durability, description, used_to,
+             thumbnail, model, extra';
+    if ($hasOffload) {
+        $base .= ', visual_key, active, weapon_json, wave_min, wave_max,
+                   rarity_weight, damage_bands';
+    }
+
+    // Active-only by default (the live runtime feed); ?all=1 for authoring.
+    $where = ($hasOffload && empty($_GET['all'])) ? ' WHERE active = 1' : '';
+
     try {
         $rows = $db->query(
-            'SELECT item_id, display_name, category, rarity, stackable, max_stack,
-                    power, weight_kg, value, durability, description, used_to,
-                    thumbnail, model, extra
-             FROM items ORDER BY category, item_id'
+            "SELECT {$base} FROM items{$where} ORDER BY category, item_id"
         )->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
-        // Table may not exist yet (migrations not run) — report cleanly.
         grave_json_response(500, ['success' => false,
             'error' => 'Items table unavailable (run migrations).']);
     }
 
     $items = [];
     foreach ($rows as $r) {
-        $items[] = [
-            'item_id'      => $r['item_id'],
-            'display_name' => $r['display_name'],
+        // §2 offload shape (id/name/…); legacy metadata kept alongside so any
+        // current consumer still resolves. Keys absent when unset.
+        $it = [
+            'id'           => $r['item_id'],
+            'name'         => $r['display_name'],
             'category'     => $r['category'],
-            'rarity'       => $r['rarity'],
             'stackable'    => (bool) $r['stackable'],
             'max_stack'    => (int) $r['max_stack'],
+            // legacy / extra metadata (unchanged consumers)
+            'item_id'      => $r['item_id'],
+            'display_name' => $r['display_name'],
+            'rarity'       => $r['rarity'],
             'power'        => $r['power'] === null ? null : (int) $r['power'],
             'weight_kg'    => $r['weight_kg'] === null ? null : (float) $r['weight_kg'],
             'value'        => $r['value'] === null ? null : (int) $r['value'],
@@ -100,6 +140,28 @@ if ($method === 'GET') {
             'model'        => $r['model'],
             'extra'        => $r['extra'] ? json_decode($r['extra'], true) : null,
         ];
+
+        if ($hasOffload) {
+            $it['active'] = (int) $r['active'] === 1;
+            if (!empty($r['visual_key'])) { $it['visual_key'] = $r['visual_key']; }
+
+            // Weapon block — present only for weapons (weapon_json set).
+            if (!empty($r['weapon_json'])) {
+                $w = json_decode((string) $r['weapon_json'], true);
+                if (is_array($w) && $w) { $it['weapon'] = $w; }
+            }
+
+            // Wave dials — only the keys that are set.
+            if ($r['wave_min']      !== null) { $it['wave_min']      = (int) $r['wave_min']; }
+            if ($r['wave_max']      !== null) { $it['wave_max']      = (int) $r['wave_max']; }
+            if ($r['rarity_weight'] !== null) { $it['rarity_weight'] = (int) $r['rarity_weight']; }
+            if (!empty($r['damage_bands'])) {
+                $b = json_decode((string) $r['damage_bands'], true);
+                if (is_array($b) && $b) { $it['damage_bands'] = $b; }
+            }
+        }
+
+        $items[] = $it;
     }
 
     grave_json_response(200, [
@@ -110,8 +172,15 @@ if ($method === 'GET') {
 }
 
 // -------------------------------------------------------------------------
-// POST — game export ingest (replace the whole catalog)
+// POST — SEED IMPORT (upsert by item_id; non-destructive)
 // -------------------------------------------------------------------------
+// The site now OWNS the item catalog (full offload — see the game repo:
+// docs/ROADMAP/loot-runtime-handoff.md), so this is no longer a "replace the
+// whole catalog" wipe. It's a one-time/occasional seed importer: Nancy exports
+// ItemDatabase + firearm specs as JSON to populate the site, then authoring
+// happens in Keeper. It UPSERTS the game-metadata columns by item_id and NEVER
+// touches the site-authored columns (visual_key, active, weapon_json, wave_min,
+// wave_max, rarity_weight, damage_bands) on rows that already exist.
 if (!items_verify_bearer()) {
     grave_json_response(401, ['success' => false, 'error' => 'Unauthorized.']);
 }
@@ -122,37 +191,67 @@ if (!is_array($list)) {
     grave_json_response(400, ['success' => false, 'error' => 'Missing "items" array.']);
 }
 
+// If the payload's weapon block should seed weapon_json too, accept a nested
+// "weapon" object per item (offload shape). Only used on INSERT of a new item;
+// existing weapon_json is preserved.
 try {
     $db->beginTransaction();
-    $db->exec('DELETE FROM items');
 
     $sql = 'INSERT INTO items
         (item_id, display_name, category, rarity, stackable, max_stack, power,
          weight_kg, value, durability, description, used_to, thumbnail, model,
-         extra, updated_at)
+         extra, weapon_json, updated_at)
         VALUES
         (:item_id, :display_name, :category, :rarity, :stackable, :max_stack, :power,
          :weight_kg, :value, :durability, :description, :used_to, :thumbnail, :model,
-         :extra, CURRENT_TIMESTAMP)';
+         :extra, :weapon_json, CURRENT_TIMESTAMP)
+        ON CONFLICT(item_id) DO UPDATE SET
+            display_name = excluded.display_name,
+            category     = excluded.category,
+            rarity       = excluded.rarity,
+            stackable    = excluded.stackable,
+            max_stack    = excluded.max_stack,
+            power        = excluded.power,
+            weight_kg    = excluded.weight_kg,
+            value        = excluded.value,
+            durability   = excluded.durability,
+            description  = excluded.description,
+            used_to      = excluded.used_to,
+            thumbnail    = excluded.thumbnail,
+            model        = excluded.model,
+            extra        = excluded.extra,
+            updated_at   = CURRENT_TIMESTAMP';
+            // NOTE: weapon_json + all wave/visual/active columns intentionally
+            // NOT in the UPDATE set — site-authored values survive re-imports.
     $stmt = $db->prepare($sql);
 
-    $inserted = 0;
+    $imported = 0;
+    // Reserved keys that are columns/handled explicitly (not folded into extra).
+    $reserved = array_merge(ITEM_COLUMNS, ['weapon', 'visual_key', 'active',
+        'wave_min', 'wave_max', 'rarity_weight', 'damage_bands']);
+
     foreach ($list as $item) {
         if (!is_array($item) || empty($item['item_id'])) {
             continue; // skip malformed rows
         }
 
-        // Fold any non-column keys into the extra blob.
+        // Fold any genuinely-unknown keys into the extra blob.
         $extra = [];
         foreach ($item as $k => $v) {
-            if (!in_array($k, ITEM_COLUMNS, true)) {
+            if (!in_array($k, $reserved, true)) {
                 $extra[$k] = $v;
             }
         }
 
+        // Weapon block seeds weapon_json ON INSERT only (preserved on conflict).
+        $weaponJson = null;
+        if (isset($item['weapon']) && is_array($item['weapon']) && $item['weapon']) {
+            $weaponJson = json_encode($item['weapon'], JSON_UNESCAPED_SLASHES);
+        }
+
         $stmt->execute([
             'item_id'      => (string) $item['item_id'],
-            'display_name' => (string) ($item['display_name'] ?? $item['item_id']),
+            'display_name' => (string) ($item['display_name'] ?? $item['name'] ?? $item['item_id']),
             'category'     => $item['category']    ?? null,
             'rarity'       => $item['rarity']      ?? null,
             'stackable'    => !empty($item['stackable']) ? 1 : 0,
@@ -166,8 +265,9 @@ try {
             'thumbnail'    => $item['thumbnail']   ?? null,
             'model'        => $item['model']       ?? null,
             'extra'        => $extra ? json_encode($extra) : null,
+            'weapon_json'  => $weaponJson,
         ]);
-        $inserted++;
+        $imported++;
     }
 
     $db->commit();
@@ -178,4 +278,4 @@ try {
     grave_json_response(500, ['success' => false, 'error' => 'Write failed.']);
 }
 
-grave_json_response(200, ['success' => true, 'replaced' => $inserted]);
+grave_json_response(200, ['success' => true, 'imported' => $imported]);
