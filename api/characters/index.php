@@ -86,10 +86,9 @@ $sql .= ' ORDER BY type, sort_order, name';
 $stmt = $db->prepare($sql);
 $stmt->execute($params);
 
-/** Absolute web path for a stored image path, or null. */
+/** Absolute URL for a stored image path (game fetches it directly), or null. */
 $imgUrl = static function ($p): ?string {
-    $p = (string) ($p ?? '');
-    return $p === '' ? null : '/' . ltrim($p, '/');
+    return grave_asset_abs_url($p === null ? null : (string) $p);
 };
 
 // Talk-bubble lines (migration 015), inline per character so the game's one

@@ -87,6 +87,34 @@ function env(string $key, $default = null)
 }
 
 /**
+ * The public base URL (no trailing slash) used to build ABSOLUTE asset URLs in
+ * the game API feeds — the game's image loader fetches these directly. Reads
+ * SITE_URL, then APP_URL, then defaults to the prod host.
+ */
+function grave_site_url(): string
+{
+    $url = trim((string) (env('SITE_URL', '') ?: env('APP_URL', '')));
+    if ($url === '') {
+        $url = 'https://thedeadlast.com';
+    }
+    return rtrim($url, '/');
+}
+
+/**
+ * Build an absolute URL for a stored asset path (e.g. 'assets/items/x.png'),
+ * or null for an empty path. Used by the /api feeds so the game gets a
+ * fetchable URL regardless of which host served the feed.
+ */
+function grave_asset_abs_url(?string $path): ?string
+{
+    $path = trim((string) ($path ?? ''));
+    if ($path === '') {
+        return null;
+    }
+    return grave_site_url() . '/' . ltrim($path, '/');
+}
+
+/**
  * Resolve a root-relative asset path (e.g. '/css/base.css') against the web
  * root and append a '?v=' cache-busting query string based on the file's
  * mtime. Falls back to the bare path if the file can't be found.

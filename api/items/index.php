@@ -10,7 +10,7 @@
  *   -> { "success": true, "count": N, "items": [ item, ... ] }
  *   Each item (offload shape; legacy metadata kept alongside for compatibility):
  *     id, name, category, stackable, max_stack        (always)
- *     icon                                             (uploaded item art; absent if none)
+ *     icon_url                                         (absolute URL to uploaded item art; absent if none)
  *     visual_key, active                               (offload; active bool)
  *     weapon: { ammo_id, capacity, damage, pellets, spread_deg, range,
  *               reload_seconds, cooldown, noise_radius, recoil_deg,
@@ -147,7 +147,7 @@ if ($method === 'GET') {
         ];
 
         if ($hasIcon && !empty($r['icon_path'])) {
-            $it['icon'] = '/' . ltrim((string) $r['icon_path'], '/');
+            $it['icon_url'] = grave_asset_abs_url((string) $r['icon_path']);
         }
 
         if ($hasOffload) {
@@ -209,11 +209,13 @@ try {
     $sql = 'INSERT INTO items
         (item_id, display_name, category, rarity, stackable, max_stack, power,
          weight_kg, value, durability, description, used_to, thumbnail, model,
-         extra, weapon_json, updated_at)
+         extra, weapon_json, visual_key, wave_min, wave_max, rarity_weight,
+         damage_bands, updated_at)
         VALUES
         (:item_id, :display_name, :category, :rarity, :stackable, :max_stack, :power,
          :weight_kg, :value, :durability, :description, :used_to, :thumbnail, :model,
-         :extra, :weapon_json, CURRENT_TIMESTAMP)
+         :extra, :weapon_json, :visual_key, :wave_min, :wave_max, :rarity_weight,
+         :damage_bands, CURRENT_TIMESTAMP)
         ON CONFLICT(item_id) DO UPDATE SET
             display_name = excluded.display_name,
             category     = excluded.category,
@@ -229,9 +231,24 @@ try {
             thumbnail    = excluded.thumbnail,
             model        = excluded.model,
             extra        = excluded.extra,
-            updated_at   = CURRENT_TIMESTAMP';
-            // NOTE: weapon_json + all wave/visual/active columns intentionally
-            // NOT in the UPDATE set — site-authored values survive re-imports.
+            -- Offload fields: seed them on update WHEN the payload carries one,
+            -- but never WIPE a site-authored value when the payload omits it.
+            -- The game export sends these, so a re-import fills pre-existing
+            -- rows; a payload without them keeps what is stored. (excluded.*
+            -- is NULL when the key is omitted, so COALESCE keeps the stored
+            -- value.)
+            weapon_json   = COALESCE(excluded.weapon_json, weapon_json),
+            visual_key    = COALESCE(excluded.visual_key, visual_key),
+            wave_min      = COALESCE(excluded.wave_min, wave_min),
+            wave_max      = COALESCE(excluded.wave_max, wave_max),
+            rarity_weight = COALESCE(excluded.rarity_weight, rarity_weight),
+            damage_bands  = COALESCE(excluded.damage_bands, damage_bands),
+            updated_at    = CURRENT_TIMESTAMP';
+            // NOTE: `active` and `icon_path` are intentionally NOT carried on
+            // update — active defaults to 1 on insert and is a site toggle;
+            // icons are authored/committed on the site. weapon_json + wave
+            // dials ARE carried (COALESCE) so a seed export can populate them on
+            // rows that already existed without clobbering later Keeper edits.
     $stmt = $db->prepare($sql);
 
     $imported = 0;
@@ -252,10 +269,15 @@ try {
             }
         }
 
-        // Weapon block seeds weapon_json ON INSERT only (preserved on conflict).
+        // Weapon block seeds weapon_json; null when the item has no weapon.
         $weaponJson = null;
         if (isset($item['weapon']) && is_array($item['weapon']) && $item['weapon']) {
             $weaponJson = json_encode($item['weapon'], JSON_UNESCAPED_SLASHES);
+        }
+        // Damage bands (offload) — accept a nested array; null when absent.
+        $damageBands = null;
+        if (isset($item['damage_bands']) && is_array($item['damage_bands']) && $item['damage_bands']) {
+            $damageBands = json_encode($item['damage_bands'], JSON_UNESCAPED_SLASHES);
         }
 
         $stmt->execute([
@@ -275,6 +297,11 @@ try {
             'model'        => $item['model']       ?? null,
             'extra'        => $extra ? json_encode($extra) : null,
             'weapon_json'  => $weaponJson,
+            'visual_key'   => (isset($item['visual_key']) && $item['visual_key'] !== '') ? (string) $item['visual_key'] : null,
+            'wave_min'     => isset($item['wave_min']) ? (int) $item['wave_min'] : null,
+            'wave_max'     => isset($item['wave_max']) ? (int) $item['wave_max'] : null,
+            'rarity_weight'=> isset($item['rarity_weight']) ? (int) $item['rarity_weight'] : null,
+            'damage_bands' => $damageBands,
         ]);
         $imported++;
     }
