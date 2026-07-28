@@ -88,12 +88,17 @@ function env(string $key, $default = null)
 
 /**
  * The public base URL (no trailing slash) used to build ABSOLUTE asset URLs in
- * the game API feeds — the game's image loader fetches these directly. Reads
- * SITE_URL, then APP_URL, then defaults to the prod host.
+ * the game API feeds — the game's image loader fetches these directly.
+ *
+ * Reads SITE_URL only, else the hardcoded current host. We deliberately do NOT
+ * fall back to APP_URL: it's an overloaded/legacy value (it still held the
+ * retired 'graverising.com' on prod, which silently poisoned every icon_url).
+ * Image URLs get the explicit SITE_URL knob or the correct default — nothing
+ * stale in between.
  */
 function grave_site_url(): string
 {
-    $url = trim((string) (env('SITE_URL', '') ?: env('APP_URL', '')));
+    $url = trim((string) env('SITE_URL', ''));
     if ($url === '') {
         $url = 'https://thedeadlast.com';
     }

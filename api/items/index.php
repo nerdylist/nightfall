@@ -253,12 +253,18 @@ try {
 
     $imported = 0;
     // Reserved keys that are columns/handled explicitly (not folded into extra).
-    $reserved = array_merge(ITEM_COLUMNS, ['weapon', 'visual_key', 'active',
-        'wave_min', 'wave_max', 'rarity_weight', 'damage_bands']);
+    $reserved = array_merge(ITEM_COLUMNS, ['id', 'name', 'weapon', 'visual_key',
+        'active', 'wave_min', 'wave_max', 'rarity_weight', 'damage_bands']);
 
     foreach ($list as $item) {
-        if (!is_array($item) || empty($item['item_id'])) {
-            continue; // skip malformed rows
+        // Accept the offload shape ("id") OR the legacy shape ("item_id").
+        // (The seed export and the GET feed both use "id".)
+        $itemId = '';
+        if (is_array($item)) {
+            $itemId = (string) ($item['item_id'] ?? $item['id'] ?? '');
+        }
+        if ($itemId === '') {
+            continue; // skip malformed rows (no id)
         }
 
         // Fold any genuinely-unknown keys into the extra blob.
@@ -281,8 +287,8 @@ try {
         }
 
         $stmt->execute([
-            'item_id'      => (string) $item['item_id'],
-            'display_name' => (string) ($item['display_name'] ?? $item['name'] ?? $item['item_id']),
+            'item_id'      => $itemId,
+            'display_name' => (string) ($item['display_name'] ?? $item['name'] ?? $itemId),
             'category'     => $item['category']    ?? null,
             'rarity'       => $item['rarity']      ?? null,
             'stackable'    => !empty($item['stackable']) ? 1 : 0,
