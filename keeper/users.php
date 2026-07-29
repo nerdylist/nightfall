@@ -191,10 +191,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: /keeper/users.php');
             exit;
         }
+        // survivor_stats has no ON DELETE CASCADE, so the survivors cascade from
+        // deleting a user throws once a stats row exists. Clear those grandchild
+        // rows explicitly first, all in a transaction.
         $db->exec('PRAGMA foreign_keys = ON');
-        $del = $db->prepare('DELETE FROM users WHERE id = ?');
-        $del->execute([$id]);
-        $_SESSION['keeper_flash'] = 'User deleted.';
+        try {
+            $db->beginTransaction();
+            $delStats = $db->prepare('DELETE FROM survivor_stats WHERE survivor_id IN (SELECT id FROM survivors WHERE user_id = ?)');
+            $delStats->execute([$id]);
+            $del = $db->prepare('DELETE FROM users WHERE id = ?');
+            $del->execute([$id]);
+            $db->commit();
+            $_SESSION['keeper_flash'] = 'User deleted.';
+        } catch (PDOException $e) {
+            $db->rollBack();
+            $_SESSION['keeper_flash'] = 'Failed to delete user.';
+        }
         header('Location: /keeper/users.php');
         exit;
     }

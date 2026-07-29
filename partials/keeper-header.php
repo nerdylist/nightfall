@@ -78,6 +78,11 @@ function keeper_nav_link(string $href, string $label, string $current, bool $ext
       </div>
 
       <div class="keeper-nav__group">
+        <p class="keeper-nav__heading">Game Data</p>
+        <?= keeper_nav_link('/keeper/survivors.php', 'Survivors', $keeperCurrent) ?>
+      </div>
+
+      <div class="keeper-nav__group">
         <p class="keeper-nav__heading">Forum</p>
         <?= keeper_nav_link('/keeper/bbs/index.php', 'Forum Home', $keeperCurrent) ?>
         <?= keeper_nav_link('/keeper/bbs/categories.php', 'Categories', $keeperCurrent) ?>

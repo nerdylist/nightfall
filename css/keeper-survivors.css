@@ -1,0 +1,10 @@
+/* THE DEAD LAST — Keeper > Survivors. Reuses the shared keeper table, icon
+   buttons, row actions, and modal/form styles from css/keeper.css and
+   css/keeper-users.css. Only page-specific tweaks live here. */
+
+/* Inline delete form in the row-actions cell (mirrors .keeper-users-inline). */
+.keeper-survivors-inline { margin: 0; display: inline-flex; }
+
+/* The context line packs several read-only facts; let it wrap gracefully. */
+.keeper-users-hint span,
+.keeper-users-hint strong { white-space: nowrap; }
