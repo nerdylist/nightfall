@@ -111,11 +111,26 @@ const SURVIVOR_START_POOL = 14;
 const SURVIVOR_ATTR_CAP = 10;
 
 /**
- * Points earned from cumulative XP, via the game's fixed curve:
- *   cost(n) = 4000 + 600(n-1) + 90(n-1)^2   (XP to buy the nth point)
- * Returns how many whole points `xp` can afford (cumulative). Used to validate
- * points_spent <= points_earned. Kept in lockstep with the game curve; if the
- * game retunes it, update here too (it's validation, not storage).
+ * XP cost to buy the nth stat point, via the game's fixed curve (refit for the
+ * eight-stat / 66-point ladder, 2026-07-29):
+ *   cost(n) = 4000 + 600·k + 32.3·k²   where k = n-1, rounded to nearest 100.
+ * Matched to the game's exact integer implementation so the two can't disagree
+ * at a rounding boundary and reject a legitimate spend:
+ *   - the quadratic term is (323·k·k)/10 with integer division (floor)
+ *   - the whole cost is rounded HALF-UP to the nearest 100
+ * Full 66-point ladder ≈ 4,576,400 XP. (Validation only, not stored — if the
+ * game retunes the curve, this one function changes, no migration.)
+ */
+function survivor_point_cost(int $n): int
+{
+    $k = $n - 1;
+    $raw = 4000 + 600 * $k + intdiv(323 * $k * $k, 10);
+    return intdiv($raw + 50, 100) * 100; // round half-up to nearest 100
+}
+
+/**
+ * Points earned from cumulative XP: how many whole points `xp` can afford
+ * (cumulative). Used to validate points_spent <= points_earned.
  */
 function survivor_points_earned(int $xp): int
 {
@@ -125,7 +140,7 @@ function survivor_points_earned(int $xp): int
     $earned = 0;
     $spent = 0;
     for ($n = 1; ; $n++) {
-        $cost = 4000 + 600 * ($n - 1) + 90 * ($n - 1) * ($n - 1);
+        $cost = survivor_point_cost($n);
         if ($spent + $cost > $xp) {
             break;
         }
