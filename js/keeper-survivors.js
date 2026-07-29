@@ -35,6 +35,7 @@
         setVal('es-outcome', d.outcome);
         setVal('es-xp', d.xp);
         setVal('es-points_spent', d.points_spent);
+        setVal('es-max_wave', d.max_wave);
         ATTRS.forEach(function (a) { setVal('es-' + a, d[a]); });
 
         // Read-only context.

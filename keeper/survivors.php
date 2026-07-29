@@ -105,6 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $skin    = trim((string) ($_POST['skin'] ?? ''));
         $xp      = (int) ($_POST['xp'] ?? 0);
         $pointsSpent = (int) ($_POST['points_spent'] ?? 0);
+        $maxWave = (int) ($_POST['max_wave'] ?? 0);
 
         $errors = [];
 
@@ -115,6 +116,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // points_spent >= 0.
         if ($pointsSpent < 0) {
             $errors[] = 'Points spent must be zero or greater.';
+        }
+        // max_wave >= 0.
+        if ($maxWave < 0) {
+            $errors[] = 'Max wave must be zero or greater.';
         }
 
         // The eight attributes: each an integer 0..cap.
@@ -156,7 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sql = 'UPDATE survivors SET name = :name, outcome = :outcome, skin = :skin, '
              . '"str" = :str, "agi" = :agi, "end" = :end, "int" = :int, '
              . '"awa" = :awa, "luk" = :luk, "foc" = :foc, "fai" = :fai, '
-             . 'xp = :xp, points_spent = :points_spent WHERE id = :id';
+             . 'xp = :xp, points_spent = :points_spent, max_wave = :max_wave WHERE id = :id';
         $upd = $db->prepare($sql);
         $upd->execute(array_merge($attrs, [
             'name'    => ($name === '') ? null : $name,
@@ -164,6 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'skin'    => $skin,
             'xp'      => $xp,
             'points_spent' => $pointsSpent,
+            'max_wave' => $maxWave,
             'id'      => $id,
         ]));
 
@@ -218,7 +224,7 @@ $endedSurvivors = (int) $db->query('SELECT COUNT(*) FROM survivors WHERE ended_a
 $survivors = $db->query(
     'SELECT s.id, s.user_id, s.ref, s.name, s.skin, s.started_at, s.ended_at, s.outcome,
             s."str" AS str, s.agi, s."end" AS end, s."int" AS int, s.awa, s.luk, s.foc, s.fai,
-            s.xp, s.points_spent, u.username AS owner
+            s.xp, s.points_spent, s.max_wave, u.username AS owner
      FROM survivors s
      LEFT JOIN users u ON u.id = s.user_id
      ORDER BY s.id DESC'
@@ -260,6 +266,7 @@ $survivors = $db->query(
               <th>Skin</th>
               <th>XP</th>
               <th>Points</th>
+              <th>Max Wave</th>
               <th>Started</th>
               <th>Ended / Outcome</th>
               <th>Actions</th>
@@ -293,6 +300,7 @@ $survivors = $db->query(
                     'xp'           => (int) $s['xp'],
                     'points_spent' => (int) $s['points_spent'],
                     'points_earned' => $pointsEarned,
+                    'max_wave'     => (int) $s['max_wave'],
                 ];
                 foreach (KEEPER_SURVIVOR_ATTRS as $a) {
                     $payload[$a] = (int) $s[$a];
@@ -306,6 +314,7 @@ $survivors = $db->query(
               <td class="keeper-cell-clamp keeper-cell-clamp--sm" title="<?= htmlspecialchars((string) $s['skin']) ?>"><?= htmlspecialchars(($s['skin'] !== null && $s['skin'] !== '') ? (string) $s['skin'] : '—') ?></td>
               <td class="keeper-cell-num"><?= number_format((int) $s['xp']) ?></td>
               <td class="keeper-cell-num"><?= (int) $s['points_spent'] ?> / <?= $pointsEarned ?></td>
+              <td class="keeper-cell-num"><?= (int) $s['max_wave'] ?></td>
               <td class="keeper-cell-nowrap"><?= htmlspecialchars($started) ?></td>
               <td class="keeper-cell-clamp" title="<?= htmlspecialchars($endedShown) ?>"><?= htmlspecialchars($endedShown) ?></td>
               <td>
@@ -326,7 +335,7 @@ $survivors = $db->query(
             </tr>
             <?php endforeach; ?>
             <?php if (empty($survivors)): ?>
-            <tr><td colspan="9" class="text-muted">No survivors found.</td></tr>
+            <tr><td colspan="10" class="text-muted">No survivors found.</td></tr>
             <?php endif; ?>
           </tbody>
         </table>
@@ -393,6 +402,10 @@ $survivors = $db->query(
             <label class="keeper-users-field">
               <span class="keeper-users-label">Points Spent</span>
               <input class="field" type="number" min="0" name="points_spent" id="es-points_spent" value="0">
+            </label>
+            <label class="keeper-users-field">
+              <span class="keeper-users-label">Max Wave</span>
+              <input class="field" type="number" min="0" name="max_wave" id="es-max_wave" value="0">
             </label>
           </div>
         </fieldset>

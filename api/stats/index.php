@@ -40,6 +40,13 @@
  *      earns (curve cost(n)=4000+600(n-1)+90(n-1)^2). A failure 400s the whole
  *      post. The survivor echo includes the sheet + derived points_earned.
  *
+ *      Survivor max_wave (025, Wave Runner board): the "survivor" block may carry
+ *      "max_wave" (int >= 0) — the survivor's LIFETIME deepest wave, ABSOLUTE.
+ *      The server MAX-MERGES it (max(stored, sent)) so retries/out-of-order
+ *      deliveries only move it up. A bare { id|ref, max_wave } is a VALID
+ *      standalone survivor action (no attrs/points/skin/ended needed) — it does
+ *      NOT 400. Echoed back in the survivor response as "max_wave".
+ *
  *      "survivor_id" / "survivor_ref" alongside "stats" is validated as
  *      belonging to the user and echoed back.
  *
@@ -323,6 +330,10 @@ function stats_survivor_public(array $row): array
         $out['points_spent'] = (int) ($row['points_spent'] ?? 0);
         $out['points_earned'] = survivor_points_earned((int) $row['xp']); // derived, for convenience
     }
+    // max_wave (025) — present when the row has the column. Absolute, max-merged.
+    if (array_key_exists('max_wave', $row)) {
+        $out['max_wave'] = (int) $row['max_wave'];
+    }
     return $out;
 }
 
@@ -478,6 +489,7 @@ $survSkin = null;
 $survName = null;
 $survOutcome = null;
 $survProgression = ['attrs' => [], 'points_spent' => null]; // attrs/points from the block
+$survMaxWave = null; // max_wave (025) — absolute lifetime deepest wave, max-merged
 
 if ($survivor !== null) {
     if (!is_array($survivor)) {
@@ -488,6 +500,17 @@ if ($survivor !== null) {
     // create sets the initial sheet, a bare {id, str, points_spent} is a spend.
     $survProgression = survivor_progression_from_block($survivor);
     $hasProgression = $survProgression['attrs'] !== [] || $survProgression['points_spent'] !== null;
+
+    // max_wave (025) — absolute, non-negative int. A bare {id|ref, max_wave} is
+    // a valid update action on its own (handled in the dispatch below).
+    if (array_key_exists('max_wave', $survivor)) {
+        $mwRaw = $survivor['max_wave'];
+        $isIntegral = is_numeric($mwRaw) && !is_bool($mwRaw) && (float) $mwRaw == (int) $mwRaw;
+        if (!$isIntegral || (int) $mwRaw < 0) {
+            grave_json_response(400, ['success' => false, 'error' => '"max_wave" must be a non-negative integer.']);
+        }
+        $survMaxWave = (int) $mwRaw;
+    }
 
     if (!empty($survivor['ended'])) {
         $survivorAction = 'end';
@@ -521,8 +544,9 @@ if ($survivor !== null) {
         if (isset($survivor['name']) && trim((string) $survivor['name']) !== '') {
             $survName = trim((string) $survivor['name']);
         }
-    } elseif ((isset($survivor['id']) || isset($survivor['ref'])) && $hasProgression) {
-        // Point-spend / attribute update: {id|ref, <attrs>, points_spent}.
+    } elseif ((isset($survivor['id']) || isset($survivor['ref'])) && ($hasProgression || $survMaxWave !== null)) {
+        // Point-spend / attribute / max_wave update: {id|ref, <attrs>,
+        // points_spent, max_wave}. A bare {id|ref, max_wave} is valid on its own.
         $survivorAction = 'update';
         if (isset($survivor['id'])) {
             if (!is_numeric($survivor['id']) || (int) $survivor['id'] <= 0) {
@@ -689,7 +713,7 @@ try {
         $progTargetId = (int) $survivorOut['id'];
     }
 
-    if ($progTargetId !== null && ($xpDelta !== null || $hasProgressionWrite || $survivorAction === 'create')) {
+    if ($progTargetId !== null && ($xpDelta !== null || $hasProgressionWrite || $survivorAction === 'create' || $survMaxWave !== null)) {
         // Read the current authoritative row (locked in this transaction).
         $curStmt = $pdo->prepare('SELECT * FROM survivors WHERE id = ? AND user_id = ?');
         $curStmt->execute([$progTargetId, $userId]);
@@ -759,6 +783,15 @@ try {
         $up->execute(array_merge($attrs, [
             'xp' => $newXp, 'points_spent' => $pointsSpent, 'id' => $progTargetId,
         ]));
+
+        // max_wave (025) — independent, absolute, MAX-MERGED. Guarded solely by
+        // $survMaxWave (a pure {id, max_wave} post reaches here with no attr/xp
+        // change). SQL MAX() keeps the merge atomic + correct vs out-of-order
+        // delivery: it can only move max_wave up, never down.
+        if ($survMaxWave !== null) {
+            $mwUp = $pdo->prepare('UPDATE survivors SET max_wave = MAX(max_wave, :mw) WHERE id = :id');
+            $mwUp->execute(['mw' => $survMaxWave, 'id' => $progTargetId]);
+        }
 
         // Refresh both the primary survivor echo AND the context echo (if this
         // post used one) so the response reflects the post-write sheet, not the
