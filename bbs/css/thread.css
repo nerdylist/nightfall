@@ -367,16 +367,33 @@
   }
 }
 
+/* ---- Fill-viewport thread page (desktop) ----
+   The whole page becomes header + main + footer with NO page scroll; each
+   column scrolls internally. Instead of magic nav/footer pixel constants, we
+   lock the body to the viewport height and let <main> flex-fill the space
+   between the (in-flow) header and footer — so their real heights are handled
+   automatically, and they stay fixed on screen. Scoped to .thread-page so other
+   forum pages scroll normally. */
 @media (min-width: 900px) {
-  .thread-layout {
+  body.thread-page {
+    height: 100vh;
+    min-height: 100vh;
+    overflow: hidden; /* no page scroll — columns scroll instead */
+  }
+  /* <main class="container"> is the flex child between header & footer; let it
+     grow to fill and become the height reference for the layout. */
+  body.thread-page > main.container {
+    flex: 1 1 auto;
+    min-height: 0;       /* allow it to shrink so children can scroll */
+    display: flex;
+    flex-direction: column;
+  }
+
+  .thread-page .thread-layout {
     grid-template-columns: 2fr 1fr;
     align-items: stretch;
-    /* CAP the columns to the viewport region (below nav, above footer) so a long
-       post can never grow the row past the screen and push the page / chat down.
-       Both columns are exactly this height; content beyond it scrolls INTERNALLY.
-       2 * --space-6 accounts for the thread-layout margin-block (top + bottom). */
-    height: calc(100vh - var(--nav-h) - var(--footer-h) - (2 * var(--space-6)));
-    max-height: calc(100vh - var(--nav-h) - var(--footer-h) - (2 * var(--space-6)));
+    flex: 1 1 auto;
+    min-height: 0;       /* fill main; children scroll instead of overflowing */
   }
   /* Left card fills the capped cell; a tall post scrolls inside the card rather
      than stretching the row. min-height:0 lets the grid child shrink-and-scroll

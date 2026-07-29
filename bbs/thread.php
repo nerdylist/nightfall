@@ -151,6 +151,10 @@ foreach ($data['users'] as $u) {
     $usersById[(int) $u['id']] = $u;
 }
 
+// Fill the viewport: header + (thread content | chat) + footer, no page scroll —
+// each column scrolls internally. See .thread-page in css/thread.css.
+$BODY_CLASS = 'thread-page';
+
 include __DIR__ . '/partials/head.php';       // DOCTYPE..head..</head><body>
 include __DIR__ . '/partials/header.php';     // <header class="site-header">
 ?>

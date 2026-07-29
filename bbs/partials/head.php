@@ -2,6 +2,9 @@
 if (!isset($CONFIG)) { require __DIR__ . '/../config.php'; }
 $BASE = $BASE ?? '/bbs/';
 $EXTRA_CSS = $EXTRA_CSS ?? [];
+// Pages may set $BODY_CLASS before including head (e.g. the thread page uses
+// 'thread-page' to fill the viewport between the fixed header/footer).
+$BODY_CLASS = $BODY_CLASS ?? '';
 ?><!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,4 +29,4 @@ $EXTRA_CSS = $EXTRA_CSS ?? [];
 <script>(function(){document.documentElement.dataset.theme=<?= json_encode($CONFIG['DEFAULT_THEME']) ?>;})();</script>
 <?php foreach ((array)$EXTRA_CSS as $href) { echo '<link rel="stylesheet" href="' . htmlspecialchars($BASE . $href) . '">' . "\n"; } ?>
 </head>
-<body>
+<body<?= $BODY_CLASS !== '' ? ' class="' . htmlspecialchars($BODY_CLASS) . '"' : '' ?>>
