@@ -22,8 +22,13 @@
  *   wave_min (int)  never spawns before this wave
  *   wave_max (int)  never spawns after this wave (absent = forever)
  *   hp_cap   (int)  hard HP ceiling regardless of band math
- *   hp_bands (array) [ { from, to|null, mode:"pct"|"flat", value }, ... ]
- *                    per-wave growth; pct compounds, flat adds, per wave.
+ *   hp_bands (array) [ { from, to|null, mode:"pct"|"flat", value,
+ *                        spawn_weight?, max_alive? }, ... ]
+ *                    per wave range: HP growth (pct compounds / flat adds per
+ *                    wave) + optional spawn mix — spawn_weight (relative pick
+ *                    likelihood, default 100) and max_alive (ceiling of this
+ *                    character alive at once). Both keys absent = today's
+ *                    behavior. See the game repo wave-scaling-handoff.md §7.
  *
  * Image fields are absolute web paths under /assets/characters/ (or null).
  * Read-only; authoring happens in Keeper, so there is no POST here.

@@ -130,10 +130,12 @@ function keeper_opt_int($v): ?int
  */
 function keeper_bands_json(array $post): ?string
 {
-    $from  = (array) ($post['band_from'] ?? []);
-    $to    = (array) ($post['band_to'] ?? []);
-    $mode  = (array) ($post['band_mode'] ?? []);
-    $value = (array) ($post['band_value'] ?? []);
+    $from   = (array) ($post['band_from'] ?? []);
+    $to     = (array) ($post['band_to'] ?? []);
+    $mode   = (array) ($post['band_mode'] ?? []);
+    $value  = (array) ($post['band_value'] ?? []);
+    $weight = (array) ($post['band_spawn_weight'] ?? []);
+    $alive  = (array) ($post['band_max_alive'] ?? []);
 
     $bands = [];
     foreach ($from as $i => $f) {
@@ -144,12 +146,23 @@ function keeper_bands_json(array $post): ?string
         }
         $t = trim((string) ($to[$i] ?? ''));
         $m = ($mode[$i] ?? 'pct') === 'flat' ? 'flat' : 'pct';
-        $bands[] = [
+        $band = [
             'from'  => max(1, (int) $f),
             'to'    => $t === '' ? null : max(1, (int) $t),
             'mode'  => $m,
             'value' => 0 + $v, // numeric (int or float)
         ];
+        // Optional spawn-mix dials (§7). Only emit a key when it was filled in,
+        // so a band without them behaves exactly as today (weight 100, no cap).
+        $w = trim((string) ($weight[$i] ?? ''));
+        if ($w !== '') {
+            $band['spawn_weight'] = max(0, (int) $w);
+        }
+        $a = trim((string) ($alive[$i] ?? ''));
+        if ($a !== '') {
+            $band['max_alive'] = max(1, (int) $a);
+        }
+        $bands[] = $band;
     }
 
     if (!$bands) {

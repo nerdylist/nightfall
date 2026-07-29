@@ -82,18 +82,20 @@ foreach (($catalogByType ?? []) as $rows) { $total += count($rows); }
 
       <div class="keeper-chars-bands" data-bands>
         <div class="keeper-chars-bands__head">
-          <span>HP bands</span>
-          <span class="keeper-chars-wave__opt">per-wave growth; tile without gaps, first “From” = Wave min</span>
+          <span>Bands</span>
+          <span class="keeper-chars-wave__opt">per wave range: HP growth + spawn mix. Tile without gaps; first “From” = Wave min. Weight (pick likelihood, default 100) and Max (alive at once) are optional.</span>
         </div>
         <div class="keeper-chars-bands__rows" data-bands-rows>
           <?php
             // Render existing bands, plus always keep the markup for JS cloning
             // in a <template>. Each row: from / to / mode / value.
             $renderBand = function ($i, $b) {
-                $from = htmlspecialchars((string) ($b['from'] ?? ''));
-                $to   = ($b['to'] ?? null) === null ? '' : htmlspecialchars((string) $b['to']);
-                $mode = ($b['mode'] ?? 'pct') === 'flat' ? 'flat' : 'pct';
-                $val  = htmlspecialchars((string) ($b['value'] ?? ''));
+                $from   = htmlspecialchars((string) ($b['from'] ?? ''));
+                $to     = ($b['to'] ?? null) === null ? '' : htmlspecialchars((string) $b['to']);
+                $mode   = ($b['mode'] ?? 'pct') === 'flat' ? 'flat' : 'pct';
+                $val    = htmlspecialchars((string) ($b['value'] ?? ''));
+                $weight = isset($b['spawn_weight']) ? htmlspecialchars((string) $b['spawn_weight']) : '';
+                $alive  = isset($b['max_alive']) ? htmlspecialchars((string) $b['max_alive']) : '';
                 ?>
                 <div class="keeper-chars-band" data-band-row>
                   <input class="field" type="number" name="band_from[]" value="<?= $from ?>" placeholder="From" min="1">
@@ -103,6 +105,8 @@ foreach (($catalogByType ?? []) as $rows) { $total += count($rows); }
                     <option value="flat" <?= $mode === 'flat' ? 'selected' : '' ?>>flat / wave</option>
                   </select>
                   <input class="field" type="number" name="band_value[]" value="<?= $val ?>" placeholder="Value" step="any">
+                  <input class="field" type="number" name="band_spawn_weight[]" value="<?= $weight ?>" placeholder="Weight" min="0" title="Spawn weight — relative pick likelihood in this range (default 100)">
+                  <input class="field" type="number" name="band_max_alive[]" value="<?= $alive ?>" placeholder="Max" min="1" title="Max alive — ceiling of this character alive at once in this range">
                   <button type="button" class="keeper-icon-btn keeper-icon-btn--danger" data-band-remove title="Remove band" aria-label="Remove band">
                     <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/xmark.svg" alt="">
                   </button>
