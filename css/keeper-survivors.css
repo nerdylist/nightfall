@@ -8,3 +8,98 @@
 /* The context line packs several read-only facts; let it wrap gracefully. */
 .keeper-users-hint span,
 .keeper-users-hint strong { white-space: nowrap; }
+
+/* ------------------------------------------------------------------ */
+/* Survivor Game Data modal — compact, fit-on-one-screen layout.       */
+/*                                                                     */
+/* survivors.php loads keeper.css + this file only (NOT keeper-users   */
+/* .css), so the grid column rules the markup relies on are redefined  */
+/* here — deliberately tighter — and scoped to #survivor-modal so no   */
+/* other page can be affected.                                         */
+/* ------------------------------------------------------------------ */
+
+/* Wider panel gives the 4-column attribute grid room to breathe, with a
+   hard height cap + internal scroll so it can never overflow the viewport. */
+#survivor-modal .keeper-modal__panel--wide {
+  max-width: 760px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-5) var(--space-5);
+}
+
+/* Trim the vertical rhythm above the form. */
+#survivor-modal .keeper-modal__head { margin-bottom: var(--space-3); }
+#survivor-modal .keeper-users-hint { margin-bottom: var(--space-3); }
+
+/* Identity grid: Name + Skin side by side, Outcome full width. */
+#survivor-modal .keeper-users-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2) var(--space-3);
+}
+#survivor-modal .keeper-users-field--wide { grid-column: 1 / -1; }
+
+#survivor-modal .keeper-users-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+#survivor-modal .keeper-users-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+/* Shorter, tighter inputs so the whole sheet stays compact. */
+#survivor-modal .keeper-users-form .field {
+  padding: 5px 9px;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+/* Attribute + progression fieldsets: slimmer padding and gaps. */
+#survivor-modal .keeper-users-statgroup {
+  border: 1px solid var(--keeper-line-soft, rgba(255, 255, 255, 0.07));
+  border-radius: var(--radius-sm, 6px);
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  margin: var(--space-3) 0 0;
+}
+
+#survivor-modal .keeper-users-statgroup legend {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  padding: 0 6px;
+}
+
+/* Attributes: 4 columns so all 8 attrs fit in two tidy rows. */
+#survivor-modal .keeper-users-statgroup:first-of-type .keeper-users-statgrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* Progression: 3 columns in one row (default for the statgrid below). */
+#survivor-modal .keeper-users-statgrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2) var(--space-3);
+}
+
+/* Tighten the action row at the bottom. */
+#survivor-modal .keeper-users-modal-actions {
+  margin-top: var(--space-3);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+/* Narrow screens: avoid crushed columns. */
+@media (max-width: 640px) {
+  #survivor-modal .keeper-users-grid { grid-template-columns: 1fr; }
+  #survivor-modal .keeper-users-statgroup:first-of-type .keeper-users-statgrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #survivor-modal .keeper-users-statgrid { grid-template-columns: 1fr 1fr; }
+}
