@@ -66,6 +66,31 @@ foreach (($catalogByType ?? []) as $rows) { $total += count($rows); }
           if (is_array($decoded)) { $bands = $decoded; }
       }
     ?>
+    <?php
+      // Archetype defaults for NEW enemy spawners: a fresh row is BORN with
+      // dials (never dial-less) per the game's design. Zombie→SHAMBLER,
+      // NPC/Enemy→HEAVY. Humans get nothing here — they level up separately.
+      // Templates mirror the game's wave-dials-defaults.json.
+      $archetypes = [
+        'SHAMBLER' => ['hp_base'=>80,'wave_min'=>1,'hp_cap'=>3000,'hp_bands'=>[
+          ['from'=>1,'to'=>10,'mode'=>'pct','value'=>3,'spawn_weight'=>100,'max_alive'=>8],
+          ['from'=>11,'to'=>30,'mode'=>'pct','value'=>4,'spawn_weight'=>90,'max_alive'=>10],
+          ['from'=>31,'to'=>60,'mode'=>'pct','value'=>2,'spawn_weight'=>70,'max_alive'=>12],
+          ['from'=>61,'to'=>null,'mode'=>'pct','value'=>1,'spawn_weight'=>60,'max_alive'=>14],
+        ]],
+        'HEAVY' => ['hp_base'=>300,'wave_min'=>15,'hp_cap'=>12000,'hp_bands'=>[
+          ['from'=>15,'to'=>30,'mode'=>'pct','value'=>8,'spawn_weight'=>5,'max_alive'=>1],
+          ['from'=>31,'to'=>60,'mode'=>'pct','value'=>5,'spawn_weight'=>18,'max_alive'=>3],
+          ['from'=>61,'to'=>100,'mode'=>'pct','value'=>2,'spawn_weight'=>30,'max_alive'=>5],
+          ['from'=>101,'to'=>null,'mode'=>'pct','value'=>1,'spawn_weight'=>35,'max_alive'=>6],
+        ]],
+      ];
+      $typeArchetype = ['Zombie'=>'SHAMBLER', 'NPC'=>'HEAVY', 'Enemy'=>'HEAVY']; // Human: none
+    ?>
+    <?php if (!$isEdit): ?>
+    <script type="application/json" data-char-archetypes><?= json_encode(['archetypes'=>$archetypes,'byType'=>$typeArchetype], JSON_UNESCAPED_SLASHES) ?></script>
+    <?php endif; ?>
+
     <fieldset class="keeper-chars-wave">
       <legend>Wave scaling <span class="keeper-chars-wave__opt">optional — spawner dials, read by the game at boot</span></legend>
 
