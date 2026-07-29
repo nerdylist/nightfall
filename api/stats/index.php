@@ -29,9 +29,19 @@
  *      Survivor end: "survivor": { "id": <int> | "ref": "<string>",
  *      "ended": true, "outcome": "..."? } — stamps ended_at (+ outcome).
  *
+ *      Survivor progression (survivor-progression-handoff.md): the "survivor"
+ *      block may carry the eight attributes (str, agi, end, int, awa, luk, foc,
+ *      fai — ints 0..10, ABSOLUTE) and "points_spent" (absolute) — on create
+ *      (initial sheet) or as a bare { id|ref, <attrs>, points_spent } update
+ *      (a point spend). XP is a DELTA in "stats": { "xp": <int >= 0> } — added
+ *      to the survivor's cumulative xp (monotonic; never decreases). All three
+ *      require a survivor (context or a survivor block in the post). Validated:
+ *      attrs 0..10, sum(8) <= 14 + points_spent, points_spent <= points the xp
+ *      earns (curve cost(n)=4000+600(n-1)+90(n-1)^2). A failure 400s the whole
+ *      post. The survivor echo includes the sheet + derived points_earned.
+ *
  *      "survivor_id" / "survivor_ref" alongside "stats" is validated as
- *      belonging to the user and echoed back; per-survivor stat
- *      aggregation is not implemented yet.
+ *      belonging to the user and echoed back.
  *
  *      "daily_playtime": [{ "date": "YYYY-MM-DD", "seconds": <int >= 0> }, ...]
  *      (optional, PER-SURVIVOR) — absolute per-real-day active survival time.
@@ -87,6 +97,63 @@ const STATS_COLUMNS = [
     'lazarus_seconds'         => 'min',
     'fastest_death_seconds'   => 'min',
 ];
+
+/**
+ * Survivor progression attributes (survivor-progression-handoff.md §2). Order
+ * matters — the game sends them in this order. All ints 0..10. Stored on the
+ * survivor row (not player_stats). `int`/`end` are SQLite-ish keywords so every
+ * query quotes the column names.
+ */
+const SURVIVOR_ATTRS = ['str', 'agi', 'end', 'int', 'awa', 'luk', 'foc', 'fai'];
+/** Starting allocation pool (base 0 at create; buys the first 14 points free). */
+const SURVIVOR_START_POOL = 14;
+/** Per-attribute cap from allocation. */
+const SURVIVOR_ATTR_CAP = 10;
+
+/**
+ * Points earned from cumulative XP, via the game's fixed curve:
+ *   cost(n) = 4000 + 600(n-1) + 90(n-1)^2   (XP to buy the nth point)
+ * Returns how many whole points `xp` can afford (cumulative). Used to validate
+ * points_spent <= points_earned. Kept in lockstep with the game curve; if the
+ * game retunes it, update here too (it's validation, not storage).
+ */
+function survivor_points_earned(int $xp): int
+{
+    if ($xp <= 0) {
+        return 0;
+    }
+    $earned = 0;
+    $spent = 0;
+    for ($n = 1; ; $n++) {
+        $cost = 4000 + 600 * ($n - 1) + 90 * ($n - 1) * ($n - 1);
+        if ($spent + $cost > $xp) {
+            break;
+        }
+        $spent += $cost;
+        $earned = $n;
+        if ($n > 100000) { // hard stop, far beyond max (66)
+            break;
+        }
+    }
+    return $earned;
+}
+
+/**
+ * Extract survivor progression fields from a `survivor` block. Returns
+ * ['attrs' => [name=>int,...present only], 'points_spent' => int|null]. Values
+ * are read as-is (validation happens later against the resolved row).
+ */
+function survivor_progression_from_block(array $block): array
+{
+    $attrs = [];
+    foreach (SURVIVOR_ATTRS as $a) {
+        if (array_key_exists($a, $block)) {
+            $attrs[$a] = $block[$a];
+        }
+    }
+    $points = array_key_exists('points_spent', $block) ? $block['points_spent'] : null;
+    return ['attrs' => $attrs, 'points_spent' => $points];
+}
 
 /**
  * Verify the Authorization: Bearer header against .env GAME_API_KEY.
@@ -222,7 +289,7 @@ function stats_apply_survivor(PDO $pdo, int $survivorId, array $clean): void
 /** Public shape of a survivor row for API responses. */
 function stats_survivor_public(array $row): array
 {
-    return [
+    $out = [
         'id'         => (int) $row['id'],
         'ref'        => (string) $row['ref'],
         'name'       => $row['name'],
@@ -231,6 +298,17 @@ function stats_survivor_public(array $row): array
         'ended_at'   => $row['ended_at'],
         'outcome'    => $row['outcome'],
     ];
+    // Progression (022) — present when the row has the columns. Echo the sheet
+    // back so the game can reconcile against the authoritative copy.
+    if (array_key_exists('xp', $row)) {
+        foreach (SURVIVOR_ATTRS as $a) {
+            $out[$a] = (int) ($row[$a] ?? 0);
+        }
+        $out['xp'] = (int) $row['xp'];
+        $out['points_spent'] = (int) ($row['points_spent'] ?? 0);
+        $out['points_earned'] = survivor_points_earned((int) $row['xp']); // derived, for convenience
+    }
+    return $out;
 }
 
 /**
@@ -336,13 +414,23 @@ if (($stats === null || $stats === []) && !is_array($survivor) && !$hasPlaytime)
     grave_json_response(400, ['success' => false, 'error' => 'Request must include "stats", "survivor", and/or "daily_playtime".']);
 }
 
+// ---- Pull survivor XP out of the stats block (it lives on the SURVIVOR row,
+//      not player_stats). Sent as a non-negative DELTA like kills/playtime.
+//      Removed here so it isn't rejected as an "unknown stat key" below. ----
+$xpDelta = null;
+if (is_array($stats) && array_key_exists('xp', $stats)) {
+    $xpRaw = $stats['xp'];
+    $isIntegral = is_numeric($xpRaw) && !is_bool($xpRaw) && (float) $xpRaw == (int) $xpRaw;
+    if (!$isIntegral || (int) $xpRaw < 0) {
+        grave_json_response(400, ['success' => false, 'error' => '"xp" must be a non-negative integer (a cumulative delta).']);
+    }
+    $xpDelta = (int) $xpRaw;
+    unset($stats['xp']);
+}
+
 // ---- Validate the stats object (before touching the database). ----
 $clean = [];
-if ($stats !== null) {
-    if (!is_array($stats) || $stats === []) {
-        grave_json_response(400, ['success' => false, 'error' => 'Missing or empty "stats" object.']);
-    }
-
+if (is_array($stats) && $stats !== []) {
     foreach ($stats as $key => $value) {
         if (!array_key_exists($key, STATS_COLUMNS)) {
             grave_json_response(400, [
@@ -368,17 +456,23 @@ if ($stats !== null) {
 
 // ---- Validate the survivor action. ----
 // Create: { ref, skin, name? }   End: { id|ref, ended: true, outcome? }
-$survivorAction = null; // null | 'create' | 'end'
+$survivorAction = null; // null | 'create' | 'end' | 'update'
 $survRef = null;
 $survId = null;
 $survSkin = null;
 $survName = null;
 $survOutcome = null;
+$survProgression = ['attrs' => [], 'points_spent' => null]; // attrs/points from the block
 
 if ($survivor !== null) {
     if (!is_array($survivor)) {
         grave_json_response(400, ['success' => false, 'error' => '"survivor" must be an object.']);
     }
+
+    // Progression (8 attrs + points_spent) can ride any survivor block —
+    // create sets the initial sheet, a bare {id, str, points_spent} is a spend.
+    $survProgression = survivor_progression_from_block($survivor);
+    $hasProgression = $survProgression['attrs'] !== [] || $survProgression['points_spent'] !== null;
 
     if (!empty($survivor['ended'])) {
         $survivorAction = 'end';
@@ -397,11 +491,12 @@ if ($survivor !== null) {
         if (isset($survivor['outcome']) && trim((string) $survivor['outcome']) !== '') {
             $survOutcome = trim((string) $survivor['outcome']);
         }
-    } elseif (isset($survivor['skin']) || isset($survivor['ref'])) {
+    } elseif (isset($survivor['skin'])) {
+        // A "skin" means create (ref+skin required). Progression rides along.
         $survivorAction = 'create';
 
         $survRef = isset($survivor['ref']) ? (string) $survivor['ref'] : '';
-        $survSkin = isset($survivor['skin']) ? trim((string) $survivor['skin']) : '';
+        $survSkin = trim((string) $survivor['skin']);
         if ($survRef === '') {
             grave_json_response(400, ['success' => false, 'error' => 'Survivor create requires a non-empty "ref" string.']);
         }
@@ -411,10 +506,24 @@ if ($survivor !== null) {
         if (isset($survivor['name']) && trim((string) $survivor['name']) !== '') {
             $survName = trim((string) $survivor['name']);
         }
+    } elseif ((isset($survivor['id']) || isset($survivor['ref'])) && $hasProgression) {
+        // Point-spend / attribute update: {id|ref, <attrs>, points_spent}.
+        $survivorAction = 'update';
+        if (isset($survivor['id'])) {
+            if (!is_numeric($survivor['id']) || (int) $survivor['id'] <= 0) {
+                grave_json_response(400, ['success' => false, 'error' => 'Survivor "id" must be a positive integer.']);
+            }
+            $survId = (int) $survivor['id'];
+        } else {
+            $survRef = (string) $survivor['ref'];
+            if (trim($survRef) === '') {
+                grave_json_response(400, ['success' => false, 'error' => 'Survivor update requires "id" or a non-empty "ref".']);
+            }
+        }
     } else {
         grave_json_response(400, [
             'success' => false,
-            'error'   => 'Unrecognized "survivor" action: send {ref, skin} to create or {id|ref, ended: true} to end.',
+            'error'   => 'Unrecognized "survivor" action: send {ref, skin} to create, {id|ref, ended:true} to end, or {id|ref, <attrs>/points_spent} to update.',
         ]);
     }
 }
@@ -501,6 +610,18 @@ if ($cleanPlaytime !== [] && $contextSurvivor === null && $survivorAction === nu
     ]);
 }
 
+// XP and attribute changes are per-survivor too. An xp delta with no survivor
+// context (no survivor_id/ref and no create/update/end in this post) is
+// ambiguous — reject it so XP is never applied to the wrong (or no) survivor.
+$hasProgressionWrite = ($survProgression['attrs'] !== []) || ($survProgression['points_spent'] !== null);
+if (($xpDelta !== null || $hasProgressionWrite)
+    && $contextSurvivor === null && $survivorAction === null) {
+    grave_json_response(400, [
+        'success' => false,
+        'error'   => '"xp"/attributes require a survivor: send "survivor_id"/"survivor_ref", or a "survivor" create/update/end in the same post.',
+    ]);
+}
+
 $survivorOut = null;
 
 $pdo->beginTransaction();
@@ -532,6 +653,106 @@ try {
         $stmt->execute(['outcome' => $survOutcome, 'id' => (int) $row['id']]);
 
         $survivorOut = stats_find_survivor($pdo, $userId, (int) $row['id'], null);
+    } elseif ($survivorAction === 'update') {
+        // Point-spend / attribute change — resolve the target row; no other
+        // side effects (progression is applied in the shared block below).
+        $row = stats_find_survivor($pdo, $userId, $survId, $survRef);
+        if ($row === null) {
+            $pdo->rollBack();
+            grave_json_response(404, ['success' => false, 'error' => 'Unknown survivor for this user.']);
+        }
+        $survivorOut = stats_find_survivor($pdo, $userId, (int) $row['id'], null);
+    }
+
+    // ---- Apply survivor progression (attrs / points_spent / xp) ----
+    // Resolve the survivor this post targets: an explicit context, else the one
+    // created/ended/updated in this same post.
+    $progTargetId = null;
+    if ($contextSurvivor !== null) {
+        $progTargetId = (int) $contextSurvivor['id'];
+    } elseif ($survivorOut !== null && isset($survivorOut['id'])) {
+        $progTargetId = (int) $survivorOut['id'];
+    }
+
+    if ($progTargetId !== null && ($xpDelta !== null || $hasProgressionWrite || $survivorAction === 'create')) {
+        // Read the current authoritative row (locked in this transaction).
+        $curStmt = $pdo->prepare('SELECT * FROM survivors WHERE id = ? AND user_id = ?');
+        $curStmt->execute([$progTargetId, $userId]);
+        $cur = $curStmt->fetch();
+        if ($cur === false) {
+            $pdo->rollBack();
+            grave_json_response(404, ['success' => false, 'error' => 'Unknown survivor for this user.']);
+        }
+
+        // XP is a monotonic cumulative delta; new total must never decrease.
+        $newXp = (int) $cur['xp'];
+        if ($xpDelta !== null) {
+            $newXp = (int) $cur['xp'] + $xpDelta; // delta is non-negative (validated)
+        }
+
+        // Resolve the eight attribute values: sent values (absolute) win, else
+        // keep stored. Validate each 0..cap.
+        $attrs = [];
+        foreach (SURVIVOR_ATTRS as $a) {
+            if (array_key_exists($a, $survProgression['attrs'])) {
+                $v = $survProgression['attrs'][$a];
+                $isIntegral = is_numeric($v) && !is_bool($v) && (float) $v == (int) $v;
+                if (!$isIntegral || (int) $v < 0 || (int) $v > SURVIVOR_ATTR_CAP) {
+                    $pdo->rollBack();
+                    grave_json_response(400, ['success' => false,
+                        'error' => 'Attribute "' . $a . '" must be an integer 0..' . SURVIVOR_ATTR_CAP . '.']);
+                }
+                $attrs[$a] = (int) $v;
+            } else {
+                $attrs[$a] = (int) $cur[$a];
+            }
+        }
+
+        // points_spent: sent (absolute) wins, else keep stored. Must be >= 0.
+        $pointsSpent = (int) $cur['points_spent'];
+        if ($survProgression['points_spent'] !== null) {
+            $ps = $survProgression['points_spent'];
+            $isIntegral = is_numeric($ps) && !is_bool($ps) && (float) $ps == (int) $ps;
+            if (!$isIntegral || (int) $ps < 0) {
+                $pdo->rollBack();
+                grave_json_response(400, ['success' => false, 'error' => '"points_spent" must be a non-negative integer.']);
+            }
+            $pointsSpent = (int) $ps;
+        }
+
+        // Rule 1: sum of the eight attributes <= starting pool + points_spent.
+        $attrSum = array_sum($attrs);
+        if ($attrSum > SURVIVOR_START_POOL + $pointsSpent) {
+            $pdo->rollBack();
+            grave_json_response(400, ['success' => false,
+                'error' => 'Attribute sum (' . $attrSum . ') exceeds allowed (' . (SURVIVOR_START_POOL + $pointsSpent) . ' = ' . SURVIVOR_START_POOL . ' start + ' . $pointsSpent . ' spent).']);
+        }
+
+        // Rule 2: points_spent <= points the survivor's XP actually earns.
+        $earned = survivor_points_earned($newXp);
+        if ($pointsSpent > $earned) {
+            $pdo->rollBack();
+            grave_json_response(400, ['success' => false,
+                'error' => 'points_spent (' . $pointsSpent . ') exceeds points earned by XP (' . $earned . ' at ' . $newXp . ' XP).']);
+        }
+
+        // Persist. Column names str/agi/end/int/... — quote the reserved-ish ones.
+        $sql = 'UPDATE survivors SET '
+             . '"str"=:str, "agi"=:agi, "end"=:end, "int"=:int, "awa"=:awa, "luk"=:luk, "foc"=:foc, "fai"=:fai, '
+             . 'xp=:xp, points_spent=:points_spent WHERE id=:id';
+        $up = $pdo->prepare($sql);
+        $up->execute(array_merge($attrs, [
+            'xp' => $newXp, 'points_spent' => $pointsSpent, 'id' => $progTargetId,
+        ]));
+
+        // Refresh both the primary survivor echo AND the context echo (if this
+        // post used one) so the response reflects the post-write sheet, not the
+        // stale pre-transaction snapshot.
+        $freshRow = stats_find_survivor($pdo, $userId, $progTargetId, null);
+        $survivorOut = $freshRow;
+        if ($contextSurvivor !== null && (int) $contextSurvivor['id'] === $progTargetId) {
+            $contextSurvivor = stats_survivor_public($freshRow);
+        }
     }
 
     if ($clean !== []) {

@@ -72,13 +72,13 @@ foreach (($catalogByType ?? []) as $rows) { $total += count($rows); }
       // NPC/Enemy→HEAVY. Humans get nothing here — they level up separately.
       // Templates mirror the game's wave-dials-defaults.json.
       $archetypes = [
-        'SHAMBLER' => ['hp_base'=>80,'wave_min'=>1,'hp_cap'=>3000,'hp_bands'=>[
+        'SHAMBLER' => ['hp_base'=>80,'wave_min'=>1,'hp_cap'=>3000,'xp_value'=>50,'hp_bands'=>[
           ['from'=>1,'to'=>10,'mode'=>'pct','value'=>3,'spawn_weight'=>100,'max_alive'=>8],
           ['from'=>11,'to'=>30,'mode'=>'pct','value'=>4,'spawn_weight'=>90,'max_alive'=>10],
           ['from'=>31,'to'=>60,'mode'=>'pct','value'=>2,'spawn_weight'=>70,'max_alive'=>12],
           ['from'=>61,'to'=>null,'mode'=>'pct','value'=>1,'spawn_weight'=>60,'max_alive'=>14],
         ]],
-        'HEAVY' => ['hp_base'=>300,'wave_min'=>15,'hp_cap'=>12000,'hp_bands'=>[
+        'HEAVY' => ['hp_base'=>300,'wave_min'=>15,'hp_cap'=>12000,'xp_value'=>400,'hp_bands'=>[
           ['from'=>15,'to'=>30,'mode'=>'pct','value'=>8,'spawn_weight'=>5,'max_alive'=>1],
           ['from'=>31,'to'=>60,'mode'=>'pct','value'=>5,'spawn_weight'=>18,'max_alive'=>3],
           ['from'=>61,'to'=>100,'mode'=>'pct','value'=>2,'spawn_weight'=>30,'max_alive'=>5],
@@ -103,6 +103,8 @@ foreach (($catalogByType ?? []) as $rows) { $total += count($rows); }
           <input class="field" type="number" name="wave_max" value="<?= $cv('wave_max') ?>" placeholder="∞" min="1"></label>
         <label class="keeper-chars-wavefield"><span>HP cap</span>
           <input class="field" type="number" name="hp_cap" value="<?= $cv('hp_cap') ?>" placeholder="none" min="0"></label>
+        <label class="keeper-chars-wavefield"><span>XP value</span>
+          <input class="field" type="number" name="xp_value" value="<?= $cv('xp_value') ?>" placeholder="50" min="0" title="XP awarded for killing this character (absent → game default 50). Per-band overrides below."></label>
       </div>
 
       <div class="keeper-chars-bands" data-bands>
@@ -121,6 +123,7 @@ foreach (($catalogByType ?? []) as $rows) { $total += count($rows); }
                 $val    = htmlspecialchars((string) ($b['value'] ?? ''));
                 $weight = isset($b['spawn_weight']) ? htmlspecialchars((string) $b['spawn_weight']) : '';
                 $alive  = isset($b['max_alive']) ? htmlspecialchars((string) $b['max_alive']) : '';
+                $bxp    = isset($b['xp_value']) ? htmlspecialchars((string) $b['xp_value']) : '';
                 ?>
                 <div class="keeper-chars-band" data-band-row>
                   <input class="field" type="number" name="band_from[]" value="<?= $from ?>" placeholder="From" min="1">
@@ -132,6 +135,7 @@ foreach (($catalogByType ?? []) as $rows) { $total += count($rows); }
                   <input class="field" type="number" name="band_value[]" value="<?= $val ?>" placeholder="Value" step="any">
                   <input class="field" type="number" name="band_spawn_weight[]" value="<?= $weight ?>" placeholder="Weight" min="0" title="Spawn weight — relative pick likelihood in this range (default 100)">
                   <input class="field" type="number" name="band_max_alive[]" value="<?= $alive ?>" placeholder="Max" min="1" title="Max alive — ceiling of this character alive at once in this range">
+                  <input class="field" type="number" name="band_xp_value[]" value="<?= $bxp ?>" placeholder="XP" min="0" title="XP value — XP for a kill in this wave range (overrides the character default)">
                   <button type="button" class="keeper-icon-btn keeper-icon-btn--danger" data-band-remove title="Remove band" aria-label="Remove band">
                     <img class="keeper-icon" src="https://nerd.biz/assets/fa/svgs/solid/xmark.svg" alt="">
                   </button>

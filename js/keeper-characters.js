@@ -107,6 +107,7 @@
     setVal('hp_base', a.hp_base);
     setVal('wave_min', a.wave_min);
     setVal('hp_cap', a.hp_cap);
+    setVal('xp_value', a.xp_value);
     setVal('wave_max', '');
     // Rebuild band rows from the template.
     rowsWrap.innerHTML = '';
@@ -124,6 +125,7 @@
       set('band_value', b.value);
       set('band_spawn_weight', b.spawn_weight);
       set('band_max_alive', b.max_alive);
+      set('band_xp_value', b.xp_value);
     });
   }
 

@@ -22,8 +22,10 @@
  *   wave_min (int)  never spawns before this wave
  *   wave_max (int)  never spawns after this wave (absent = forever)
  *   hp_cap   (int)  hard HP ceiling regardless of band math
+ *   xp_value (int)   XP awarded for killing this character (absent = game
+ *                    default 50; per-band xp_value overrides inside hp_bands)
  *   hp_bands (array) [ { from, to|null, mode:"pct"|"flat", value,
- *                        spawn_weight?, max_alive? }, ... ]
+ *                        spawn_weight?, max_alive?, xp_value? }, ... ]
  *                    per wave range: HP growth (pct compounds / flat adds per
  *                    wave) + optional spawn mix — spawn_weight (relative pick
  *                    likelihood, default 100) and max_alive (ceiling of this
@@ -77,10 +79,14 @@ foreach ($db->query('PRAGMA table_info(characters)') as $ci) {
     $cols[$ci['name']] = true;
 }
 $hasWaveDials = isset($cols['hp_base'], $cols['wave_min'], $cols['wave_max'], $cols['hp_cap'], $cols['hp_bands']);
+$hasXpValue = isset($cols['xp_value']);
 
 $select = 'id, name, age, gender, type, description, avatar_path, pose_path';
 if ($hasWaveDials) {
     $select .= ', hp_base, wave_min, wave_max, hp_cap, hp_bands';
+}
+if ($hasXpValue) {
+    $select .= ', xp_value';
 }
 $sql = "SELECT {$select} FROM characters";
 if ($where) {
@@ -148,6 +154,13 @@ foreach ($stmt->fetchAll() as $c) {
                 $row['hp_bands'] = $decoded;
             }
         }
+    }
+
+    // Enemy xp_value dial (023) — XP awarded for killing this character.
+    // Character-level; per-band xp_value (if authored) rides inside hp_bands.
+    // Emitted only when set; absent → the game's default (50).
+    if ($hasXpValue && $c['xp_value'] !== null) {
+        $row['xp_value'] = (int) $c['xp_value'];
     }
 
     $out[] = $row;

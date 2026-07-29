@@ -40,7 +40,7 @@ function keeper_ensure_characters_table(PDO $db): void
     // Wave-scaling dials (016) — added idempotently for DBs that predate it.
     foreach ([
         'hp_base' => 'INTEGER', 'wave_min' => 'INTEGER', 'wave_max' => 'INTEGER',
-        'hp_cap' => 'INTEGER', 'hp_bands' => 'TEXT',
+        'hp_cap' => 'INTEGER', 'hp_bands' => 'TEXT', 'xp_value' => 'INTEGER',
     ] as $col => $decl) {
         try { $db->exec("ALTER TABLE characters ADD COLUMN {$col} {$decl}"); }
         catch (Throwable $e) { /* already exists */ }
@@ -136,6 +136,7 @@ function keeper_bands_json(array $post): ?string
     $value  = (array) ($post['band_value'] ?? []);
     $weight = (array) ($post['band_spawn_weight'] ?? []);
     $alive  = (array) ($post['band_max_alive'] ?? []);
+    $bxp    = (array) ($post['band_xp_value'] ?? []);
 
     $bands = [];
     foreach ($from as $i => $f) {
@@ -152,8 +153,9 @@ function keeper_bands_json(array $post): ?string
             'mode'  => $m,
             'value' => 0 + $v, // numeric (int or float)
         ];
-        // Optional spawn-mix dials (§7). Only emit a key when it was filled in,
-        // so a band without them behaves exactly as today (weight 100, no cap).
+        // Optional spawn-mix / xp dials. Only emit a key when it was filled in,
+        // so a band without them behaves exactly as today (weight 100, no cap,
+        // xp = character/game default).
         $w = trim((string) ($weight[$i] ?? ''));
         if ($w !== '') {
             $band['spawn_weight'] = max(0, (int) $w);
@@ -161,6 +163,10 @@ function keeper_bands_json(array $post): ?string
         $a = trim((string) ($alive[$i] ?? ''));
         if ($a !== '') {
             $band['max_alive'] = max(1, (int) $a);
+        }
+        $x = trim((string) ($bxp[$i] ?? ''));
+        if ($x !== '') {
+            $band['xp_value'] = max(0, (int) $x);
         }
         $bands[] = $band;
     }
@@ -218,6 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $waveMin = keeper_opt_int($_POST['wave_min'] ?? '');
         $waveMax = keeper_opt_int($_POST['wave_max'] ?? '');
         $hpCap   = keeper_opt_int($_POST['hp_cap'] ?? '');
+        $xpValue = keeper_opt_int($_POST['xp_value'] ?? '');
         $hpBands = keeper_bands_json($_POST);
 
         try {
@@ -241,7 +248,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'UPDATE characters SET name=:name, age=:age, gender=:gender, type=:type,
                         description=:description, avatar_path=:avatar, pose_path=:pose,
                         hp_base=:hp_base, wave_min=:wave_min, wave_max=:wave_max,
-                        hp_cap=:hp_cap, hp_bands=:hp_bands,
+                        hp_cap=:hp_cap, hp_bands=:hp_bands, xp_value=:xp_value,
                         updated_at=CURRENT_TIMESTAMP
                  WHERE id=:id'
             );
@@ -250,16 +257,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':description' => ($desc === '' ? null : $desc),
                 ':avatar' => $avatar, ':pose' => $pose,
                 ':hp_base' => $hpBase, ':wave_min' => $waveMin, ':wave_max' => $waveMax,
-                ':hp_cap' => $hpCap, ':hp_bands' => $hpBands,
+                ':hp_cap' => $hpCap, ':hp_bands' => $hpBands, ':xp_value' => $xpValue,
                 ':id' => $id,
             ]);
             $_SESSION['keeper_flash'] = "Updated \"{$name}\".";
         } else {
             $stmt = $db->prepare(
                 'INSERT INTO characters (name, age, gender, type, description, avatar_path, pose_path,
-                        hp_base, wave_min, wave_max, hp_cap, hp_bands)
+                        hp_base, wave_min, wave_max, hp_cap, hp_bands, xp_value)
                  VALUES (:name, :age, :gender, :type, :description, :avatar, :pose,
-                        :hp_base, :wave_min, :wave_max, :hp_cap, :hp_bands)'
+                        :hp_base, :wave_min, :wave_max, :hp_cap, :hp_bands, :xp_value)'
             );
             $stmt->execute([
                 ':name' => $name, ':age' => $age, ':gender' => $gender, ':type' => $type,
@@ -267,7 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':avatar' => ($avatarNew === '' ? null : $avatarNew),
                 ':pose'   => ($poseNew === '' ? null : $poseNew),
                 ':hp_base' => $hpBase, ':wave_min' => $waveMin, ':wave_max' => $waveMax,
-                ':hp_cap' => $hpCap, ':hp_bands' => $hpBands,
+                ':hp_cap' => $hpCap, ':hp_bands' => $hpBands, ':xp_value' => $xpValue,
             ]);
             $_SESSION['keeper_flash'] = "Added \"{$name}\".";
         }

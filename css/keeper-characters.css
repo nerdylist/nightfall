@@ -301,8 +301,8 @@ body.keeper-modal-open { overflow: hidden; }
 .keeper-chars-bands__rows { display: flex; flex-direction: column; gap: 8px; }
 .keeper-chars-band {
   display: grid;
-  /* from · to · mode · value · spawn_weight · max_alive · remove */
-  grid-template-columns: 1fr 1fr 1.3fr 1fr 1fr 1fr auto;
+  /* from · to · mode · value · spawn_weight · max_alive · xp_value · remove */
+  grid-template-columns: 1fr 1fr 1.3fr 1fr 1fr 1fr 1fr auto;
   gap: 8px; align-items: center;
 }
 .keeper-chars-band-add { margin-top: 10px; }
