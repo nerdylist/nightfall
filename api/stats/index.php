@@ -284,6 +284,41 @@ function stats_apply_survivor(PDO $pdo, int $survivorId, array $clean): void
         return;
     }
 
+    // DEFENSIVE (2026-07-29): only mirror keys that are REAL survivor_stats
+    // columns. STATS_COLUMNS is the ingest whitelist, but survivor_stats has
+    // drifted behind it before — twice now a whitelisted key (humans_killed /
+    // zombies_killed, added 026) had no column here, so the INSERT threw
+    // "no such column" and the transaction's catch turned it into a 500 that
+    // rolled back the WHOLE post. Introspect the actual table columns and drop
+    // any $clean key that isn't one, so a future STATS_COLUMNS addition silently
+    // skips the survivor mirror for that stat (it's still written to the user
+    // aggregate on player_stats, which has every column) instead of 500ing the
+    // flush. Cached in a static so the PRAGMA runs once per request. If
+    // introspection itself fails, fall back to the old behaviour rather than
+    // crashing (worst case is the pre-hardening behaviour, not worse).
+    static $survivorStatsCols = null;
+    if ($survivorStatsCols === null) {
+        try {
+            $survivorStatsCols = [];
+            $info = $pdo->query('PRAGMA table_info(survivor_stats)');
+            if ($info !== false) {
+                foreach ($info->fetchAll(PDO::FETCH_ASSOC) as $col) {
+                    if (isset($col['name'])) {
+                        $survivorStatsCols[(string) $col['name']] = true;
+                    }
+                }
+            }
+        } catch (Throwable $e) {
+            $survivorStatsCols = false; // sentinel: introspection unavailable
+        }
+    }
+    if (is_array($survivorStatsCols)) {
+        $clean = array_intersect_key($clean, $survivorStatsCols);
+        if ($clean === []) {
+            return; // every sent key mirrors to the user aggregate only
+        }
+    }
+
     $columns = array_keys($clean);
     $insertCols = implode(', ', $columns);
     $placeholders = implode(', ', array_map(fn ($c) => ':' . $c, $columns));
