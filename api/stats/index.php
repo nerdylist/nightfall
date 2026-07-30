@@ -449,10 +449,25 @@ if ($method === 'GET') {
         grave_json_response(404, ['success' => false, 'error' => 'Unknown username.']);
     }
 
+    // All of this user's survivors, newest first (matches Keeper admin
+    // ordering), each shaped through stats_survivor_public(). Guarded so a DB
+    // without the survivors table still returns stats with survivors => [].
+    $survivors = [];
+    try {
+        $sStmt = $pdo->prepare('SELECT * FROM survivors WHERE user_id = :user_id ORDER BY id DESC');
+        $sStmt->execute(['user_id' => $userId]);
+        foreach ($sStmt->fetchAll() as $sRow) {
+            $survivors[] = stats_survivor_public($sRow);
+        }
+    } catch (Throwable $e) {
+        $survivors = [];
+    }
+
     grave_json_response(200, [
-        'success'  => true,
-        'username' => $username,
-        'stats'    => stats_row($pdo, $userId),
+        'success'   => true,
+        'username'  => $username,
+        'stats'     => stats_row($pdo, $userId),
+        'survivors' => $survivors,
     ]);
 }
 
