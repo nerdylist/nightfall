@@ -786,11 +786,16 @@ try {
 
         // max_wave (025) — independent, absolute, MAX-MERGED. Guarded solely by
         // $survMaxWave (a pure {id, max_wave} post reaches here with no attr/xp
-        // change). SQL MAX() keeps the merge atomic + correct vs out-of-order
-        // delivery: it can only move max_wave up, never down.
+        // change). The merge is computed in PHP (NOT SQL MAX(col, val)) so it
+        // works on every SQLite build — some builds reject/misparse the 2-arg
+        // scalar MAX(col, :param) as the aggregate. $cur is fetched via SELECT *
+        // in this transaction, so $cur['max_wave'] is available (null-coalesced
+        // to 0 to stay safe on an un-migrated DB). Behaviour-identical: max_wave
+        // can only move up, never down; idempotent on replay.
         if ($survMaxWave !== null) {
-            $mwUp = $pdo->prepare('UPDATE survivors SET max_wave = MAX(max_wave, :mw) WHERE id = :id');
-            $mwUp->execute(['mw' => $survMaxWave, 'id' => $progTargetId]);
+            $mergedMaxWave = max((int) ($cur['max_wave'] ?? 0), $survMaxWave);
+            $mwUp = $pdo->prepare('UPDATE survivors SET max_wave = :mw WHERE id = :id');
+            $mwUp->execute(['mw' => $mergedMaxWave, 'id' => $progTargetId]);
         }
 
         // Refresh both the primary survivor echo AND the context echo (if this
@@ -840,7 +845,17 @@ try {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
-    grave_json_response(500, ['success' => false, 'error' => 'Write failed.']);
+    error_log('[api/stats] write failed: ' . $e->getMessage());
+    $err = ['success' => false, 'error' => 'Write failed.'];
+    // Opt-in diagnostic: append the real message only when the caller passes
+    // ?debug=<MIGRATE_TOKEN> matching .env, so we can see the true cause on prod
+    // without leaking internals to normal callers. The error_log line above
+    // always records it regardless.
+    $dbgToken = (string) env('MIGRATE_TOKEN', '');
+    if ($dbgToken !== '' && hash_equals($dbgToken, (string) ($_GET['debug'] ?? ''))) {
+        $err['detail'] = $e->getMessage();
+    }
+    grave_json_response(500, $err);
 }
 
 $response = [
